@@ -1,7 +1,13 @@
+from __future__ import annotations
+from functools import wraps
+from inspect import isgeneratorfunction
+from typing import Any, Generator, List, Optional, Sequence, Tuple
 
-# Originally by Ian Piumarta (http://www.ritsumei.ac.jp/~piumarta/pl/src/unify.py; 2017-10-27 07:03:38) for a
-# course on programming languages (http://www.ritsumei.ac.jp/~piumarta/pl/index.html). Slides and exercises
-# for the course contain his original discussion.
+"""
+Originally by Ian Piumarta (http://www.ritsumei.ac.jp/~piumarta/pl/src/unify.py; 2017-10-27 07:03:38) for a
+course on programming languages (http://www.ritsumei.ac.jp/~piumarta/pl/index.html). Slides and exercises
+for the course contain his original discussion.
+"""
 
 """
 A couple of on-line introductions to Prolog.
@@ -9,11 +15,6 @@ A couple of on-line introductions to Prolog.
 o http://www.cse.unsw.edu.au/~billw/cs9414/notes/prolog/intro.html
 o http://www.learnprolognow.org/lpnpage.php?pageid=online
 """
-
-from __future__ import annotations
-from functools import wraps
-from inspect import isgeneratorfunction
-from typing import Any, Generator, List, Optional, Sequence, Tuple
 
 """
 File organization.
