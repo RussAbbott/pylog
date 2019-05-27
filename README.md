@@ -8,7 +8,7 @@ Structurally, Prolog is both one of the simplest of all programming languages—
 
 * Blackburn, Patrick, Johan Bos, and Kristina Striegnitz (2012) [*Learn Prolog Now!*](http://lpn.swi-prolog.org/lpnpage.php?pageid=online) (This version of the book is embedded in SWI Prolog’s [SWI SH](http://swish.swi-prolog.org/) ([SWI-Prolog](http://www.swi-prolog.org/) for SHaring), an online prolog interpreter similar to iPython.)
 
-* Wilson, Bill, [*Introduction to Prolog Programming*](http://www.cse.unsw.edu.au/~billw/cs9414/notes/prolog/intro.html), for the course COMP9414/9814 “Artificial Intelligence. Consists mostly of extracts from the first five chapters of 
+* Wilson, Bill, ["Introduction to Prolog Programming"](http://www.cse.unsw.edu.au/~billw/cs9414/notes/prolog/intro.html), for the course COMP9414/9814 “Artificial Intelligence. Consists mostly of extracts from the first five chapters of 
 
   * Bratko, I. (2011) [*Programming in Prolog for Artificial Intelligence*](https://www.amazon.com/gp/product/0321417461/ref=dbs_a_def_rwt_hsch_vapi_taft_p1_i0), 4th Edition, Addison-Wesley.
  
