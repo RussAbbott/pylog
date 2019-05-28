@@ -10,10 +10,7 @@ for the course contain his original discussion.
 """
 
 """
-A couple of on-line introductions to Prolog.
-
-o http://www.cse.unsw.edu.au/~billw/cs9414/notes/prolog/intro.html
-o http://www.learnprolognow.org/lpnpage.php?pageid=online
+See discussion on the GitHub page: https://github.com/RussAbbott/pylog
 """
 
 """
