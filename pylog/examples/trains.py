@@ -2,7 +2,7 @@ from functools import reduce
 from typing import List, Tuple, Union
 
 from control_structures import forall
-from logic_variables import Container, Ground, n_vars, Term, unify, unify_pairs, Var
+from logic_variables import Container, Ground, n_Vars, Term, unify, unify_pairs, Var
 
 from sequence_options.sequences import PyTuple
 
@@ -19,7 +19,7 @@ def best_route(Start: Union[Ground, Var], Route: Container, End: Union[Ground, V
   The best route is defined to be the one that passes the fewest intermediate stations.
   """
   for i in range(len(lines)):
-    legs = [Start, *n_vars(2*i+1), End]
+    legs = [Start, *n_Vars(2*i+1), End]
     # If it succeeds, chain will instantiate legs to
     #         [Station, (Line, int), Station, (Line, int), ... , Station]
     # Once legs is instantiated, must take the ground values so that the
@@ -115,11 +115,11 @@ def sum_distances(legs: [Union[str, Tuple[str, int]]]) -> ([str], int):
 
 if __name__ == '__main__':
 
-  def print_route(stationsAndLines, stationsPassed):
-    for i in range(len(stationsAndLines) // 2):
-      (station, line, nextStation) = stationsAndLines[2 * i:2 * i + 3]
-      print(f'\tFrom {station} take the {line} line to {nextStation}.')
-    print(f'  Including transfer stations, if any, you will pass {stationsPassed - 1} intermediate stations')
+  def print_route(stations_and_lines, stations_passed):
+    for i in range(len(stations_and_lines) // 2):
+      (station, line, next_station) = stations_and_lines[2 * i:2 * i + 3]
+      print(f'\tFrom {station} take the {line} line to {next_station}.')
+    print(f'  Including transfer stations, if any, you will pass {stations_passed - 1} intermediate stations')
 
 
   for (_A, _B) in [("Takatsuki", "Yamashina"),  # Direct
