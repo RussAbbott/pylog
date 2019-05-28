@@ -1,10 +1,12 @@
-from control_structures import would_succeed, forall, forany, print_SF
+from control_structures import would_succeed, forall, forany, print_sf
 from logic_variables import Container, unify, Var
 
 from sequence_options.super_sequence import is_subsequence
 
 from examples.puzzles import Puzzle
 
+
+# Test commit
 """
     =================================================================================================================
       This and the scholarship problem are both written so that they can use either LinkedLists or one of the
@@ -72,15 +74,15 @@ def scholarship_problem(Ss, ListType):
   Students = ListType( [Student(scholarship=25+i*5) for i in range(4)] )
   # To avoid arithmetic, we'll use the fact that the scholarships
   # are evenly spaced with 5,000 increments. The code deals with
-  # scholarship numbers in thousamds, i.e., 25, 30, 35, 40.
+  # scholarship numbers in thousands, i.e., 25, 30, 35, 40.
 
   # All the clues must succeed.
   for _ in forall([
     # Unify the answer parameter (Ss) with the internal answer list (Students).
     lambda: unify(Students, Ss),
-    # print_SF allows us to leave a trace of progress.
-    # Since the print_SF statements are all included in a forall list, they should all succeed.
-    lambda: print_SF(f'\n{rule_applications.incr_and_return( )}) At the start: {Students}', 'Succeed'),
+    # print_sf allows us to leave a trace of progress.
+    # Since the print_sf statements are all included in a forall list, they should all succeed.
+    lambda: print_sf(f'\n{rule_applications.incr_and_return( )}) At the start: {Students}', 'Succeed'),
 
     # 1. The student who studies Astronomy gets a smaller scholarship than Amy.
     # Could have used inThisOrder rather than splitAt.
@@ -89,7 +91,7 @@ def scholarship_problem(Ss, ListType):
                     # Make sure that all students can be included, i.e., no duplicate names.
                     lambda: would_succeed(ListType.members)(Student_names, Students)
                     ]),
-    lambda: print_SF(f'{rule_applications.incr_and_return()}) After 1: {Students}', 'Succeed'),
+    lambda: print_sf(f'{rule_applications.incr_and_return()}) After 1: {Students}', 'Succeed'),
 
     # 2. Amy studies either English or Philosophy.
     # Runs slightly faster with Philosophy tried first (33 vs 37). Gets the same result either way.
@@ -100,33 +102,33 @@ def scholarship_problem(Ss, ListType):
 
                     # Make sure that all students can be included, i.e., no duplicate names.
                     lambda: would_succeed(ListType.members)(Student_names, Students)]),
-    lambda: print_SF(f'{rule_applications.incr_and_return()}) After 2: {Students}', 'Succeed'),
+    lambda: print_sf(f'{rule_applications.incr_and_return()}) After 2: {Students}', 'Succeed'),
 
-    # 3. The student who studies Comp Sci has a 5000 USD bigger scholarship than Carrie.
+    # 3. The student who studies Comp Sci has a 5000 USD larger scholarship than Carrie.
     # To avoid arithmetic, take advantage of the known structure of the Scholarships list.
     lambda: forall([lambda: ListType.is_contiguous_in([Student(name='Carrie'), Student(major='Comp Sci')], Students),
 
                     # Make sure that all students can be included, i.e., no duplicate names.
                     lambda: would_succeed(ListType.members)(Student_names, Students)
                     ]),
-    lambda: print_SF(f'{rule_applications.incr_and_return()}) After 3: {Students}', 'Succeed'),
+    lambda: print_sf(f'{rule_applications.incr_and_return()}) After 3: {Students}', 'Succeed'),
 
-    # 4. Erma has a 10000 USD bigger scholarship than Carrie.
+    # 4. Erma has a 10000 USD larger scholarship than Carrie.
     # This means that Erma comes after Carrie and that there is one person between them.
     lambda: forall([lambda: ListType.is_contiguous_in([Student(name='Carrie'), Var(), Student(name='Erma')], Students),
 
                     # Make sure that all students can be included, i.e., no duplicate names.
                     lambda: would_succeed(ListType.members)(Student_names, Students)
                     ]),
-    lambda: print_SF(f'{rule_applications.incr_and_return()}) After 4: {Students}', 'Succeed'),
+    lambda: print_sf(f'{rule_applications.incr_and_return()}) After 4: {Students}', 'Succeed'),
 
-    # 5. Tracy has a bigger scholarship than the student that studies English.
+    # 5. Tracy has a larger scholarship than the student that studies English.
     lambda: forall([lambda: is_subsequence([Student(major='English'), Student(name='Tracy')], Students),
 
                     # Make sure that all students can be included, i.e., no duplicate names.
                     lambda: would_succeed(ListType.members)(Student_names, Students),
                     ]),
-    lambda: print_SF(f'{rule_applications.incr_and_return()}) After 5: {Students}', 'Succeed'),
+    lambda: print_sf(f'{rule_applications.incr_and_return()}) After 5: {Students}', 'Succeed'),
 
     # Make sure all majors are mentioned.
     lambda: ListType.members([Student(major='Astronomy'),  Student(major='English'),
@@ -140,11 +142,11 @@ if __name__ == '__main__':
 
   """ Select either LinkedList or PyList or PyTuple as the ListType. """
 
-  # from sequence_options.linked_list import LinkedList
-  # ListType = LinkedList
+  from sequence_options.linked_list import LinkedList
+  ListType = LinkedList
 
-  from sequence_options.sequences import PyList  # or PyTuple
-  ListType = PyList  # or PyTuple
+  # from sequence_options.sequences import PyList  # or PyTuple
+  # ListType = PyList  # or PyTuple
 
   """ ---------------------------------------------------- """
   
