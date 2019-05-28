@@ -58,3 +58,38 @@ In Prolog, program components are understood as predicates. They may *succeed* o
 Success or failure is implemented in Python through generators. A generator that `yield`s a result (at the Python level) is said to succeed (at the Prolog level); one that does not `yield` a result, fails (at the Prolog level).
 
 In this case, `isEven(i)` succeeds/fails when `i` is/is not even. (In either case it produces an output line.) When<br />`for _ in isEven(i)` succeeds/fails for a given `i`, the list comprehension completes/fails to complete the iteration for that `i` and includes (does not include) `i` in the generated list.  
+
+## File organization 
+
+```
+pylog
+    examples
+        n_queens.py
+        puzzles.py
+        scholarship_problem.py
+        trains.py
+        zebra_problem.py
+    sequence_options
+        linked_list.py
+        sequences.py
+        super_sequence.py
+    control_structures.py
+    logic_variables.py
+```
+
+## File dependencies (Circular dependencies are not allowed.)
+
+```
+logic_variables (this file): none
+control_structures: logic_variables
+
+super_sequence: control_structures, logic_variables
+linked_list and sequences: control_structures, logic_variables, super_sequence
+
+n_queens: logic_variables
+trains: control_structures, logic_variables, 
+puzzle: logic_variables, super_sequence
+zebra_problem: control_structures, logic_variables, puzzles
+scholarship_problem: control_structures, logic_variables, puzzles, super_sequence
+
+```
