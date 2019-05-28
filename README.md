@@ -64,17 +64,17 @@ In this case, `isEven(i)` succeeds/fails when `i` is/is not even. (In either cas
 ```
 pylog
     examples                     -- A directory of sample pylog programs
-        n_queens.py              -- The traditional n-queens problem.
-        puzzles.py               -- A file containing information common to the scholar_problem and the zebra_problem
+        n_queens.py              -- The traditional n-queens problem. Uses minimal pylog features but illustrates the pylog style.
+        puzzles.py               -- A file containing information common to the scholarship_problem and the zebra_problem
         scholarship_problem.py   -- A traditional Prolog logic puzzle
-        trains.py                -- A revised version of the example in Piumarta
+        trains.py                -- A revised version of the train example from Piumarta
         zebra_problem.py         -- The well-known logic puzzle often solved with Prolog
     sequence_options             -- A directory of options for lists and sequences
         linked_list.py           -- A traditional head/tail list structure. Allows a variable tail.
         sequences.py             -- Implementations of Python lists and tuples.
         super_sequence.py        -- A class that serves as a superclass of all other sequences.
-    control_structures.py        -- Implementations of the Prolog control structures
-    logic_variables.py           -- Implementations of the Prolog's logic variables.
+    control_structures.py        -- Implementation of the Prolog control structures
+    logic_variables.py           -- Implementation of Prolog's logic variables
 ```
 
 ## File dependencies/`imports from` (circular dependencies not allowed)
