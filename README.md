@@ -57,4 +57,4 @@ In Prolog, program components are understood as predicates. They may *succeed* o
 
 Success or failure is implemented in Python through generators. A generator that `yield`s a result (at the Python level) is said to succeed (at the Prolog level); one that does not `yield` a result, fails (at the Prolog level).
 
-In this case, `for _ in isEven(i)` succeeds when `i` is event and fails when `i` is not even. When the `for` expressions succeeds/fails, the list comprehension completes an iteration and includes (does not include) `i` in the generated list.
+In this case, `for _ in isEven(i)` succeeds when `i` is event and fails when `i` is not even. When the `for` expression succeeds/fails, the list comprehension completes/fails to complete the iteration for that particular `i` and includes (does not include) `i` in the generated list.
