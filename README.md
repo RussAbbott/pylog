@@ -49,7 +49,13 @@ Can you figure out how it produces the following results?
 >>> print(evens)
 [0, 2, 4, 6, 8] 
 ```
-In particular, what does `for _ in isEven(i)` do in the list comprehension?
+In particular, what does 
+
+```python 
+for _ in isEven(i)
+``` 
+
+do in the list comprehension?
 
 In Prolog, program components are understood as predicates. They may *succeed* or *fail*. To succeed/fail means that the system was/was not able to establish that the predicate holds given the information available. 
 
