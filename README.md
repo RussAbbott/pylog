@@ -89,7 +89,7 @@ pylog                            -- Root directory
     logic_variables.py           -- Implementation of Prolog's logic variables
 ```
 
-## File dependencies/`imports from` (circular dependencies not allowed)
+## File dependencies/`imports from` relations
 
 ```
 logic_variables: none
@@ -107,6 +107,6 @@ scholarship_problem: control_structures, logic_variables, puzzles, super_sequenc
 ```
 ## Naming conventions
 
-For the most part, Python identifier names follow PEP8 conventions—all lower case, with underscores between words; no camel case except for class names.
+For the most part, Python identifier names follow PEP 8 conventions—all lower case, with underscores between words; no camel case except for class names.
 
 However, since Prolog uses identifiers that begin with an upper case letter for Prolog variables, Python identifiers used as Prolog variables begin with upper case letters.
