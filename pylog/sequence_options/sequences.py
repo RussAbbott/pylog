@@ -7,6 +7,11 @@ from sequence_options.super_sequence import SuperSequence
 
 
 class PySequence(SuperSequence):
+  """
+  Python treats lists and tuples as essentially the same. This is the common core.
+  The self.args are the list/tuple elements. Their length is fixed. (This disallows
+  appending elements to a list or extending a list.)
+  """
   def __init__(self, pyType, initialElements: Union[list, tuple]):
     super().__init__( (pyType, *initialElements) )
 
@@ -30,38 +35,38 @@ class PySequence(SuperSequence):
 
   @staticmethod
   def is_contiguous_in(As: List, Zs: PySequence):
-    """ Can As be unified with a segment of Zs? """
-    (lenAs, lenZs) = (len(As), len(Zs))
+    """ Can As be unified with a contiguous segment of Zs? """
+    (lenAs, len_Zs) = (len(As), len(Zs))
     if lenAs == 0:
       yield  # Succeed
-    elif lenAs > lenZs:
+    elif lenAs > len_Zs:
       return  # Fail.
     else:
-      for i in range(lenZs - lenAs + 1):
+      for i in range(len_Zs - lenAs + 1):
         # Succeed for each Zs segment that can be unified with As.
-        for _ in unify_sequences(As, Zs.args[i:i + lenAs]):
+        for _ in unify_sequences(As, Zs.args[i:i+lenAs]):
           yield
 
   @staticmethod
-  def member(e: Term, aList):
-    """ Is e in aList? """
-    if len(aList) > 0:
-      for _ in forany([lambda: unify(e, aList.head( )),
-                       lambda: PySequence.member(e, aList.tail( ))]):
+  def member(E: Term, A_List):
+    """ Is E in A_List? """
+    if len(A_List) > 0:
+      for _ in forany([lambda: unify(E, A_List.head( )),
+                       lambda: PySequence.member(E, A_List.tail( ))]):
         yield
 
   @staticmethod
-  def members(es: List, self):
-    """ Do all elements of es appear in aList (in any order). """
-    if not es:
+  def members(Es: List, A_List: PySequence):
+    """ Do all elements of Es appear in A_List (in any order). """
+    if not Es:
       yield
-    elif len(self) > 0:
-      for _ in PySequence.member(es[0], self):
-        yield from PySequence.members(es[1:], self)
+    else:  # len(A_List) > 0:
+      for _ in PySequence.member(Es[0], A_List):
+        yield from PySequence.members(Es[1:], A_List)
 
   @staticmethod
-  def next_to(E1, E2, Es):
-    """ E1 and E2 are next to each other in Es. """
+  def next_to(E1: Term, E2: Term, Es: PySequence):
+    """ Are E1 and E2 are next to each other in Es. """
     for _ in forany([
       lambda: PySequence.is_contiguous_in([E1, E2], Es),
       lambda: PySequence.is_contiguous_in([E2, E1], Es),
@@ -101,23 +106,23 @@ def append(Xs: Union[PySequence, Var], Ys: Union[PySequence, Var], Zs: Union[PyS
       return
 
   if isinstance(Zs, Var):
-    seq_type = type(Xs)
+    ListType = type(Xs)
     # Make Zs a list of Var's of length len(Xs) + len(Ys)
     # After this unification, Zs will still be a Var, but
     # by the time we reach this point again, Zs will refer
     # to its trail end, which is not a Var.
-    for _ in unify(Zs, seq_type(n_Vars(len(Xs) + len(Ys)))):
+    for _ in unify(Zs, ListType(n_Vars(len(Xs) + len(Ys)))):
       yield from append(Xs, Ys, Zs)
     return
 
   # We now know that: Zs is not a Var -- although it may be a sequence of Vars.
   # Divide up its length among Xs and Ys
-  seq_type = type(Zs)
-  lenZs = len(Zs)
-  for i in range(lenZs+1):
+  ListType = type(Zs)
+  len_Zs = len(Zs)
+  for i in range(len_Zs + 1):
     # If Xs or Ys are already instantiated to some fixed length Sequence, unify will fail when given the wrong length.
-    for _ in unify_pairs([ (Xs, seq_type(n_Vars(i))),
-                           (Ys, seq_type(n_Vars(lenZs - i)))  ]):
+    for _ in unify_pairs([ (Xs, ListType(n_Vars(i))),
+                           (Ys, ListType(n_Vars(len_Zs - i)))  ]):
       # Although the lengths of Xs and Ys vary with i,
       # Xs, Ys, and Zs are all of fixed lengths in which len(Xs) + len(Ys) = len(Zs).
       # Concatenate Xs and Ys and then unify the concatenation with Zs.

@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import List, Tuple, Union
+from typing import Any, List, Tuple, Union
 
 from control_structures import forall, forany
 from logic_variables import eot, Ground, n_Vars, Term, unify, unify_pairs, Var
@@ -124,17 +124,17 @@ class LinkedList(SuperSequence):
     ]):
       yield
 
-  def prefix_and_tail(self):
+  def prefix_and_tail(self) -> Tuple[List[Term], Any]:
     """ Get the initial list of objects and either the tail if it is a Var or [] if it is not a Var. """
     if self.is_empty():
       return ([], [])
     else:
       Tail_EoT = self.tail().trail_end()
-      if isinstance(Tail_EoT, Var):
-        return ([self.head()], Tail_EoT)
-      else:
+      if isinstance(Tail_EoT, LinkedList):
         (tail_prefix, Tail_Tail) = Tail_EoT.prefix_and_tail( )
         return ([self.head()] + tail_prefix, Tail_Tail)
+      else:
+        return ([self.head()], Tail_EoT)
 
   def tail(self) -> Union[LinkedList, Var]:
     return self.args[1]
@@ -373,6 +373,7 @@ if __name__ == '__main__':
     for _ in unify(E, B):
       # Since E is a Var, must take its trail_end to get something that has a head and tail.
       E_EoT = E.trail_end( )
+      assert isinstance(E_EoT, LinkedList)
       print(f'5b. unify(E, B) => E: {E}, E_EoT.head(): {E_EoT.head( )}, E_EoT.tail(): {E_EoT.tail( )}\n')
 
   # The empty LinkedList is a LinkedList ith no arguments.

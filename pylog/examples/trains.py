@@ -41,7 +41,7 @@ def best_route(Start: Union[Ground, Var], Route: Container, End: Union[Ground, V
 def chain(*legs: List[Term]):
   """
   Can we get from the first station to the last? If so, which lines and
-  which intermediate stations would we use?
+  which intermediate stations should we use?
   :param legs: a sequence of: station, line, station, line, ... station.
          All but the first and last may be variables.
   :return:
@@ -100,8 +100,10 @@ def sum_distances(legs: [Union[str, Tuple[str, int]]]) -> ([str], int):
 
   def split_elts(chnDist, elt):
     """
+    This is the reduce function.
+
     If elt is a station, add it to the existing list of stations and lines.
-    If it a (line, dist) tuple, add the line the existing list of stations and lines and
+    If it a (line, dist) tuple, add the line to the existing list of stations and lines and
     add the dist to the existing dist.
     """
     (chn, dist) = chnDist

@@ -6,7 +6,10 @@ from logic_variables import Structure, unify, Term
 
 
 class SuperSequence(Structure):
-  """ A subclass of Structure that can serve as a superclass for both PySequence and LinkedList"""
+  """
+  A subclass of Structure that can serve as a superclass for both PySequence and LinkedList
+  Declares a number of abstract methods.
+  """
 
   def __getitem__(self, key: Union[int, slice]) -> Union[SuperSequence, Term]:
       pass
@@ -28,9 +31,11 @@ def is_subsequence(As: List, Zs: SuperSequence):
   if not As:
     # If no more As to match, we're done. Succeed.
     yield
+
   elif not Zs:
     # If no more Zs to match the remaining As, fail.
     pass
+
   else:
     for _ in forany([
                      # Match As[0] and Zs[0]; go on to is_subsequence(As[1:], Zs[1:])

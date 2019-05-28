@@ -1,7 +1,7 @@
 from control_structures import forall, print_sf
 from logic_variables import n_Vars, unify
 
-from examples.puzzles import Puzzle, run_problem
+from examples.puzzles import Puzzle_Item, run_problem
 
 """ 
     =================================================================================================================
@@ -53,7 +53,7 @@ Solution:
 """
 
 
-class House(Puzzle):
+class House(Puzzle_Item):
   def __init__(self, nationality=None, smoke=None, pet=None, drink=None, color=None):
     functor = type(self).__name__.lower()
     nationality = self.make_property(nationality)
@@ -122,6 +122,7 @@ def zebra_problem(Houses, ListType):
     
     # 14. The Norwegians live next to the blue house.
     lambda: ListType.next_to(House(nationality='Norwegians'), House(color='blue'), Houses),
+
     lambda: print_sf(f'After 14: {Houses}', 'Succeed'),
 
     # Fill in unmentioned properties.
@@ -134,11 +135,11 @@ if __name__ == '__main__':
 
   """ Select either LinkedList or a PySequence (PyList or PyTuple) as the ListType. """
 
-  # from sequence_options.linked_list import LinkedList
-  # ListType = LinkedList
+  from sequence_options.linked_list import LinkedList
+  ListType = LinkedList
 
-  from sequence_options.sequences import PyList  # or PyTuple
-  ListType = PyList  # or PyTuple
+  # from sequence_options.sequences import PyList  # or PyTuple
+  # ListType = PyList  # or PyTuple
 
   """ additional_answer function, if any """
 

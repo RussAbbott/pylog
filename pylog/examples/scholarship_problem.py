@@ -3,7 +3,7 @@ from logic_variables import Container, Var
 
 from sequence_options.super_sequence import is_subsequence
 
-from examples.puzzles import Puzzle, run_problem
+from examples.puzzles import Puzzle_Item, run_problem
 
 """
     =================================================================================================================
@@ -48,7 +48,7 @@ No more.
 """
 
 
-class Student(Puzzle):
+class Student(Puzzle_Item):
 
   def __init__(self, name=None, major=None, scholarship=None):
     functor = type(self).__name__.lower( )

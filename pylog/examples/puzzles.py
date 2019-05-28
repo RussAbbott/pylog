@@ -8,7 +8,8 @@ A utility superclass for logic puzzles.
 """
 
 
-class Puzzle(Structure):
+class Puzzle_Item(Structure):
+  """ An item in a puzzle list. """
 
   def __str__(self):
     """

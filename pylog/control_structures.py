@@ -5,22 +5,22 @@ from logic_variables import eot, Ground, unify, unify_pairs, Var
 
 class Bool_Yield_Wrapper:
   """
-  Objects of this class are created for generators. It takes two steps.
+  Objects of this class are created to serve as generators. It takes two steps.
   Suppose gen is a generator, i.e.,
 
   def gen():
       yield
 
-  Such generators are decorated with @bool_yield_wrapper, which returns a function that will create the
-  generator when invoked.
+  Such generators are decorated with @bool_yield_wrapper, which returns a function that will create an
+  instance of this class when invoked.
 
   That function is invoked by calling the original generator, e.g.,
 
-  runnable_gen = gen(...)
+  runnable_gen = bool_yield_wrapper(gen)(...)
 
   runnable_gen will be an instance of Bool_Yield_Wrapper, this class. It is run through its has_more( ) method. E.g.
-  while runnable_gen.has_more( ):
-      <do something>
+    while runnable_gen.has_more( ):
+        <do something>
 
   The original gen function must be such that it returns its value through one of its parameters.
   To use the append function as an example,
@@ -29,17 +29,17 @@ class Bool_Yield_Wrapper:
   def append(_Xs: Union[PrList, Var], Ys: Union[PrList, Var], _Zs: Union[PrList, Var]):
       ....
 
-  running_append = append(Xs, Ys, Zs) # Presumably one or more of Xs, Ys, and Zs is uninstantiated.
+  runnable_append = append(Xs, Ys, Zs) # Presumably one or more of Xs, Ys, and Zs is uninstantiated.
 
-  while running_append.has_more( ): ... will instantiate the uninstantiated variables.
+  while runnable_append.has_more( ): ... will instantiate the uninstantiated variables.
 
-  (Xs, Ys, Zs) = (Var(), Var(), PrList( [1, 2, 3] )
-  running_append = append(Xs, Ys, Zs)
-  while running_append.has_more( ):
-      print(f'Xs = {Xs}\nYs = {Ys}\nZs = {Zs}')
-      # Prints the various instantiations of Xs and Ys, which, when concatenated, produce Zs.
+    (Xs, Ys, Zs) = (Var(), Var(), PrList( [1, 2, 3] )
+    runnable_append = append(Xs, Ys, Zs)
+    while runnable_append.has_more( ):
+        print(f'Xs = {Xs}\nYs = {Ys}\nZs = {Zs}')
+        # Prints the various instantiations of Xs and Ys, which, when concatenated, produce Zs.
 
-  These Bool_Yield_Wrapper objects are used in with and while statements. The current strategy is to
+  These Bool_Yield_Wrapper objects are used in "with" and "while" statements. The current strategy is to
   have a with-statement and embedded while-statement for each generator. For example:
 
       with append(Xs, Ys, Zs) as gen:
@@ -52,8 +52,8 @@ class Bool_Yield_Wrapper:
     self.done = False
     self.gen = gen
     self.name = gen.__name__
-    # self.next = None
 
+  # __enter__ and __exit__ are required for "with"-statements
   def __enter__(self):
     return self
 
@@ -80,7 +80,6 @@ class Bool_Yield_Wrapper:
       return False
     else:
       try:
-        # self.next = next(self.gen)
         next(self.gen)
         return True
       except StopIteration:
@@ -96,7 +95,7 @@ class Bool_Yield_Wrapper:
 
 def bool_yield_wrapper(gen):
   """
-  A decorator. Generates the Bool_Yield_Wrapper object as a generator. See is_even_3, below
+  A decorator. Generates the Bool_Yield_Wrapper object. See is_even_3, below
   Can also be used explicitly as a function. See is_even_5, below.
   :param gen: the function (not a call to the function) being decorated.
   """
@@ -107,6 +106,10 @@ def bool_yield_wrapper(gen):
 
 
 def bool_to_sf(b: bool) -> Generator[None, None, None]:
+  """ 
+  Turns a boolean condition into a Generator, which succeeds/fails
+  if the boolean condition is True/False
+  """
   if b:
     yield
 
@@ -127,13 +130,14 @@ def fails(f):
 
 def forall(gens):
   """
-  Succeeds if all generators in the gens list succeed. The elements in the terms list
-  are embedded in lamgda functions to avoid premature evaluation.
+  Succeeds if all generators in the gens list succeed. The elements in the gens list
+  are embedded in lambda functions to avoid premature evaluation.
   """
   if not gens:
+    # They have all succeeded.
     yield
   else:
-    # Get terms[0] and evaluate the lambda expression to get a fresh iterator.
+    # Get gens[0] and evaluate the lambda expression to get a fresh iterator.
     # If it succeeds, run the rest of the generators in the list.
     for _ in gens[0]( ):
       yield from forall(gens[1:])
@@ -143,26 +147,27 @@ def forany(gens):
   """
   Succeeds if any of the generators in the gens list succeed. On "back-up," tries them all.
   """
-  for term in gens:
-    # Get the terms; evaluate them to extract them from lambda; and run them.
+  for gen in gens:
+    # Get the gens; evaluate them to extract them from lambda; and run them.
     # Succeed if any of them succeed.
     # Can probably not do the lambda trick here, but keeping it makes it
     # parallel to forall. Succeed if any of them succeed.
-    for _ in term( ):
+    # Try them all even if earlier ones succeed. 
+    for _ in gen( ):
       yield
 
 
-def print_sf(x, succeedOrFail):
+def print_sf(x, succeed_or_fail):
   """
   Can be included in a list of generators (as in forall and forany) to see where we are.
   The second argument determines whether it succeeds or fails.
-  Normally it is set to Succeed so that if included in a list of forall generators,
-  it doesn't stop them from succeeding.
-  When included in a list of forany generators, can be set to Fail so that forany
+  When included in a list of forall generators, it is set to Succeed so that
+  it doesn't stop forall from succeeding.
+  When included in a list of forany generators, it should be set to Fail so that forany
   will just go on the the next one and won't produce extraneous successes.
   """
   print(x)
-  if succeedOrFail == 'Succeed':
+  if succeed_or_fail == 'Succeed':
     yield
   else:
     pass
@@ -178,18 +183,13 @@ def would_succeed(f):
     succeeded = False
     for _ in f(*args, **kwargs):
       succeeded = True
-      # pass
+
     if succeeded:
-      yield  # Succeed if f succeeded.
+      yield  # Succeed (once) if f succeeded.
     else:
       pass   # Fail if f failed
 
   return would_succeed_wrapper
-
-
-def yield_from_bool(expr: bool):
-  if expr:
-    yield
 
 
 if __name__ == '__main__':

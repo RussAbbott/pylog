@@ -1,7 +1,7 @@
 from __future__ import annotations
 from functools import wraps
 from inspect import isgeneratorfunction
-from typing import Any, Generator, List, Optional, Sequence, Tuple
+from typing import Any, Generator, Iterable, List, Optional, Sequence, Tuple
 
 """
 Originally by Ian Piumarta (http://www.ritsumei.ac.jp/~piumarta/pl/src/unify.py; 2017-10-27 07:03:38) for a
@@ -61,7 +61,7 @@ The pylog core (this file) contains the logic variable data structure classes an
 the unify functions.
 
 Prolog is not a functional language. It does not have functions that return values. 
-Values are returned by unifying a parameter with the value to be returned.
+Values are returned by unifying a function's parameter with the value to be returned.
 """
 
 
@@ -70,7 +70,7 @@ def eot(f):
 
   @wraps(f)
   def eot_wrapper(*args, **kwargs):
-    args = [arg.trail_end() if isinstance(arg, Var) else arg for arg in args]
+    args = (arg.trail_end() if isinstance(arg, Var) else arg for arg in args)
     if isgeneratorfunction(f):
       yield from f(*args, **kwargs)
     else:
@@ -86,7 +86,7 @@ class Term:
                                                        |
                                ------------------------------------------------
                                |                       |                      |
-                            Ground                     Var                 Structure
+                            Ground                    Var                 Structure
                                |                                              |
                    -----------------------                              SuperSequence
                    |                     |                                    |
@@ -104,12 +104,11 @@ class Term:
   def __init__(self):
     Term.term_count += 1
     self.term_id = self.term_count
-    super().__init__()
 
   # @eot Can't use decorators on dunder methods without doing this:
   # (https://stackoverflow.com/questions/55550300/python-how-to-decorate-a-special-dunder-method).
   # Not sure I understand it. Not sure it's worth the trouble.
-  def __eq__(self, other) -> bool:
+  def __eq__(self, other: Term) -> bool:
     """
     self == other if either (a) they have the same ground value or (b) are the same variable.
     """
@@ -118,10 +117,10 @@ class Term:
     return self_eot is other_eot or \
            (self is not self_eot or other is not other_eot) and self_eot == other_eot
 
-  def __lt__(self, other) -> bool:
+  def __lt__(self, other: Term) -> bool:
     return str(self) < str(other)
 
-  def __ne__(self, other) -> bool:
+  def __ne__(self, other: Term) -> bool:
     return not (self == other)
 
   def __str__(self) -> str:
@@ -132,7 +131,7 @@ class Term:
     return f'{self_eot}' if self_eot.is_ground( ) or isinstance(self_eot, Structure) else f'_{self_eot.term_id}'
 
   @staticmethod
-  def ensure_is_logic_variable(x):
+  def ensure_is_logic_variable(x: Any) -> Term:
     # Ground anything that is not a Term.
     return x if isinstance(x, Term) else Ground(x)
 
@@ -142,7 +141,7 @@ class Term:
   def is_ground(self) -> bool:
     return False
 
-  def trail_end(self):
+  def trail_end(self) -> Term:
     return self
 
 
@@ -154,18 +153,18 @@ class Ground(Term):
     self._ground_value = ground_value
     super( ).__init__( )
 
-  def __eq__(self, other) -> bool:
+  def __eq__(self, other: Term) -> bool:
     other_eot = other.trail_end()
     return isinstance(other_eot, Ground) and self.get_ground_value() == other_eot.get_ground_value()
 
-  def __lt__(self, other) -> bool:
+  def __lt__(self, other: Term) -> bool:
     other_eot = other.trail_end()
     return isinstance(other_eot, Ground) and self.get_ground_value() < other_eot.get_ground_value()
 
   def __str__(self) -> str:
     return f'{self._ground_value}'
 
-  def get_ground_value(self):
+  def get_ground_value(self) -> Any:
     return self._ground_value
 
   def is_ground(self) -> bool:
@@ -173,14 +172,14 @@ class Ground(Term):
 
 
 class Container(Ground):
-  def get_contents(self):
+  def get_contents(self) -> Any:
     return self._ground_value
 
-  def incr_and_return(self):
+  def incr_and_return(self) -> Any:
     self._ground_value += 1
     return self._ground_value
 
-  def set_contents(self, value):
+  def set_contents(self, value: Any):
     self._ground_value = value
 
 
@@ -191,14 +190,10 @@ class Structure(Term):
   """
   def __init__(self, term: Tuple = ( None, () )):
     self.functor = term[0]
-    # if isinstance(self.functor, type) and \
-    #    (self.functor.__name__ == tuple or self.functor == list) and \
-    #    self.__class__.__name__ not in ['PyList', 'PyTuple']:
-    #   raise Exception("Can't call Structure directly with list or tuple as functor. Call PyList or PyTuple.")
     self.args = tuple(map(self.ensure_is_logic_variable, term[1:]))
     super().__init__()
 
-  def __eq__(self, other) -> bool:
+  def __eq__(self, other: Term) -> bool:
     other_eot = other.trail_end()
     return (isinstance(other_eot, Structure) and
             self.functor == other_eot.functor and
@@ -220,7 +215,7 @@ class Structure(Term):
     return grounded
 
   @staticmethod
-  def values_string(values):
+  def values_string(values: Iterable):
     result = ', '.join(map(str, values))
     return result
 
@@ -231,6 +226,7 @@ class Var(Term):
   """
 
   def __init__(self):
+    # self.trail_next points to the next element on the trail, if any.
     self.trail_next = None
     super().__init__()
 
@@ -238,7 +234,7 @@ class Var(Term):
     # Is this the end of the trail?
     return self.trail_next is not None
 
-  def get_ground_value(self):
+  def get_ground_value(self) -> Optional[Any]:
     Trail_End_Var = self.trail_end( )
     return Trail_End_Var.get_ground_value( ) if Trail_End_Var.is_ground( ) else None
 
@@ -288,12 +284,11 @@ def unify(Left: Term, Right: Term):
   # If at least one is a Var. Make the other an extension of its trail.
   # (If both are Vars, it makes no functional difference which extends which.)
   elif isinstance(Left, Var) or isinstance(Right, Var):
-    (pointsFrom, pointsTo) = (Left, Right) if isinstance(Left, Var) else \
-                             (Right, Left)
+    (pointsFrom, pointsTo) = (Left, Right) if isinstance(Left, Var) else (Right, Left)
     pointsFrom.trail_next = pointsTo
     yield
     # All yields create a context in which more of the program is executed--like
-    # the body of a while- or for-loop. A "next()" request asks for alternatives.
+    # the body of a while-loop or a for-loop. A "next()" request asks for alternatives.
     # But there is only one functional way to do unification.
     # So on backup, simply unlink the two and exit without a further yield.
     pointsFrom.trail_next = None
@@ -316,7 +311,7 @@ def unify_pairs(tuples: List[Tuple[Term, Term]]):
     # If they unify, go on to the rest of the tuples list.
     for _ in unify(Left, Right):
       yield from unify_pairs(restOfTuples)
-    # Equivalent to the following.
+    # The preceding is equivalent to the following.
     # for _ in forall([lambda: unify(Left, Right),
     #                  lambda: unify_pairs(restOfTuples)]):
     #   yield
@@ -327,9 +322,11 @@ def unify_sequences(seq_1: Sequence, seq_2: Sequence):
   # The two sequences must be the same length.
   if len(seq_1) != len(seq_2):
     return
+
   # If they are both empty, we are done.
   if len(seq_1) == 0:
     yield
+
   else:
     # Unify the first element of each sequence. If successful go on to the rest.
     for _ in unify(seq_1[0], seq_2[0]):
