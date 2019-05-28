@@ -14,49 +14,6 @@ See discussion on the GitHub page: https://github.com/RussAbbott/pylog
 """
 
 """
-File organization.
-
-pylog
-    examples
-        n_queens.py
-        puzzles.py
-        scholarship_problem.py
-        trains.py
-        zebra_problem.py
-    sequence_options
-        linked_list.py
-        sequences.py
-        super_sequence.py
-    control_structures.py
-    logic_variables.py
-"""
-
-"""
-
-File dependencies. Circular dependencies are not allowed.
-
-logic_variables (this file): none
-control_structures: logic_variables
-
-super_sequence: control_structures, logic_variables
-linked_list and sequences: control_structures, logic_variables, super_sequence
-
-n_queens: logic_variables
-trains: control_structures, logic_variables, 
-puzzle: logic_variables, super_sequence
-zebra_problem: control_structures, logic_variables, puzzles
-scholarship_problem: control_structures, logic_variables, puzzles, super_sequence
-
-"""
-
-"""
-Naming conventions. For the most part I used the PEP8 conventions, i.e., all lower case and no camel case 
-except for class names.
-
-However, I also attempted to follow the Prolog convention that Prolog variable names begin with upper case letters.
-"""
-
-"""
 The pylog core (this file) contains the logic variable data structure classes and 
 the unify functions.
 
