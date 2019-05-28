@@ -29,7 +29,7 @@ SWI-Prolog aims at scalability. Its robust support for multi-threading exploits 
 * Piumarta, Ian (2017) ["Programming-language-paradigms"](http://www.ritsumei.ac.jp/~piumarta/pl/) (a course).  “Logic programming and Prolog” is explored in weeks 5 ([slides-5](http://www.ritsumei.ac.jp/~piumarta/pl/slides/PL-05.pdf), [exercises-5](http://www.ritsumei.ac.jp/~piumarta/pl/ex/PL-05-ex.pdf)), 6 ([slides-6](http://www.ritsumei.ac.jp/~piumarta/pl/slides/PL-06.pdf), [exercises-6](http://www.ritsumei.ac.jp/~piumarta/pl/ex/PL-06-ex.pdf)), and 7 ([slides-7](http://www.ritsumei.ac.jp/~piumarta/pl/slides/PL-07.pdf), [exercises-7](http://www.ritsumei.ac.jp/~piumarta/pl/ex/PL-07-ex.pdf)). Week 7 is a Prolog tutorial. You should be able to understand it without first reading weeks 5 and 6. But those weeks are important. They show how to  implement many Prolog features in Python.
 
 ## Pylog: prolog in Python
-This repository is a Python implementation of many prolog features. Based on Piumarta’s (Python 2) [`unify.py`](http://www.ritsumei.ac.jp/~piumarta/pl/src/unify.py).
+This repository is a Python implementation of many prolog features. It is based on Piumarta’s (Python 2) [`unify.py`](http://www.ritsumei.ac.jp/~piumarta/pl/src/unify.py).
 
 ## To Do
 Read the slides and work through the exercises for all three weeks of Piumarta. (Use Blackburn and Bratko for more thorough Prolog coverage.) 
