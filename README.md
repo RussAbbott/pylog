@@ -1,6 +1,6 @@
 # pylog: Prolog in Python
 
-Prolog, a programming language derived from logic, was developed in the 1970s. It became very popular during the 1980s as an AI language. It went out of favor because it was difficult to trace the execution of Prolog programs—which made debugging difficult.
+Prolog, a programming language derived from logic, was developed in the 1970s. It became very popular during the 1980s as an AI language, especially in Japan as part of their 5th generation program. It went out of favor because it was difficult to trace the execution of Prolog programs—which made debugging difficult.
 
 Structurally, Prolog is both one of the simplest of all programming languages—you can learn it very quickly—and one of the most interesting. It is quite different from virtually all other programming languages. In Prolog you make assertions of facts and then pose questions about those facts. Answers are *unified* with variables.  It is seductively elegant and powerful. We can look a few [examples](https://swish.swi-prolog.org/p/kb_rja.pl).
 
