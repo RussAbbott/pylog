@@ -37,7 +37,9 @@ Read the slides and work through the exercises for all three weeks of Piumarta. 
 Consider the following (Python) code. (You can run it [here](https://colab.research.google.com/drive/1BkWBGY0GpOYqHLpyylzbPU9OLdyqxSmk).)
 
 ```python
-def isEven(i: int) -> bool:
+from typing import Generator
+
+def isEven(i: int) -> Generator[None, None, None]:
     if i % 2 == 0:
         print(f'{i}-even', end = ', ')
         yield 
