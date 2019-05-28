@@ -51,4 +51,4 @@ Can you figure out how it produces the following results?
 >>> print(evens)
 [0, 2, 4, 6, 8] 
 ```
-In particular, what does`       for _ in isEven(i)       `do—beside triggering a PyCharm warning that `bool` objects are not iterable?
+In particular, what does`       for _ in isEven(i)       `do in the list comprehension—beside triggering a PyCharm warning that `bool` objects are not iterable?
