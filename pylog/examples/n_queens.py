@@ -1,5 +1,6 @@
-from logic_variables import Container
 from typing import Generator, List
+
+from logic_variables import Container
 
 
 def add_a_row(placement_container: Container, board_width: int) -> Generator[List[int], None, None]:

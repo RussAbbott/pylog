@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import List, Tuple, Union
 
 from control_structures import forall, forany
-from logic_variables import eot, Ground, n_vars, Term, unify, unify_pairs, Var
+from logic_variables import eot, Ground, n_Vars, Term, unify, unify_pairs, Var
 from sequence_options.super_sequence import is_subsequence,  SuperSequence
 
 
@@ -17,10 +17,10 @@ class LinkedList(SuperSequence):
   When used as a constructor, the argument must be either a Python list or a (Head, Tail) tuple.
   In the second case, Tail must be a LinkedList or a Var.
   """
-  def __init__(self, listOrTuple: Union[list, str, tuple] ):
-    args = self.args_from_pyList(listOrTuple) if isinstance(listOrTuple, list) else \
-           listOrTuple if isinstance(listOrTuple, tuple) else \
-           self.args_from_pyList(list(listOrTuple))  # Run listOrTuple to get a list if it's a generator.
+  def __init__(self, list_or_tuple: Union[list, str, tuple] ):
+    args = self.args_from_pyList(list_or_tuple) if isinstance(list_or_tuple, list) else \
+           list_or_tuple if isinstance(list_or_tuple, tuple) else \
+           self.args_from_pyList(list(list_or_tuple))  # Run list_or_tuple to get a list if it's a generator.
     # super( ) is the Structure class. Create a structure with functor [ ] and *args as args.
     # args will either have two elements or none -- if we are creating an empty list.
     super().__init__( ('linkedList', *args) )
@@ -39,7 +39,7 @@ class LinkedList(SuperSequence):
         return LinkedList(slice_elements)
     if not isinstance(tail, Var):
       return None
-    template = LinkedList(n_vars(stop))
+    template = LinkedList(n_Vars(stop))
     for _ in unify(self, template):
       (prefix, _) = template.prefix_and_tail()
       return LinkedList(prefix[key])
@@ -64,9 +64,9 @@ class LinkedList(SuperSequence):
     return ( ) if not pyList else ( Term.ensure_is_logic_variable(pyList[0]), LinkedList(pyList[1:]) )
 
   def get_ground_value(self):
-    argsList = self.to_python_list()
-    groundArgs = [arg.get_ground_value() for arg in argsList]
-    return groundArgs
+    args_list = self.to_python_list()
+    ground_args = [arg.get_ground_value() for arg in args_list]
+    return ground_args
 
   def head(self) -> Term:
     return self.args[0]
@@ -75,13 +75,13 @@ class LinkedList(SuperSequence):
   def is_contiguous_in(As: List, Zs: LinkedList):
     """ Can As be unified with a segment of Zs? """
     As = LinkedList(As)
-    (lenAs, lenZs) = (len(As), len(Zs))
-    if lenAs == 0:
+    (len_As, lenZs) = (len(As), len(Zs))
+    if len_As == 0:
       yield  # Succeed once.
-    elif lenAs > lenZs:
+    elif len_As > lenZs:
       return  # Fail.
     else:
-      (Xs, Ys) = n_vars(2)
+      (Xs, Ys) = n_Vars(2)
       # Succeed if we can find a way to divide Zs into Xs and Ys so that As is an initial sublist of Ys.
       for _ in forall([lambda: append(Xs, Ys, Zs),
                        lambda: append(As, Var( ), Ys)
@@ -94,26 +94,26 @@ class LinkedList(SuperSequence):
 
   # @eot  Get a strange error message when this is un-commented.
   @staticmethod
-  def member(e: Term, aList):
-    """ Is e in aList? """
-    aList = aList.trail_end()
-    if isinstance(aList, Var):
-      for _ in unify(aList, LinkedList((Var( ), Var( )))):
-        yield from LinkedList.member(e, aList)
+  def member(e: Term, A_List):
+    """ Is e in A_List? """
+    A_List = A_List.trail_end()
+    if isinstance(A_List, Var):
+      for _ in unify(A_List, LinkedList((Var( ), Var( )))):
+        yield from LinkedList.member(e, A_List)
     else:
-      if len(aList) > 0:
-        for _ in forany([lambda: unify(e, aList.head( )),
-                         lambda: LinkedList.member(e, aList.tail( ))]):
+      if len(A_List) > 0:
+        for _ in forany([lambda: unify(e, A_List.head( )),
+                         lambda: LinkedList.member(e, A_List.tail( ))]):
           yield
 
   @staticmethod
-  def members(es: List, aList):
-    """ Do all elements of es appear in aList (in any order). """
+  def members(es: List, A_List):
+    """ Do all elements of es appear in A_List (in any order). """
     if not es:
       yield
-    elif len(aList) > 0:
-      for _ in LinkedList.member(es[0], aList):
-        yield from LinkedList.members(es[1:], aList)
+    elif len(A_List) > 0:
+      for _ in LinkedList.member(es[0], A_List):
+        yield from LinkedList.members(es[1:], A_List)
 
   @staticmethod
   def next_to(E1, E2, Es):
@@ -129,12 +129,12 @@ class LinkedList(SuperSequence):
     if self.is_empty():
       return ([], [])
     else:
-      tailEoT = self.tail().trail_end()
-      if isinstance(tailEoT, Var):
-        return ([self.head()], tailEoT)
+      Tail_EoT = self.tail().trail_end()
+      if isinstance(Tail_EoT, Var):
+        return ([self.head()], Tail_EoT)
       else:
-        (tailPrefix, tailTail) = tailEoT.prefix_and_tail( )
-        return ([self.head()] + tailPrefix, tailTail)
+        (tail_prefix, Tail_Tail) = Tail_EoT.prefix_and_tail( )
+        return ([self.head()] + tail_prefix, Tail_Tail)
 
   def tail(self) -> Union[LinkedList, Var]:
     return self.args[1]
@@ -176,7 +176,7 @@ def append(Xs: Union[LinkedList, Var], Ys: Union[LinkedList, Var], Zs: Union[Lin
   But those are not visible at this level.
 
   Clause 2. The recursive step.
-  Move an element between Xs and Zs and call append recursively with Xs_tail and Zs_tail.
+  Move an element between Xs and Zs and call append recursively with Xs_Tail and Zs_Tail.
   Since an empty list cannot unify with a LinkedList that has a head and a tail, if either
   Xs or Zs is empty, unify_pairs will fail.
 
@@ -184,29 +184,21 @@ def append(Xs: Union[LinkedList, Var], Ys: Union[LinkedList, Var], Zs: Union[Lin
   """
 
   # Create the existential variables at the start.
-  (XZ_head, Xs_tail, Zs_tail) = n_vars(3)
+  (XZ_Head, Xs_Tail, Zs_Tail) = n_Vars(3)
 
   for _ in forany([
     # Clause 1.
     lambda: unify_pairs([(Xs, emptyLinkedList),
                          (Ys, Zs)]),
     # Clause 2.
-    lambda: forall([lambda: unify_pairs([ (Xs, LinkedList( (XZ_head, Xs_tail) )),
-                                          (Zs, LinkedList( (XZ_head, Zs_tail) ))
+    lambda: forall([lambda: unify_pairs([ (Xs, LinkedList( (XZ_Head, Xs_Tail) )),
+                                          (Zs, LinkedList( (XZ_Head, Zs_Tail) ))
                                           ]),
-                    lambda: append(Xs_tail, Ys, Zs_tail)])
+                    lambda: append(Xs_Tail, Ys, Zs_Tail)])
                    ]):
     yield
 
 
-# def split_at(Zs: LinkedList, Start: LinkedList, Pivot: Term, End: LinkedList):
-#   """
-#   Split Zs into a prefix list (Start), an element (Pivot) and a suffic list (End)
-#   """
-#   for _ in append(Start, LinkedList( (Pivot, End) ), Zs):
-#     yield
-#
-#
 if __name__ == '__main__':
 
   A = LinkedList((Var( ), Var( )))
@@ -231,23 +223,20 @@ if __name__ == '__main__':
     Xs[5]: 5
   """
   Xs = list(map(Ground, range(9)))
-  SubXs = [Ground(1), Var( ), Ground(4), Var( ), Ground(8)]
-  print(f'\nLinkedList(SubXs): {LinkedList(SubXs)}, LinkedList(Xs): {LinkedList(Xs)}')
-  for _ in is_subsequence(SubXs, LinkedList(Xs)):
-    print(f'\tLinkedList(SubXs): {LinkedList(SubXs)}')
-  SubXs = [Ground(1), Var( ), Ground(8), Var( ), Ground(7)]
-  print(f'\nLinkedList(SubXs): {LinkedList(SubXs)}, LinkedList(Xs): {LinkedList(Xs)}')
-  for _ in is_subsequence(SubXs, LinkedList(Xs)):
-    print(f'\tLinkedList(SubXs): {LinkedList(SubXs)}')
+  Sub_Xs = [Ground(1), Var( ), Ground(4), Var( ), Ground(8)]
+  print(f'\nLinkedList(Sub_Xs): {LinkedList(Sub_Xs)}, LinkedList(Xs): {LinkedList(Xs)}')
+  for _ in is_subsequence(Sub_Xs, LinkedList(Xs)):
+    print(f'\tLinkedList(Sub_Xs): {LinkedList(Sub_Xs)}')
+  Sub_Xs = [Ground(1), Var( ), Ground(8), Var( ), Ground(7)]
+  print(f'\nLinkedList(Sub_Xs): {LinkedList(Sub_Xs)}, LinkedList(Xs): {LinkedList(Xs)}')
+  for _ in is_subsequence(Sub_Xs, LinkedList(Xs)):
+    print(f'\tLinkedList(Sub_Xs): {LinkedList(Sub_Xs)}')
 
-  (Start, Pivot, End) = n_vars(3)
+  (Start, Pivot, End) = n_Vars(3)
   Zs = LinkedList( list(range(10)) )
-  # print(f'\n?- split_at({Zs}, Start, Pivot, End)')
-  # for _ in split_at(Zs, Start, Pivot, End):
-  #   print(f'=> {Start} {Pivot} {End}')
 
-  L = LinkedList( n_vars(3) )
-  print(f'\nGiven: L = LinkedList( n_vars(3) ): {L}' )
+  L = LinkedList( n_Vars(3) )
+  print(f'\nGiven: L = LinkedList( n_Vars(3) ): {L}' )
   E = Var( )
   for _ in unify(L, LinkedList([1, 2, 3])):
     print(f'Given: E: {E}, L: {L}')
@@ -257,18 +246,18 @@ if __name__ == '__main__':
       print(f'E = {E}')
 
   lst = LinkedList( [*map(Ground, [1, 2, 3, 2, 1])] )
-  Esub = [Ground(2), Var( )]
-  linkedlistEsub = LinkedList(Esub)
-  print(linkedlistEsub)
-  print(f'\nEsub: {linkedlistEsub}\n?- is_contiguous_in(Esub, {lst})')
-  for _ in LinkedList.is_contiguous_in(Esub, lst):
-    print(f'Esub: {linkedlistEsub}')
+  E_Sub = [Ground(2), Var( )]
+  linkedlistE_Sub = LinkedList(E_Sub)
+  print(linkedlistE_Sub)
+  print(f'\nE_Sub: {linkedlistE_Sub}\n?- is_contiguous_in(E_Sub, {lst})')
+  for _ in LinkedList.is_contiguous_in(E_Sub, lst):
+    print(f'E_Sub: {linkedlistE_Sub}')
 
-  Esub = [Var( ), Ground(2)]
-  linkedlistEsub = LinkedList(Esub)
-  print(f'\nEsub: {linkedlistEsub}\n?- is_contiguous_in(Esub, {lst})')
-  for _ in LinkedList.is_contiguous_in(Esub, lst):
-    print(f'Esub: {linkedlistEsub}')
+  E_Sub = [Var( ), Ground(2)]
+  linkedlistE_Sub = LinkedList(E_Sub)
+  print(f'\nE_Sub: {linkedlistE_Sub}\n?- is_contiguous_in(E_Sub, {lst})')
+  for _ in LinkedList.is_contiguous_in(E_Sub, lst):
+    print(f'E_Sub: {linkedlistE_Sub}')
 
   X = Ground('abc')
   Z1 = Var( )
@@ -302,7 +291,6 @@ if __name__ == '__main__':
   
   End test
   """
-
 
   # Append examples
   # Run "forward:" Xs + Ys --> Zs
@@ -359,16 +347,16 @@ if __name__ == '__main__':
 
   print(f'\n?- LinkedList([Var()]).is_ground(): {LinkedList([Var( )]).is_ground( )}')
   A = LinkedList([1, 2, 3])
-  BHead = Var( )
-  BTail = Var( )
-  B = LinkedList((BHead, BTail))
+  B_Head = Var( )
+  B_Tail = Var( )
+  B = LinkedList((B_Head, B_Tail))
 
   print(f'1. A: {A}, B: {B}')
   for _ in unify(A, B):
     print(f'2. A: {A}, B: {B}')
 
-    BTailTrailEnd = BTail.trail_end( )
-    C = LinkedList([0, *BTailTrailEnd.get_ground_value( )])
+    B_Tail_TrailEnd = B_Tail.trail_end( )
+    C = LinkedList([0, *B_Tail_TrailEnd.get_ground_value( )])
     print(f'3. C: {C}')
 
     D2 = Var( )
@@ -389,27 +377,27 @@ if __name__ == '__main__':
 
   # The empty LinkedList is a LinkedList ith no arguments.
   head = Ground('head')
-  unclosedList1 = LinkedList((head, Var( )))
-  print(f'6. unclosedList1: {unclosedList1}, len(unclosedList1): {len(unclosedList1)}')
-  unclosedList2 = LinkedList((Var( ), Var( )))
-  print(f'7. unclosedList2: {unclosedList2}, len(unclosedList2): {len(unclosedList2)}')
-  for _ in unify(LinkedList([*range(5)]), unclosedList2):
-    print(f'8. unify(LinkedList([*range(5)]), unclosedList2) => ' 
-          f'unclosedList2: {unclosedList2}; len(unclosedList2): {len(unclosedList2)}')
+  Unclosed_List1 = LinkedList((head, Var( )))
+  print(f'6. Unclosed_List1: {Unclosed_List1}, len(Unclosed_List1): {len(Unclosed_List1)}')
+  Unclosed_List2 = LinkedList((Var( ), Var( )))
+  print(f'7. Unclosed_List2: {Unclosed_List2}, len(Unclosed_List2): {len(Unclosed_List2)}')
+  for _ in unify(LinkedList([*range(5)]), Unclosed_List2):
+    print(f'8. unify(LinkedList([*range(5)]), Unclosed_List2) => ' 
+          f'Unclosed_List2: {Unclosed_List2}; len(Unclosed_List2): {len(Unclosed_List2)}')
 
-  unclosedList3 = LinkedList((Var( ), Var( )))
+  Unclosed_List3 = LinkedList((Var( ), Var( )))
   limit1 = 4
-  for _ in LinkedList.member(Ground(5), unclosedList3):
+  for _ in LinkedList.member(Ground(5), Unclosed_List3):
     if limit1 <= 0:
       break
     limit1 -= 1
-    print(unclosedList3)
+    print(Unclosed_List3)
     limit2 = 2
-    for _ in LinkedList.member(Ground(9), unclosedList3):
+    for _ in LinkedList.member(Ground(9), Unclosed_List3):
       if limit2 <= 0:
         break
       limit2 -= 1
-      print(unclosedList3)
+      print(Unclosed_List3)
 
   print('\nEnd fifth test\n')
 
@@ -423,9 +411,9 @@ if __name__ == '__main__':
   4. D3: 3, D2: 2, D: [3, 2, 3]
   5. E: [1, 2, 3], E_EoT.head(): 1, E_EoT.tail(): [2, 3]
   
-  6. unclosedList1: ('[]', 'head', '_64')
-  7. unclosedList2: ('[]', '_66', '_67')
-  8. unclosedList2: [1, 2, 3]
+  6. Unclosed_List1: ('[]', 'head', '_64')
+  7. Unclosed_List2: ('[]', '_66', '_67')
+  8. Unclosed_List2: [1, 2, 3]
   
   End fifth test
   """

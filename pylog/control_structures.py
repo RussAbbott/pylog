@@ -106,7 +106,7 @@ def bool_yield_wrapper(gen):
   return wrapped_func
 
 
-def bool_to_SF(b: bool) -> Generator[None, None, None]:
+def bool_to_sf(b: bool) -> Generator[None, None, None]:
   if b:
     yield
 
@@ -152,7 +152,7 @@ def forany(gens):
       yield
 
 
-def print_SF(x, succeedOrFail):
+def print_sf(x, succeedOrFail):
   """
   Can be included in a list of generators (as in forall and forany) to see where we are.
   The second argument determines whether it succeeds or fails.
@@ -206,14 +206,14 @@ if __name__ == '__main__':
   # If is_even_1(i) fails to unify, for _ in is_even_1(i) fails.
   # It works similarly to an if condition.
   evens_1 = [i for i in range(5) for _ in is_even_1(i)]
-  print(f'1. evens_1: {evens_1}')    # => 1. evens_1: [0, 2, 4]
+  print(f'\n1. evens_1: {evens_1}')    # => 1. evens_1: [0, 2, 4]
 
   # Same as is_even_1 but includes the range generator.
   def is_even_2(n: int, Res: Var) -> Generator[None, None, None]:
     for i in range(n):
         for _ in unify_pairs([ (Ground(i % 2 == 0), Ground(True)),
                                (Ground(i), Res)
-                              ]):
+                               ]):
           yield
 
   # Can reuse this variable in all examples.

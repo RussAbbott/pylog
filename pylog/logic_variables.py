@@ -40,15 +40,23 @@ File dependencies. Circular dependencies are not allowed.
 
 logic_variables (this file): none
 control_structures: logic_variables
-sequences: logic_variables
-linked_list: control_structures, logic_variables, sequences
+
+super_sequence: control_structures, logic_variables
+linked_list and sequences: control_structures, logic_variables, super_sequence
 
 n_queens: logic_variables
-puzzle: logic_variables
 trains: control_structures, logic_variables, 
-scholarship_problem: control_structures, logic_variables, sequences, puzzles
-zebra_problem: control_structures, linked_list, logic_variables, sequences, puzzles
+puzzle: logic_variables, super_sequence
+zebra_problem: control_structures, logic_variables, puzzles
+scholarship_problem: control_structures, logic_variables, puzzles, super_sequence
 
+"""
+
+"""
+Naming conventions. For the most part I used the PEP8 conventions, i.e., all lower case and no camel case 
+except for class names.
+
+However, I also attempted to follow the Prolog convention that Prolog variable names begin with upper case letters.
 """
 
 """
@@ -94,11 +102,11 @@ class Term:
                                                                                   PyList      PyTuple
   """
 
-  termCount = 0
+  term_count = 0
 
   def __init__(self):
-    Term.termCount += 1
-    self.termId = self.termCount
+    Term.term_count += 1
+    self.term_id = self.term_count
     super().__init__()
 
   # @eot Can't use decorators on dunder methods without doing this:
@@ -109,9 +117,9 @@ class Term:
     self == other if either (a) they have the same ground value or (b) are the same variable.
     """
     # return self is other
-    (selfEoT, otherEoT) = (self.trail_end(), other.trail_end())
-    return selfEoT is otherEoT or \
-           (self is not selfEoT or other is not otherEoT) and selfEoT == otherEoT
+    (self_eot, other_eot) = (self.trail_end(), other.trail_end())
+    return self_eot is other_eot or \
+           (self is not self_eot or other is not other_eot) and self_eot == other_eot
 
   def __lt__(self, other) -> bool:
     return str(self) < str(other)
@@ -121,10 +129,10 @@ class Term:
 
   def __str__(self) -> str:
     """
-    The str( ) of a Var is its ground value if is_ground( ) or its termId otherwise.
+    The str( ) of a Var is its ground value if is_ground( ) or its term_id otherwise.
     """
-    selfEoT = self.trail_end( )
-    return f'{selfEoT}' if selfEoT.is_ground( ) or isinstance(selfEoT, Structure) else f'_{selfEoT.termId}'
+    self_eot = self.trail_end( )
+    return f'{self_eot}' if self_eot.is_ground( ) or isinstance(self_eot, Structure) else f'_{self_eot.term_id}'
 
   @staticmethod
   def ensure_is_logic_variable(x):
@@ -145,23 +153,23 @@ class Ground(Term):
 
   """ A wrapper class for integers, strings, etc. """
 
-  def __init__(self, groundValue: Optional[Any] = None ):
-    self.groundValue = groundValue
+  def __init__(self, ground_value: Optional[Any] = None ):
+    self._ground_value = ground_value
     super( ).__init__( )
 
   def __eq__(self, other) -> bool:
-    otherEoT = other.trail_end()
-    return isinstance(otherEoT, Ground) and self.get_ground_value() == otherEoT.get_ground_value()
+    other_eot = other.trail_end()
+    return isinstance(other_eot, Ground) and self.get_ground_value() == other_eot.get_ground_value()
 
   def __lt__(self, other) -> bool:
-    otherEoT = other.trail_end()
-    return isinstance(otherEoT, Ground) and self.get_ground_value() < otherEoT.get_ground_value()
+    other_eot = other.trail_end()
+    return isinstance(other_eot, Ground) and self.get_ground_value() < other_eot.get_ground_value()
 
   def __str__(self) -> str:
-    return f'{self.groundValue}'
+    return f'{self._ground_value}'
 
   def get_ground_value(self):
-    return self.groundValue
+    return self._ground_value
 
   def is_ground(self) -> bool:
     return True
@@ -169,14 +177,14 @@ class Ground(Term):
 
 class Container(Ground):
   def get_contents(self):
-    return self.groundValue
+    return self._ground_value
 
   def incr_and_return(self):
-    self.groundValue += 1
-    return self.groundValue
+    self._ground_value += 1
+    return self._ground_value
 
   def set_contents(self, value):
-    self.groundValue = value
+    self._ground_value = value
 
 
 class Structure(Term):
@@ -194,21 +202,21 @@ class Structure(Term):
     super().__init__()
 
   def __eq__(self, other) -> bool:
-    otherEoT = other.trail_end()
-    return (isinstance(otherEoT, Structure) and
-            self.functor == otherEoT.functor and
-            len(self.args) == len(otherEoT.args) and
-            all([selfArg == otherEoTArg for (selfArg, otherEoTArg) in zip(self.args, otherEoT.args)]))
+    other_eot = other.trail_end()
+    return (isinstance(other_eot, Structure) and
+            self.functor == other_eot.functor and
+            len(self.args) == len(other_eot.args) and
+            all([selfArg == other_eotArg for (selfArg, other_eotArg) in zip(self.args, other_eot.args)]))
 
   # noinspection PySimplifyBooleanCheck
   def __str__(self):
-    argsStr = self.values_string(self.args)
-    result = f'{self.functor}({argsStr})'
+    args_str = self.values_string(self.args)
+    result = f'{self.functor}({args_str})'
     return result
 
   def get_ground_value(self) -> Tuple:
-    groundArgs = [arg.get_ground_value() for arg in self.args]
-    return (self.functor, *groundArgs)
+    ground_args = [arg.get_ground_value() for arg in self.args]
+    return (self.functor, *ground_args)
 
   def is_ground(self) -> bool:
     grounded = all([arg.is_ground() for arg in self.args])
@@ -226,36 +234,36 @@ class Var(Term):
   """
 
   def __init__(self):
-    self.trailNext = None
+    self.trail_next = None
     super().__init__()
 
   def _has_trail_next(self) -> bool:
     # Is this the end of the trail?
-    return self.trailNext is not None
+    return self.trail_next is not None
 
   def get_ground_value(self):
-    trail_endVar = self.trail_end( )
-    return trail_endVar.get_ground_value( ) if trail_endVar.is_ground( ) else None
+    Trail_End_Var = self.trail_end( )
+    return Trail_End_Var.get_ground_value( ) if Trail_End_Var.is_ground( ) else None
 
   def is_ground(self) -> bool:
     """ Is ground if its trail end is ground """
-    trail_endTerm = self.trail_end( )
-    return not isinstance(trail_endTerm, Var) and trail_endTerm.is_ground()
+    Trail_End_Var = self.trail_end( )
+    return not isinstance(Trail_End_Var, Var) and Trail_End_Var.is_ground()
 
   def trail_end(self):
     """
     return: the Term, whatever it is, at the end of this Var's unification trail.
     """
-    return self.trailNext.trail_end( ) if self._has_trail_next( ) else self
+    return self.trail_next.trail_end( ) if self._has_trail_next( ) else self
 
 
-def n_vars(n: int) -> List[Var]:
+def n_Vars(n: int) -> List[Var]:
   """ Generate a list of uninstantiated variables of length n. """
   return [Var( ) for _ in range(n)]
 
 
 @eot
-def unify(left: Term, right: Term):
+def unify(Left: Term, Right: Term):
   """
   Unify two logic Terms.
 
@@ -272,33 +280,33 @@ def unify(left: Term, right: Term):
   # If the trail_ends are equal, either because they have the same ground value or
   # because they are the same (unbound) Var, do nothing. They are already unified.
   # yield to indicate unification success.
-  if left == right:
+  if Left == Right:
     yield
 
   # Since they are not equal, if they are both ground but have different values,
   # they can't be unified. To indicate unification failure, terminate without a yield.
-  elif left.is_ground( ) and right.is_ground( ):
+  elif Left.is_ground( ) and Right.is_ground( ):
     pass
 
   # If at least one is a Var. Make the other an extension of its trail.
   # (If both are Vars, it makes no functional difference which extends which.)
-  elif isinstance(left, Var) or isinstance(right, Var):
-    (pointsFrom, pointsTo) = (left, right) if isinstance(left, Var) else \
-                             (right, left)
-    pointsFrom.trailNext = pointsTo
+  elif isinstance(Left, Var) or isinstance(Right, Var):
+    (pointsFrom, pointsTo) = (Left, Right) if isinstance(Left, Var) else \
+                             (Right, Left)
+    pointsFrom.trail_next = pointsTo
     yield
     # All yields create a context in which more of the program is executed--like
     # the body of a while- or for-loop. A "next()" request asks for alternatives.
     # But there is only one functional way to do unification.
     # So on backup, simply unlink the two and exit without a further yield.
-    pointsFrom.trailNext = None
+    pointsFrom.trail_next = None
 
-  # If both left and right are Structures, they can be unified if
+  # If both Left and Right are Structures, they can be unified if
   # (a) they have the same functor and
   # (b) their arguments can be unified.
-  elif isinstance(left, Structure) and isinstance(right, Structure) and \
-       left.functor == right.functor:
-    yield from unify_sequences(left.args, right.args)
+  elif isinstance(Left, Structure) and isinstance(Right, Structure) and \
+       Left.functor == Right.functor:
+    yield from unify_sequences(Left.args, Right.args)
 
 
 def unify_pairs(tuples: List[Tuple[Term, Term]]):
@@ -307,12 +315,12 @@ def unify_pairs(tuples: List[Tuple[Term, Term]]):
     yield
   else:
     # Get the first tuple from the tuples list.
-    [(left, right), *restOfTuples] = tuples
+    [(Left, Right), *restOfTuples] = tuples
     # If they unify, go on to the rest of the tuples list.
-    for _ in unify(left, right):
+    for _ in unify(Left, Right):
       yield from unify_pairs(restOfTuples)
     # Equivalent to the following.
-    # for _ in forall([lambda: unify(left, right),
+    # for _ in forall([lambda: unify(Left, Right),
     #                  lambda: unify_pairs(restOfTuples)]):
     #   yield
 
@@ -439,8 +447,8 @@ if __name__ == '__main__':
 
 
   evens = [(i, isEvn, isEvn.trail_end( ).get_ground_value( )) for i in range(3) for isEvn in is_even(i)]
-  evensStr = [(a, f'{type(b).__name__}({b.trail_end( ).get_ground_value( )})', c) for (a, b, c) in evens]
-  print(f'\nevens: {evensStr}\n')
+  evens_str = [(a, f'{type(b).__name__}({b.trail_end( ).get_ground_value( )})', c) for (a, b, c) in evens]
+  print(f'\nevens: {evens_str}\n')
   print('End of fourth test')
 
   """

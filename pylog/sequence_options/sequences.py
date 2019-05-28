@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import List, Union
 
 from control_structures import forany
-from logic_variables import eot, Ground, n_vars, Term, unify, unify_pairs, unify_sequences, Var
+from logic_variables import eot, Ground, n_Vars, Term, unify, unify_pairs, unify_sequences, Var
 from sequence_options.super_sequence import SuperSequence
 
 
@@ -106,7 +106,7 @@ def append(Xs: Union[PySequence, Var], Ys: Union[PySequence, Var], Zs: Union[PyS
     # After this unification, Zs will still be a Var, but
     # by the time we reach this point again, Zs will refer
     # to its trail end, which is not a Var.
-    for _ in unify(Zs, seq_type(n_vars(len(Xs) + len(Ys)))):
+    for _ in unify(Zs, seq_type(n_Vars(len(Xs) + len(Ys)))):
       yield from append(Xs, Ys, Zs)
     return
 
@@ -116,8 +116,8 @@ def append(Xs: Union[PySequence, Var], Ys: Union[PySequence, Var], Zs: Union[PyS
   lenZs = len(Zs)
   for i in range(lenZs+1):
     # If Xs or Ys are already instantiated to some fixed length Sequence, unify will fail when given the wrong length.
-    for _ in unify_pairs([ (Xs, seq_type(n_vars(i))),
-                           (Ys, seq_type(n_vars(lenZs - i)))  ]):
+    for _ in unify_pairs([ (Xs, seq_type(n_Vars(i))),
+                           (Ys, seq_type(n_Vars(lenZs - i)))  ]):
       # Although the lengths of Xs and Ys vary with i,
       # Xs, Ys, and Zs are all of fixed lengths in which len(Xs) + len(Ys) = len(Zs).
       # Concatenate Xs and Ys and then unify the concatenation with Zs.
@@ -155,13 +155,14 @@ if __name__ == '__main__':
   for _ in append(Xs, Ys, Zs):
     print(f'\tXs: {Xs}, Ys: {Ys}, Zs: {Zs}')
 
-  X = tuple(n_vars(15))
+  X = tuple(n_Vars(15))
   Y = X[4:8]
+  print(f'\nX: {PyTuple(X)}, Y: {PyTuple(Y)}')
   for _ in unify_sequences(Y, tuple(map(Ground, ['A', 'B', 'C', 'D']))):
-    print(f'\nX: {PyTuple(X)}, Y: {PyTuple(Y)}')
+    print(f"unify_sequences(Y, tuple(map(Ground, ['A', 'B', 'C', 'D']))) => X: {PyTuple(X)}, Y: {PyTuple(Y)}")
 
-  B = tuple(n_vars(8))
-  print(f'B: {PyTuple(B)}')
+  B = tuple(n_Vars(8))
+  print(f'\nB: {PyTuple(B)}')
 
   for _ in unify(B[3], Ground('XYZ')):
-    print(f'B: {PyTuple(B)}')
+    print(f"unify(B[3], Ground('XYZ')) => B: {PyTuple(B)}")
