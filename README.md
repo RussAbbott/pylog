@@ -44,7 +44,7 @@ def isEven(i: int) -> Generator[None, None, None]:
         print(f'{i}-odd', end = ', ')
 ```
 Can you figure out how it produces the following results? 
-```
+```python
 >>> evens = [i for i in range(10) for _ in isEven(i)] 
 0-even, 1-odd, 2-even, 3-odd, 4-even, 5-odd, 6-even, 7-odd, 8-even, 9-odd,
 
