@@ -8,6 +8,14 @@ Structurally, Prolog is both one of the simplest of all programming languages—
 
 We can look a few examples [here](https://swish.swi-prolog.org/p/kb_rja.pl).
 
+## SWI-Prolog
+
+[SWI-Prolog](http://www.swi-prolog.org/features.html) has kept the Prolog flame burning and seems to have developed a successful community of Prolog users.
+
+> SWI-Prolog is a versatile implementation of the Prolog language. Although SWI-Prolog gained its popularity primarily in education, its development is mostly driven by the needs for application development. This is facilitated by a rich interface to other IT components by supporting many document types and (network) protocols as well as a comprehensive low-level interface to C that is the basis for high-level interfaces to C++, Java (bundled), C#, Python, etc (externally available). Data type extensions such as dicts and strings as well as full support for Unicode and unbounded integers simplify smooth exchange of data with other components.
+
+> SWI-Prolog aims at scalability. Its robust support for multi-threading exploits multi-core hardware efficiently and simplifies embedding in concurrent applications. Its Just In Time Indexing (JITI) provides transparent and efficient support for predicates with millions of clauses.
+
 ## Prolog tutorials
 
 * Blackburn, Patrick, Johan Bos, and Kristina Striegnitz (2012) [*Learn Prolog Now!*](http://lpn.swi-prolog.org/lpnpage.php?pageid=online) (This version of the book is embedded in SWI Prolog’s [SWI SH](http://swish.swi-prolog.org/) ([SWI-Prolog](http://www.swi-prolog.org/) for SHaring), an online prolog interpreter similar to Jupyter.)
