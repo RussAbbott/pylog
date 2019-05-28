@@ -1,12 +1,10 @@
 from control_structures import would_succeed, forall, forany, print_sf
-from logic_variables import Container, unify, Var
+from logic_variables import Container, Var
 
 from sequence_options.super_sequence import is_subsequence
 
-from examples.puzzles import Puzzle
+from examples.puzzles import Puzzle, run_problem
 
-
-# Test commit
 """
     =================================================================================================================
       This and the scholarship problem are both written so that they can use either LinkedLists or one of the
@@ -34,8 +32,8 @@ The available majors are: Astronomy, English, Philosophy, Comp Sci.
 
 1. The student who studies Astronomy gets a smaller scholarship than Amy.
 2. Amy studies either English or Philosophy.
-3. The student who studies Comp Sci has a 5000 USD bigger scholarship than Carrie.
-4. Erma has a 10000 USD bigger scholarship than Carrie.
+3. The student who studies Comp Sci has a $5,000 bigger scholarship than Carrie.
+4. Erma has a $10,000 bigger scholarship than Carrie.
 5. Tracy has a bigger scholarship than the student that studies English.
 
 The answer.
@@ -61,7 +59,7 @@ class Student(Puzzle):
     super( ).__init__((functor, name, major, scholarship))
 
 
-def scholarship_problem(Ss, ListType):
+def scholarship_problem(Students, ListType):
 
   # Keeps count of the number of successful rule applications.
   rule_applications = Container(0)
@@ -70,16 +68,10 @@ def scholarship_problem(Ss, ListType):
   Student_names = [Student(name='Amy'),  Student(name='Carrie'),
                    Student(name='Erma'), Student(name='Tracy')]
 
-  # The answer list starts as an ordered list of scholarship values.
-  Students = ListType( [Student(scholarship=25+i*5) for i in range(4)] )
-  # To avoid arithmetic, we'll use the fact that the scholarships
-  # are evenly spaced with 5,000 increments. The code deals with
-  # scholarship numbers in thousands, i.e., 25, 30, 35, 40.
-
   # All the clues must succeed.
   for _ in forall([
     # Unify the answer parameter (Ss) with the internal answer list (Students).
-    lambda: unify(Students, Ss),
+    # lambda: unify(Students, Ss),
     # print_sf allows us to leave a trace of progress.
     # Since the print_sf statements are all included in a forall list, they should all succeed.
     lambda: print_sf(f'\n{rule_applications.incr_and_return( )}) At the start: {Students}', 'Succeed'),
@@ -104,7 +96,7 @@ def scholarship_problem(Ss, ListType):
                     lambda: would_succeed(ListType.members)(Student_names, Students)]),
     lambda: print_sf(f'{rule_applications.incr_and_return()}) After 2: {Students}', 'Succeed'),
 
-    # 3. The student who studies Comp Sci has a 5000 USD larger scholarship than Carrie.
+    # 3. The student who studies Comp Sci has a $5,000 larger scholarship than Carrie.
     # To avoid arithmetic, take advantage of the known structure of the Scholarships list.
     lambda: forall([lambda: ListType.is_contiguous_in([Student(name='Carrie'), Student(major='Comp Sci')], Students),
 
@@ -113,7 +105,7 @@ def scholarship_problem(Ss, ListType):
                     ]),
     lambda: print_sf(f'{rule_applications.incr_and_return()}) After 3: {Students}', 'Succeed'),
 
-    # 4. Erma has a 10000 USD larger scholarship than Carrie.
+    # 4. Erma has a $10,000 larger scholarship than Carrie.
     # This means that Erma comes after Carrie and that there is one person between them.
     lambda: forall([lambda: ListType.is_contiguous_in([Student(name='Carrie'), Var(), Student(name='Erma')], Students),
 
@@ -133,31 +125,31 @@ def scholarship_problem(Ss, ListType):
     # Make sure all majors are mentioned.
     lambda: ListType.members([Student(major='Astronomy'),  Student(major='English'),
                               Student(major='Philosophy'), Student(major='Comp Sci')],
-                              Students)
+                             Students)
   ]):
     yield
 
 
 if __name__ == '__main__':
 
-  """ Select either LinkedList or PyList or PyTuple as the ListType. """
+  """ Select either LinkedList or a PySequence (PyList or PyTuple) as the ListType. """
 
-  from sequence_options.linked_list import LinkedList
-  ListType = LinkedList
+  # from sequence_options.linked_list import LinkedList
+  # ListType = LinkedList
 
-  # from sequence_options.sequences import PyList  # or PyTuple
-  # ListType = PyList  # or PyTuple
+  from sequence_options.sequences import PyList  # or PyTuple
+  ListType = PyList  # or PyTuple
 
-  """ ---------------------------------------------------- """
-  
-  inp = None  # needed below at this block level
-  Students = Var()
-  for _ in scholarship_problem(Students, ListType):
-    print('\nStudents: ')
-    for student in Students.trail_end():
-      print(f'\t{student}')
-    inp = input('\nMore? (y, or n)? > ').lower( )
-    if inp != 'y':
-      break
-  if inp == 'y':
-    print('No more solutions.')
+  """ additional_answer function, if any """
+
+  # No additional answers
+
+  """ Set up the Answer list """
+  # The answer list starts as an ordered list of scholarship values.
+  # To avoid arithmetic, we'll use the fact that the scholarships
+  # are evenly spaced with $5,000 increments. The code deals with
+  # scholarship numbers in thousands, i.e., 25, 30, 35, 40.
+  Students = ListType([Student(scholarship=25 + i * 5) for i in range(4)])
+
+  """ Run problem """
+  run_problem(scholarship_problem, ListType, Students)
