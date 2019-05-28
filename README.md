@@ -93,3 +93,9 @@ zebra_problem: control_structures, logic_variables, puzzles
 scholarship_problem: control_structures, logic_variables, puzzles, super_sequence
 
 ```
+## Naming conventions
+
+For the most part, Python identifier names follow PEP8 conventions: all lower case, with underscores between wirds. No camel case except for class names.
+
+However, since Prolog uses identifiers that begin with an upper case letter for Prolog variables, Python identifiers used as Prolog variables begin with upper case letters.
+
