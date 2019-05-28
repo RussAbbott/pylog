@@ -77,10 +77,10 @@ pylog
     logic_variables.py           -- Implementations of the Prolog's logic variables.
 ```
 
-## File dependencies (Circular dependencies are not allowed.)
+## File dependencies/`imports from` (circular dependencies not allowed)
 
 ```
-logic_variables (this file): none
+logic_variables: none
 control_structures: logic_variables
 
 super_sequence: control_structures, logic_variables
