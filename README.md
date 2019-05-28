@@ -74,7 +74,7 @@ succeeds/fails for a given `i`, the list comprehension completes/fails to comple
 ## File organization 
 
 ```
-pylog
+pylog                            -- Root directory
     examples                     -- A directory of sample pylog programs
         n_queens.py              -- The traditional n-queens problem. Uses minimal pylog features but illustrates the pylog style.
         puzzles.py               -- A file containing information common to the scholarship_problem and the zebra_problem
