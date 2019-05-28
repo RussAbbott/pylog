@@ -14,7 +14,7 @@ We can look a few examples [here](https://swish.swi-prolog.org/p/kb_rja.pl).
 
 <dl>
 <dt>From the <a href="http://www.swi-prolog.org/features.html">SWI-Prolog website</a></dt>
-<dd> SWI-Prolog is a versatile implementation of the <a href="https://en.wikipedia.org/wiki/Prolog">Prolog language</a>. Although SWI-Prolog gained its popularity primarily in education, its development is mostly driven by the needs for application development. This is facilitated by a rich interface to other IT components by supporting many document types and (network) protocols as well as a comprehensive low-level interface to C that is the basis for high-level interfaces to C++, Java (bundled), C#, Python, etc (externally available). Data type extensions such as dicts and strings as well as full support for Unicode and unbounded integers simplify smooth exchange of data with other components.<br><br>
+<dd> SWI-Prolog is a versatile implementation of the <a href="https://en.wikipedia.org/wiki/Prolog">Prolog language</a>. Although SWI-Prolog gained its popularity primarily in education, its development is mostly driven by the needs for application development. This is facilitated by a rich interface to other IT components by supporting many document types and (network) protocols as well as a comprehensive low-level interface to C that is the basis for high-level interfaces to C++, Java (bundled), C#, Python, etc (externally available). Data type extensions such as dicts and strings as well as full support for Unicode and unbounded integers simplify smooth exchange of data with other components.<br /><br />
 SWI-Prolog aims at scalability. Its robust support for multi-threading exploits multi-core hardware efficiently and simplifies embedding in concurrent applications. Its Just In Time Indexing (JITI) provides transparent and efficient support for predicates with millions of clauses.</dd>
 </dl>
 
@@ -57,4 +57,4 @@ In Prolog, program components are understood as predicates. They may *succeed* o
 
 Success or failure is implemented in Python through generators. A generator that `yield`s a result (at the Python level) is said to succeed (at the Prolog level); one that does not `yield` a result, fails (at the Prolog level).
 
-In this case, `isEven(i)` succeeds/fails when `i` is/is not even. (In either case it produces an output line.) When `for _ in isEven(i)` succeeds/fails for a given `i`, the list comprehension completes/fails to complete the iteration for that `i` and includes (does not include) `i` in the generated list.  
+In this case, `isEven(i)` succeeds/fails when `i` is/is not even. (In either case it produces an output line.) When<br />`for _ in isEven(i)` succeeds/fails for a given `i`, the list comprehension completes/fails to complete the iteration for that `i` and includes (does not include) `i` in the generated list.  
