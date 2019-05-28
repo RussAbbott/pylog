@@ -29,7 +29,7 @@ SWI-Prolog aims at scalability. Its robust support for multi-threading exploits 
 ## Pylog: prolog in Python
 This repository is a Python implementation of many Prolog features. It is a fork of Piumarta’s [`unify.py`](http://www.ritsumei.ac.jp/~piumarta/pl/src/unify.py).
 
-As an introductory example, consider the following (Python) code. (You can run it [here](https://colab.research.google.com/drive/1BkWBGY0GpOYqHLpyylzbPU9OLdyqxSmk).) (The type annotations are not required, but they are useful to understand what's going on.)
+As an introductory example, consider the following (Python) code. (You can run it [here](https://colab.research.google.com/drive/1BkWBGY0GpOYqHLpyylzbPU9OLdyqxSmk).) (The type annotations are not required, but they are useful to understand what's going on.) (The following is adapted from [Piumarta's week 5 exercises](http://www.ritsumei.ac.jp/~piumarta/pl/ex/PL-05-ex.py).)
 
 ```python
 from typing import Generator
