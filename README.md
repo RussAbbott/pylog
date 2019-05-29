@@ -98,7 +98,7 @@ control_structures: logic_variables
 super_sequence: control_structures, logic_variables
 linked_list and sequences: control_structures, logic_variables, super_sequence
 
-n_queens: logic_variables
+n_queens: logic_variables, sequences
 trains: control_structures, logic_variables, 
 puzzle: logic_variables, super_sequence
 zebra_problem: control_structures, logic_variables, puzzles
