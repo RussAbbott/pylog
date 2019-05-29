@@ -69,7 +69,7 @@ In this case, `isEven(i)` succeeds/fails when `i` is even/odd. (In either case i
 for _ in isEven(i)
 ```
 
-succeeds/fails for a given `i`, the list comprehension completes/fails to complete the iteration for that `i` and includes (does not include) `i` in the generated list.  
+succeeds/fails for a given `i`, the list comprehension completes/fails to complete the iteration for that `i` and includes/does not include `i` in the generated list.  
 
 ## File organization 
 
