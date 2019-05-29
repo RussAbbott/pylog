@@ -4,36 +4,35 @@ from inspect import isgeneratorfunction
 from typing import Any, Generator, Iterable, List, Optional, Sequence, Tuple
 
 """
-Originally by Ian Piumarta (http://www.ritsumei.ac.jp/~piumarta/pl/src/unify.py; 2017-10-27 07:03:38) for a
-course on programming languages (http://www.ritsumei.ac.jp/~piumarta/pl/index.html). Slides and exercises
-for the course contain his original discussion.
-"""
+Developed by Ian Piumarta as the "unify" library (http://www.ritsumei.ac.jp/~piumarta/pl/src/unify.py) for a
+course on programming languages (http://www.ritsumei.ac.jp/~piumarta/pl/index.html). 
 
-"""
 See discussion on the GitHub page: https://github.com/RussAbbott/pylog
 """
 
 """
-The pylog core (this file) contains the logic variable data structure classes and 
-the unify functions.
-
-Prolog is not a functional language. It does not have functions that return values. 
-Values are returned by unifying a function's parameter with the value to be returned.
+The pylog core (this file) contains the logic variable and data structure classes and the unify function.
 """
 
 
 def eot(f):
-  """ A decorator that takes tail_end() of all Var arguments """
+  """ A decorator that takes trail_end() of all Var arguments """
+
+  def get_arg_Vars_trail_ends(args):
+    args = (arg.trail_end() if isinstance(arg, Var) else arg for arg in args)
+    return args
 
   @wraps(f)
-  def eot_wrapper(*args, **kwargs):
-    args = (arg.trail_end() if isinstance(arg, Var) else arg for arg in args)
-    if isgeneratorfunction(f):
-      yield from f(*args, **kwargs)
-    else:
-      return f(*args, **kwargs)
+  def eot_wrapper_gen(*args, **kwargs):
+    args = get_arg_Vars_trail_ends(args)
+    yield from f(*args, **kwargs)
 
-  return eot_wrapper
+  @wraps(f)
+  def eot_wrapper_non_gen(*args, **kwargs):
+    args = get_arg_Vars_trail_ends(args)
+    return f(*args, **kwargs)
+
+  return eot_wrapper_gen if isgeneratorfunction(f) else eot_wrapper_non_gen
 
 
 class Term:
@@ -191,10 +190,12 @@ class Var(Term):
     # Is this the end of the trail?
     return self.trail_next is not None
 
+  @eot
   def get_ground_value(self) -> Optional[Any]:
     Trail_End_Var = self.trail_end( )
     return Trail_End_Var.get_ground_value( ) if Trail_End_Var.is_ground( ) else None
 
+  # Can't use @eot. Generates an infinite recursive loop.
   def is_ground(self) -> bool:
     """ Is ground if its trail end is ground """
     Trail_End_Var = self.trail_end( )
@@ -291,6 +292,12 @@ def unify_sequences(seq_1: Sequence, seq_2: Sequence):
 
 
 if __name__ == '__main__':
+
+  V = Var()
+
+  print(isgeneratorfunction(V.get_ground_value))
+
+  print(V.get_ground_value())
 
   print(f'{Structure(  (list, 1, 2, 3) ) }')
 
