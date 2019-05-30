@@ -71,6 +71,10 @@ for _ in isEven(i)
 
 succeeds/fails for a given `i`, the list comprehension completes/fails to complete the iteration for that `i` and includes/does not include `i` in the generated list.  
 
+## Logic variables and unification 
+
+*<To be written>*
+
 ## File organization 
 
 ```
