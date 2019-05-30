@@ -73,7 +73,7 @@ succeeds/fails for a given `i`, the list comprehension completes/fails to comple
 
 ## Logic variables and unification 
 
-*<To be written>*
+*To be written*
 
 ## File organization 
 
