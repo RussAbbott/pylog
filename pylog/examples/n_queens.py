@@ -1,11 +1,19 @@
-from typing import Generator, List
+from typing import Generator, List, Union
 from math import log10, floor
 
+from control_structures import eot
 from logic_variables import unify, Var  
 from sequence_options.sequences import PyList
 
 
-def complete_queen_placements(Placement: PyList, board_width: int, Solution: Var) -> Generator[List[int], None, None]:
+# The eot decorator replaces every Var arg with the value at the end of its unification trail.
+# The one that we care about is Placement, which will have been created as a Var by append
+# at the previous level.
+# Solution is also a Var, but it is at the end of its unification trail. So it is unchanged.
+@eot
+def place_remaining_queens(Placement: Union[PyList, Var],
+                           board_width: int,
+                           Solution: Var)                  -> Generator[List[int], None, None]:
   """
   Find a safe spot for a queen in the row after those in the current Placement and continue with the rest of the rows.
   
@@ -13,37 +21,44 @@ def complete_queen_placements(Placement: PyList, board_width: int, Solution: Var
   the values in the current Placement are extracted and processed directly. An extended placement_vector
   is then wrapped in a PyList wrapper.
 
-  :param Placement: The placement_vector is the positions of the queens in currently set rows.
-  A placement_vector is a list of n integers. The rth integer indicates where the queen is to be
-  placed in the rth row. I.e., placement_vector[r] is the position of the queen in row r.
-  A placement_vector is a Python list. A Placement is a PyList, which essentially wraps a python list.
+  :param Placement: The positions of the queens in the currently set rows.
+  A Placement is a list of n integers. The rth integer indicates where the queen is to be
+  placed in the rth row. I.e., Placement[r] is the position of the queen in row r.
   :param board_width: the size of the board: board_width x board_width, generally 8.
   :param Solution: the Var that will eventually be unified with the Placement holding an answer
   """
-  # The elements of a PyList are all Logic Variables of some sort. In this case they are all
-  # Ground(<int>) for some integer. To work with the actual values, we convert the PyList to
-  # a Python list and then extract the values from their logic variable wrappers.
-  placement_vector = [col.get_ground_value() for col in Placement.to_python_list()]
+  # This will eventually try all the columns.
+  # It's what makes Prolog look like it's backtracking.
   for col in range(board_width):
-    if is_safe(placement_vector, col):
-      extended_placement = placement_vector + [col]
-      # The PyList constructor wraps elements of the list it is given in Ground wrappers.
-      Extended_Placement = PyList(extended_placement)
-      if len(extended_placement) == board_width:
+    if is_safe(Placement, col):
+      Extended_Placement = Placement + PyList([col])
+      if len(Extended_Placement) == board_width:
         # Found a solution. Unify it with the Solution Var.
         for _ in unify(Extended_Placement, Solution):
           yield
       else:
-        # Find a column for the remaining rows.
-        yield from complete_queen_placements(Extended_Placement, board_width, Solution)
+        # Find columns for the remaining queens.
+        yield from place_remaining_queens(Extended_Placement, board_width, Solution)
         # The preceding (yield from) line is equivalent to the following.
-        # for _ in complete_queen_placements(extended_placement, board_width, Placement):
+        # for _ in place_remaining_queens(extended_placement, board_width, Placement):
         #   yield
 
 
-def is_safe(placement_vector: [int], col: int) -> bool:
+def is_safe(Placement: PyList, col: int) -> bool:
   """ Given the placement_vector so far, is it safe to add a queen in the next row at col? """
-  row = len(placement_vector)
+  # The elements of a PyList are all Logic Variables of some sort. In this case they are all
+  # Ground(<int>) for some integer. To work with the actual values, we convert the PyList to
+  # a Python list and then extract the values from their Ground wrappers.
+
+  # Col_Nbr will be a Ground object containing a col number.
+  # get_ground_value() extracts the actual integer.
+  placement_vector = [Col_Nbr.get_ground_value() for Col_Nbr in Placement.to_python_list()]
+  row = len(Placement)
+  # (row, col) is the proposed position of the new queen.
+  # (row, col) is a safe placement if
+  # (a) col has not been used previously, and
+  # (b) col is not on the same diagonal as any previous queen.
+  # (rowp, colp) are the positions of the previous queens.
   return all([col != colp and abs(rowp - row) != abs(colp - col)
               for (rowp, colp) in enumerate(placement_vector)])
 
@@ -58,7 +73,7 @@ def gen_n_queens(board_width: int):
   solutionNbr = 0
   Solution = Var()
   # Traditional Prolog style puts Solution, the Arg that will be unified with the answer, at the end.
-  for _ in complete_queen_placements(Placement, board_width, Solution):
+  for _ in place_remaining_queens(Placement, board_width, Solution):
     solutionNbr += 1
     # get_ground_value follows Solution's unification trail to the end and then finds the ground value.
     # (In this case, the Solution's trail end is only one step away.)
@@ -82,4 +97,4 @@ def one_row(row: int, col: int, board_width: int) -> str:
 
 
 if __name__ == "__main__":
-  gen_n_queens(10)
+  gen_n_queens(8)

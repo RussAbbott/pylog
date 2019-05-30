@@ -15,6 +15,13 @@ class PySequence(SuperSequence):
   def __init__(self, pyType, initialElements: Union[list, tuple]):
     super().__init__( (pyType, *initialElements) )
 
+  def __add__(self, Other: Union[PySequence, Var]):
+    Result = Var()
+    Other_EoT = Other.trail_end()
+    assert isinstance(Other_EoT, PySequence)
+    for _ in append(self, Other_EoT, Result):
+      return Result
+
   def __getitem__(self, key: Union[int, slice]):
     return self.args[key] if isinstance(key, int) else self.__class__(self.args[key])
 

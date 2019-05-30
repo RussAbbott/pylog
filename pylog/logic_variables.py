@@ -186,6 +186,10 @@ class Var(Term):
     self.trail_next = None
     super().__init__()
 
+  def __len__(self):
+    self_eot = self.trail_end()
+    return len(self_eot) if hasattr(self_eot, '__len__') else None
+
   def _has_trail_next(self) -> bool:
     # Is this the end of the trail?
     return self.trail_next is not None
