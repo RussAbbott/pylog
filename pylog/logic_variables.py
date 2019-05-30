@@ -1,7 +1,7 @@
 from __future__ import annotations
 from functools import wraps
 from inspect import isgeneratorfunction
-from typing import Any, Generator, Iterable, List, Optional, Sequence, Tuple
+from typing import Any, Generator, Iterable, List, Optional, Sequence, Sized, Tuple
 
 """
 Developed by Ian Piumarta as the "unify" library (http://www.ritsumei.ac.jp/~piumarta/pl/src/unify.py) for a
@@ -188,6 +188,8 @@ class Var(Term):
 
   def __len__(self):
     self_eot = self.trail_end()
+    # To make PyCharm's type checker happy.
+    assert isinstance(self_eot, Sized)
     return len(self_eot) if hasattr(self_eot, '__len__') else None
 
   def _has_trail_next(self) -> bool:

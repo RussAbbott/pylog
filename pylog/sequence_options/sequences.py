@@ -15,12 +15,16 @@ class PySequence(SuperSequence):
   def __init__(self, pyType, initialElements: Union[list, tuple]):
     super().__init__( (pyType, *initialElements) )
 
-  def __add__(self, Other: Union[PySequence, Var]):
-    Result = Var()
+  def __add__(self, Other: Union[PySequence, Var]) -> PySequence:
     Other_EoT = Other.trail_end()
+    # If not, can't append.
     assert isinstance(Other_EoT, PySequence)
+    Result = Var()
     for _ in append(self, Other_EoT, Result):
-      return Result
+      Result_EoT = Result.trail_end()
+      # To make the PyCharm type checker happy.
+      assert isinstance(Result_EoT, PySequence)
+      return Result_EoT
 
   def __getitem__(self, key: Union[int, slice]):
     return self.args[key] if isinstance(key, int) else self.__class__(self.args[key])

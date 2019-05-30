@@ -192,6 +192,16 @@ def would_succeed(f):
   return would_succeed_wrapper
 
 
+def yield_to_bool(f):
+
+  def y_to_b_wrapper(*args, **kwargs):
+    for _ in f(*args, **kwargs):
+      return True
+    return False
+
+  return y_to_b_wrapper
+
+
 if __name__ == '__main__':
 
   # The following examples illustrate various ways to call a generator
