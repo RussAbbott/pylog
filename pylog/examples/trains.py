@@ -2,7 +2,7 @@ from functools import reduce
 from typing import List, Tuple, Union
 
 from control_structures import forall
-from logic_variables import Container, Ground, n_Vars, Term, unify, unify_pairs, Var
+from logic_variables import Ground, n_Vars, Term, unify, unify_pairs, Var
 
 from sequence_options.sequences import PyTuple
 
@@ -14,7 +14,7 @@ lines = {
 }
 
 
-def best_route(Start: Union[Ground, Var], Route: Container, End: Union[Ground, Var]):
+def best_route(Start: Union[Ground, Var], Route: Var, End: Union[Ground, Var]):
   """
   The best route is defined to be the one that passes the fewest intermediate stations.
   """
@@ -31,9 +31,9 @@ def best_route(Start: Union[Ground, Var], Route: Container, End: Union[Ground, V
     if route_options:
       routes_with_totals = map(sum_distances, route_options)
       best_option = min(routes_with_totals, key=lambda optDist: optDist[1])
-      Route.set_contents(best_option)
-      yield
-      # break or return prevents backtracking, i.e., jumps out of the for-loop
+      yield from unify(Route, Ground(best_option))
+      # break or return prevents backtracking, i.e., looking for alternative (and possibly longer) routes.
+      # Has an effect similar to a cut (!) in Prolog.
       break
       # return
 
@@ -74,9 +74,8 @@ def connected(S1: Union[Ground, Var], Line_Dist: Union[Var, PyTuple], S2: Union[
         stations = lines[Line.get_ground_value()]
         pos1 = stations.index(S1.get_ground_value())
         pos2 = stations.index(S2.get_ground_value())
-        for _ in unify(Line_Dist, PyTuple((Line, Ground(abs(pos1 - pos2))))):
-          # print(f'<- connected({A}, {Line_Dist}, {B})?')
-          yield
+        # print(f'<- connected({A}, {Line_Dist}, {B})?')
+        yield from unify(Line_Dist, PyTuple( (Line, Ground(abs(pos1 - pos2))) ) )
   # print(f'XX connected({A}, {LD}, {B})?')
 
 
@@ -98,7 +97,7 @@ def sum_distances(legs: [Union[str, Tuple[str, int]]]) -> ([str], int):
   :return: (legs, total_dist), where legs drops the internal distances along each line
   """
 
-  def split_elts(chnDist, elt):
+  def split_elts(chnDist: Tuple[List[str], int], elt: Union[str, Tuple[str, int]]) -> Tuple[List[str], int]:
     """
     This is the reduce function.
 
@@ -108,7 +107,7 @@ def sum_distances(legs: [Union[str, Tuple[str, int]]]) -> ([str], int):
     """
     (chn, dist) = chnDist
     new_chn = chn + [(elt[0] if isinstance(elt, tuple) else elt)]
-    new_dist = dist + (elt[1] if isinstance(elt, tuple) else 0)
+    new_dist = dist + elt[1] if isinstance(elt, tuple) else dist
     return (new_chn, new_dist)
 
   (new_chain, total_dist) = reduce( split_elts, legs, ([], 0) )
@@ -117,9 +116,9 @@ def sum_distances(legs: [Union[str, Tuple[str, int]]]) -> ([str], int):
 
 if __name__ == '__main__':
 
-  def print_route(stations_and_lines, stations_passed):
+  def print_route(stations_and_lines: List[str], stations_passed: int):
     for i in range(len(stations_and_lines) // 2):
-      (station, line, next_station) = stations_and_lines[2 * i:2 * i + 3]
+      (station, line, next_station) = stations_and_lines[2*i:2*i+3]
       print(f'\tFrom {station} take the {line} line to {next_station}.')
     print(f'  Including transfer stations, if any, you will pass {stations_passed - 1} intermediate stations')
 
@@ -142,10 +141,9 @@ if __name__ == '__main__':
                    ]:
 
     (A, B) = (Ground(_A), Ground(_B))
-    Route = Container( )
-
-    # Use Route as a container to pass back the route.
-    # (Yielding it would be equivalent but not in keeping with the Prolog-style of the example.)
+    # Use Route in Prolog style to pass back the route.
+    # In this case it's simply a basket in which the best route is conveyed.
+    Route = Var( )
     for _ in best_route(A, Route, B):
       print(f'\nFind a best route (passing the fewest intermediate stations) from {A} to {B}: ')
-      print_route( *Route.get_contents() )
+      print_route( *Route.trail_end().get_ground_value() )

@@ -1,5 +1,5 @@
 from control_structures import would_succeed, forall, forany, print_sf
-from logic_variables import Container, Var
+from logic_variables import Ground, Var
 
 from sequence_options.super_sequence import is_subsequence
 
@@ -62,7 +62,7 @@ class Student(Puzzle_Item):
 def scholarship_problem(Students, ListType):
 
   # Keeps count of the number of successful rule applications.
-  rule_applications = Container(0)
+  rule_applications = Ground(0)
 
   # A list of students with all the student names.
   Student_names = [Student(name='Amy'),  Student(name='Carrie'),
@@ -70,8 +70,6 @@ def scholarship_problem(Students, ListType):
 
   # All the clues must succeed.
   for _ in forall([
-    # Unify the answer parameter (Ss) with the internal answer list (Students).
-    # lambda: unify(Students, Ss),
     # print_sf allows us to leave a trace of progress.
     # Since the print_sf statements are all included in a forall list, they should all succeed.
     lambda: print_sf(f'\n{rule_applications.incr_and_return( )}) At the start: {Students}', 'Succeed'),
