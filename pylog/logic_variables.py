@@ -113,10 +113,6 @@ class Ground(Term):
     other_eot = other.trail_end()
     return isinstance(other_eot, Ground) and self.get_ground_value() == other_eot.get_ground_value()
 
-  def incr_and_return(self) -> Any:
-    self._ground_value += 1
-    return self._ground_value
-
   def __lt__(self, other: Term) -> bool:
     other_eot = other.trail_end()
     return isinstance(other_eot, Ground) and self.get_ground_value() < other_eot.get_ground_value()
@@ -129,6 +125,10 @@ class Ground(Term):
 
   def is_ground(self) -> bool:
     return True
+  #
+  # def incr_and_return(self) -> Any:
+  #   self._ground_value += 1
+  #   return self._ground_value
 
 
 # class Container(Ground):
