@@ -113,6 +113,10 @@ class Ground(Term):
     other_eot = other.trail_end()
     return isinstance(other_eot, Ground) and self.get_ground_value() == other_eot.get_ground_value()
 
+  def incr_and_return(self) -> Any:
+    self._ground_value += 1
+    return self._ground_value
+
   def __lt__(self, other: Term) -> bool:
     other_eot = other.trail_end()
     return isinstance(other_eot, Ground) and self.get_ground_value() < other_eot.get_ground_value()
@@ -127,18 +131,18 @@ class Ground(Term):
     return True
 
 
-class Container(Ground):
-  def get_contents(self) -> Any:
-    return self._ground_value
-
-  def incr_and_return(self) -> Any:
-    self._ground_value += 1
-    return self._ground_value
-
-  def set_contents(self, value: Any):
-    self._ground_value = value
-
-
+# class Container(Ground):
+#   def get_contents(self) -> Any:
+#     return self._ground_value
+#
+#   def incr_and_return(self) -> Any:
+#     self._ground_value += 1
+#     return self._ground_value
+#
+#   def set_contents(self, value: Any):
+#     self._ground_value = value
+#
+#
 class Structure(Term):
   """
   self.functor is the functor
