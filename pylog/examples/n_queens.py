@@ -1,5 +1,5 @@
 from typing import Generator, List
-from math import log10, floor
+from math import log10
 
 from logic_variables import unify, Var
 from sequence_options.sequences import PyList
@@ -91,7 +91,7 @@ def layout(placement_vector: [int], board_width: int) -> str:
   """ Format the placement_vector for display. """
   offset = ord('a')
   # Generate the column headers.
-  col_hdrs = ' '*(4+floor(log10(board_width))) + \
+  col_hdrs = ' '*(4+int(log10(board_width))) + \
              '  '.join([f'{chr(n+offset)}' for n in range(board_width)]) + '  col#\n'
   display = col_hdrs + '\n'.join([one_row(r, c, board_width) for (r, c) in enumerate(placement_vector)])
   return display
@@ -105,9 +105,9 @@ def one_row(row: int, col: int, board_width: int) -> str:
 
 
 def space_offset(n, board_width):
-  return " "*( floor(log10(board_width) ) - floor(log10(n)) )
+  return " "*( int(log10(board_width) ) - int(log10(n)) )
 
 
 if __name__ == "__main__":
   # The parameter to gen_n_queens is the size of the board, typically 8x8.
-  gen_n_queens(8)
+  gen_n_queens(10)
