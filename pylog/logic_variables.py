@@ -1,6 +1,7 @@
 from __future__ import annotations
 from functools import wraps
 from inspect import isgeneratorfunction
+from numbers import Number
 from typing import Any, Generator, Iterable, List, Optional, Sequence, Sized, Tuple
 
 """
@@ -101,11 +102,20 @@ class Term:
     return self
 
 
+def is_immutable(x):
+  if isinstance(x, (Number, str, bool)) or callable(x):
+    return True
+  if isinstance(x, (frozenset, tuple)):
+    return all(is_immutable(c) for c in x)
+  return False
+
+
 class Ground(Term):
 
   """ A wrapper class for integers, strings, etc. """
 
   def __init__(self, ground_value: Optional[Any] = None ):
+    assert is_immutable(ground_value), "Only immutable elements are allowed"
     self._ground_value = ground_value
     super( ).__init__( )
 
