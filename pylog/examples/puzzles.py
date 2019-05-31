@@ -4,6 +4,18 @@ from logic_variables import Ground, Structure, Term, Var
 from sequence_options.super_sequence import SuperSequence
 
 
+class SimpleCounter:
+  def __init__(self, init_value=0):
+    self._count = init_value
+
+  def __str__(self):
+    return str(self._count)
+
+  def incr(self, amount=1):
+    self._count += amount
+    return self
+
+
 class Puzzle_Item(Structure):
   """
   A utility superclass for logic puzzles.

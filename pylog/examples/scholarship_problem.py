@@ -1,9 +1,9 @@
 from control_structures import would_succeed, forall, forany, print_sf
-from logic_variables import Ground, Var
+from logic_variables import Var
 
 from sequence_options.super_sequence import is_subsequence
 
-from examples.puzzles import Puzzle_Item, run_puzzle
+from examples.puzzles import Puzzle_Item, run_puzzle, SimpleCounter
 
 """
     =================================================================================================================
@@ -34,7 +34,7 @@ The available majors are: Astronomy, English, Philosophy, Comp Sci.
 2. Amy studies either English or Philosophy.
 3. The student who studies Comp Sci has a $5,000 bigger scholarship than Carrie.
 4. Erma has a $10,000 bigger scholarship than Carrie.
-5. Tracy has a bigger scholarship than the student that studies English.
+5. Tracy has a bigger scholarship than the student who studies English.
 
 The answer.
 
@@ -62,67 +62,72 @@ class Student(Puzzle_Item):
 def scholarship_problem(Students, ListType):
 
   # Keeps count of the number of successful rule applications.
-  rule_applications = Ground(0)
+  rule_applications = SimpleCounter( )
 
   # A list of students with all the student names.
   Student_names = [Student(name='Amy'),  Student(name='Carrie'),
                    Student(name='Erma'), Student(name='Tracy')]
 
+  # A list of students with all the majors.
+  Majors = [Student(major='Astronomy'),  Student(major='Comp Sci'),
+            Student(major='English'), Student(major='Philosophy')]
+
   # All the clues must succeed.
   for _ in forall([
-    # print_sf allows us to leave a trace of progress.
+    # print_sf allows us to trace the solution progress.
     # Since the print_sf statements are all included in a forall list, they should all succeed.
-    lambda: print_sf(f'\n{rule_applications.incr_and_return( )}) At the start: {Students}', 'Succeed'),
+    lambda: print_sf(f'\n{rule_applications.incr( )}) At the start: {Students}', 'Succeed'),
 
     # 1. The student who studies Astronomy gets a smaller scholarship than Amy.
     lambda: forall([lambda: is_subsequence([Student(major='Astronomy'), Student(name='Amy')], Students),
 
-                    # Make sure that all students can be included, i.e., no duplicate names.
-                    lambda: would_succeed(ListType.members)(Student_names, Students)
+                    # Make sure that all students and majors can be included, i.e., no duplicate names or majors.
+                    lambda: would_succeed(ListType.members)(Student_names, Students),
+                    lambda: would_succeed(ListType.members)(Majors, Students)
                     ]),
-    lambda: print_sf(f'{rule_applications.incr_and_return()}) After 1: {Students}', 'Succeed'),
+    lambda: print_sf(f'{rule_applications.incr()}) After 1: {Students}', 'Succeed'),
 
     # 2. Amy studies either English or Philosophy.
-    # Runs slightly faster with Philosophy tried first (33 vs 37). Gets the same result either way.
     lambda: forall([lambda: forany([
                                     lambda: ListType.member(Student(name='Amy', major='English'), Students),
                                     lambda: ListType.member(Student(name='Amy', major='Philosophy'), Students),
                                    ]),
 
-                    # Make sure that all students can be included, i.e., no duplicate names.
-                    lambda: would_succeed(ListType.members)(Student_names, Students)]),
-    lambda: print_sf(f'{rule_applications.incr_and_return()}) After 2: {Students}', 'Succeed'),
+                    # Make sure that all students and majors can be included, i.e., no duplicate names or majors.
+                    lambda: would_succeed(ListType.members)(Student_names, Students),
+                    lambda: would_succeed(ListType.members)(Majors, Students)
+                    ]),
+    lambda: print_sf(f'{rule_applications.incr()}) After 2: {Students}', 'Succeed'),
 
     # 3. The student who studies Comp Sci has a $5,000 larger scholarship than Carrie.
     # To avoid arithmetic, take advantage of the known structure of the Scholarships list.
     lambda: forall([lambda: ListType.is_contiguous_in([Student(name='Carrie'), Student(major='Comp Sci')], Students),
 
-                    # Make sure that all students can be included, i.e., no duplicate names.
-                    lambda: would_succeed(ListType.members)(Student_names, Students)
+                    # Make sure that all students and majors can be included, i.e., no duplicate names or majors.
+                    lambda: would_succeed(ListType.members)(Student_names, Students),
+                    lambda: would_succeed(ListType.members)(Majors, Students)
                     ]),
-    lambda: print_sf(f'{rule_applications.incr_and_return()}) After 3: {Students}', 'Succeed'),
+    lambda: print_sf(f'{rule_applications.incr()}) After 3: {Students}', 'Succeed'),
 
     # 4. Erma has a $10,000 larger scholarship than Carrie.
     # This means that Erma comes after Carrie and that there is one person between them.
     lambda: forall([lambda: ListType.is_contiguous_in([Student(name='Carrie'), Var(), Student(name='Erma')], Students),
 
-                    # Make sure that all students can be included, i.e., no duplicate names.
-                    lambda: would_succeed(ListType.members)(Student_names, Students)
+                    # Make sure that all students and majors can be included, i.e., no duplicate names or majors.
+                    lambda: would_succeed(ListType.members)(Student_names, Students),
+                    lambda: would_succeed(ListType.members)(Majors, Students)
                     ]),
-    lambda: print_sf(f'{rule_applications.incr_and_return()}) After 4: {Students}', 'Succeed'),
+    lambda: print_sf(f'{rule_applications.incr()}) After 4: {Students}', 'Succeed'),
 
-    # 5. Tracy has a larger scholarship than the student that studies English.
+    # 5. Tracy has a larger scholarship than the student who studies English.
     lambda: forall([lambda: is_subsequence([Student(major='English'), Student(name='Tracy')], Students),
 
-                    # Make sure that all students can be included, i.e., no duplicate names.
+                    # Make sure that all students and majors can be included, i.e., no duplicate names or majors.
                     lambda: would_succeed(ListType.members)(Student_names, Students),
+                    lambda: would_succeed(ListType.members)(Majors, Students)
                     ]),
-    lambda: print_sf(f'{rule_applications.incr_and_return()}) After 5: {Students}', 'Succeed'),
+    lambda: print_sf(f'{rule_applications.incr()}) After 5: {Students}', 'Succeed'),
 
-    # Make sure all majors are mentioned.
-    lambda: ListType.members([Student(major='Astronomy'),  Student(major='English'),
-                              Student(major='Philosophy'), Student(major='Comp Sci')],
-                             Students)
   ]):
     yield
 
