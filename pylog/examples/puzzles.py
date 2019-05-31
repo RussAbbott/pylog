@@ -3,13 +3,12 @@ from typing import Callable, Type
 from logic_variables import Ground, Structure, Term, Var
 from sequence_options.super_sequence import SuperSequence
 
-"""
-A utility superclass for logic puzzles.
-"""
-
 
 class Puzzle_Item(Structure):
-  """ An item in a puzzle list. """
+  """
+  A utility superclass for logic puzzles.
+  An item in a puzzle list.
+  """
 
   def __str__(self):
     """
@@ -36,7 +35,7 @@ class Puzzle_Item(Structure):
                     Ground(prop)
 
 
-def run_problem(problem: Callable, ListType: Type, Answer_List: SuperSequence, additional_answer: Callable = None):
+def run_puzzle(problem: Callable, ListType: Type, Answer_List: SuperSequence, additional_answer: Callable = None):
   """ Runs the problem and displays the answer. Takes and displays timing information. """
 
   inp = None  # needed below at this block level

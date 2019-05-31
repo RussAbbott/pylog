@@ -3,16 +3,16 @@ from logic_variables import Container, Var
 
 from sequence_options.super_sequence import is_subsequence
 
-from examples.puzzles import Puzzle_Item, run_problem
+from examples.puzzles import Puzzle_Item, run_puzzle
 
 """
     =================================================================================================================
-      This and the scholarship problem are both written so that they can use either LinkedLists or one of the
+      This and the zebra problem are both written so that they can use either LinkedLists or one of the
       PySequence options: PyList or PyTuple.
       
       The list functions are written as static methods. It would have been better had that not been necessary.
       The problem is that LinkedLists may have variable tails, which means that when one takes the tail of such
-      a list, one is left with a Var rather than a LinkedList object.  And Var's do not have these methods defined.
+      a list, one is left with a Var rather than a LinkedList object. And Var's do not have these methods defined.
     =================================================================================================================
 """
 
@@ -77,7 +77,6 @@ def scholarship_problem(Students, ListType):
     lambda: print_sf(f'\n{rule_applications.incr_and_return( )}) At the start: {Students}', 'Succeed'),
 
     # 1. The student who studies Astronomy gets a smaller scholarship than Amy.
-    # Could have used inThisOrder rather than splitAt.
     lambda: forall([lambda: is_subsequence([Student(major='Astronomy'), Student(name='Amy')], Students),
 
                     # Make sure that all students can be included, i.e., no duplicate names.
@@ -134,11 +133,11 @@ if __name__ == '__main__':
 
   """ Select either LinkedList or a PySequence (PyList or PyTuple) as the ListType. """
 
-  from sequence_options.linked_list import LinkedList
-  ListType = LinkedList
-
-  # from sequence_options.sequences import PyList  # or PyTuple
-  # ListType = PyList  # or PyTuple
+  # from sequence_options.linked_list import LinkedList
+  # ListType = LinkedList
+  #
+  from sequence_options.sequences import PyList  # or PyTuple
+  ListType = PyList  # or PyTuple
 
   """ additional_answer function, if any """
 
@@ -149,7 +148,7 @@ if __name__ == '__main__':
   # To avoid arithmetic, we'll use the fact that the scholarships
   # are evenly spaced with $5,000 increments. The code deals with
   # scholarship numbers in thousands, i.e., 25, 30, 35, 40.
-  Students = ListType([Student(scholarship=25 + i * 5) for i in range(4)])
+  Students = ListType([Student(scholarship=(25 + i*5)) for i in range(4)])
 
   """ Run problem """
-  run_problem(scholarship_problem, ListType, Students)
+  run_puzzle(scholarship_problem, ListType, Students)

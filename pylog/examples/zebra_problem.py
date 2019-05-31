@@ -1,7 +1,7 @@
 from control_structures import forall, print_sf
 from logic_variables import n_Vars, unify
 
-from examples.puzzles import Puzzle_Item, run_problem
+from examples.puzzles import Puzzle_Item, run_puzzle
 
 """ 
     =================================================================================================================
@@ -10,12 +10,12 @@ from examples.puzzles import Puzzle_Item, run_problem
       
       The list functions are written as static methods. It would have been better had that not been necessary.
       The problem is that LinkedLists may have variable tails, which means that when one takes the tail of such
-      a list, one is left with a Var rather than a LinkedList object.  And Var's do not have these methods defined.
+      a list, one is left with a Var rather than a LinkedList object. And Var's do not have these methods defined.
     =================================================================================================================
 """
 
 """
-One version of the famous Zebra problem. (All versions are all structurally similar, but the names are often different.)
+One version of the famous Zebra problem. (All versions are structurally similar, but the names are often different.)
 
                         ----------------------------------------------------------------
 
@@ -135,11 +135,11 @@ if __name__ == '__main__':
 
   """ Select either LinkedList or a PySequence (PyList or PyTuple) as the ListType. """
 
-  from sequence_options.linked_list import LinkedList
-  ListType = LinkedList
-
-  # from sequence_options.sequences import PyList  # or PyTuple
-  # ListType = PyList  # or PyTuple
+  # from sequence_options.linked_list import LinkedList
+  # ListType = LinkedList
+  #
+  from sequence_options.sequences import PyList  # or PyTuple
+  ListType = PyList  # or PyTuple
 
   """ additional_answer function, if any """
 
@@ -155,4 +155,4 @@ if __name__ == '__main__':
   Houses = ListType([House( ) for _ in range(5)])
 
   """ Run problem """
-  run_problem(zebra_problem, ListType, Houses, additional_answer)
+  run_puzzle(zebra_problem, ListType, Houses, additional_answer)
