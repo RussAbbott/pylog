@@ -1,7 +1,7 @@
 from control_structures import would_succeed, forall, forany, print_sf
 from logic_variables import Var
 
-from sequence_options.super_sequence import is_contiguous_in, is_subsequence, member, members
+from sequence_options.super_sequence import is_contiguous_in, is_a_subsequence_of, member, members
 
 from examples.puzzles import Puzzle_Item, run_puzzle, SimpleCounter
 
@@ -75,7 +75,7 @@ def scholarship_problem(Students):
     lambda: print_sf(f'\n{rule_applications.incr( )}) At the start: {Students}', 'Succeed'),
 
     # 1. The student who studies Astronomy gets a smaller scholarship than Amy.
-    lambda: forall([lambda: is_subsequence([Student(major='Astronomy'), Student(name='Amy')], Students),
+    lambda: forall([lambda: is_a_subsequence_of([Student(major='Astronomy'), Student(name='Amy')], Students),
 
                     # Make sure that all students and majors can be included, i.e., no duplicate names or majors.
                     lambda: would_succeed(members)(Student_names, Students),
@@ -118,7 +118,7 @@ def scholarship_problem(Students):
     lambda: print_sf(f'{rule_applications.incr()}) After 4: {Students}', 'Succeed'),
 
     # 5. Tracy has a larger scholarship than the student who studies English.
-    lambda: forall([lambda: is_subsequence([Student(major='English'), Student(name='Tracy')], Students),
+    lambda: forall([lambda: is_a_subsequence_of([Student(major='English'), Student(name='Tracy')], Students),
 
                     # Make sure that all students and majors can be included, i.e., no duplicate names or majors.
                     lambda: would_succeed(members)(Student_names, Students),

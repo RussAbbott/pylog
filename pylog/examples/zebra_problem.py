@@ -2,7 +2,7 @@ from control_structures import forall, print_sf
 from logic_variables import n_Vars, unify
 
 from examples.puzzles import Puzzle_Item, run_puzzle
-from sequence_options.super_sequence import is_contiguous_in, member, members, next_to
+from sequence_options.super_sequence import is_contiguous_in, member, members, next_to_in
 
 """ 
     =================================================================================================================
@@ -102,11 +102,11 @@ def zebra_problem(Houses):
     # lambda: print_sf(f'After 9: {Houses}', 'Succeed'),
     
     # 10. The Chesterfield smokers live next to the fox.
-    lambda: next_to(House(smoke='Chesterfield'), House(pet='fox'), Houses),
+    lambda: next_to_in(House(smoke='Chesterfield'), House(pet='fox'), Houses),
     # lambda: print_sf(f'After 10: {Houses}', 'Succeed'),
     
     # 11. They smoke Kool in the house next to the horse.
-    lambda: next_to(House(smoke='Kool'), House(pet='horse'), Houses),
+    lambda: next_to_in(House(smoke='Kool'), House(pet='horse'), Houses),
     # lambda: print_sf(f'After 11: {Houses}', 'Succeed'),
     
     # 12. The Lucky smokers drink juice.
@@ -118,7 +118,7 @@ def zebra_problem(Houses):
     # lambda: print_sf(f'After 13: {Houses}', 'Succeed'),
     
     # 14. The Norwegians live next to the blue house.
-    lambda: next_to(House(nationality='Norwegians'), House(color='blue'), Houses),
+    lambda: next_to_in(House(nationality='Norwegians'), House(color='blue'), Houses),
 
     lambda: print_sf(f'After 14: {Houses}', 'Succeed'),
 
@@ -132,11 +132,11 @@ if __name__ == '__main__':
 
   """ Select either LinkedList or a PySequence (PyList or PyTuple) as the ListType. """
 
-  # from sequence_options.linked_list import LinkedList
-  # ListType = LinkedList
-  #
-  from sequence_options.sequences import PyList  # or PyTuple
-  ListType = PyList  # or PyTuple
+  from sequence_options.linked_list import LinkedList
+  ListType = LinkedList
+
+  # from sequence_options.sequences import PyList  # or PyTuple
+  # ListType = PyList  # or PyTuple
 
   """ additional_answer function, if any """
 
