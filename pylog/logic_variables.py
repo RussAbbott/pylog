@@ -20,13 +20,13 @@ def eot(f):
   """ A decorator that takes trail_end() of all Var arguments """
 
   def get_arg_Vars_trail_ends(args):
-    args = (arg.trail_end() if isinstance(arg, Var) else arg for arg in args)
-    return args
+    args_trail_ends = (arg.trail_end() if isinstance(arg, Var) else arg for arg in args)
+    return args_trail_ends
 
   @wraps(f)
   def eot_wrapper_gen(*args, **kwargs):
-    args = get_arg_Vars_trail_ends(args)
-    yield from f(*args, **kwargs)
+    arg_trail_ends = get_arg_Vars_trail_ends(args)
+    yield from f(*arg_trail_ends, **kwargs)
 
   @wraps(f)
   def eot_wrapper_non_gen(*args, **kwargs):
@@ -103,7 +103,7 @@ class Term:
 
 
 def is_immutable(x):
-  if isinstance(x, (Number, str, bool)) or callable(x):
+  if isinstance(x, (Number, str, bool)) or callable(x) or x is None:
     return True
   if isinstance(x, (frozenset, tuple)):
     return all(is_immutable(c) for c in x)
@@ -195,7 +195,6 @@ class Var(Term):
     if self is not self_eot and hasattr(self_eot, '__getitem__'):
       return self_eot.__getitem__(key)
 
-
   def __len__(self):
     self_eot = self.trail_end()
     # To make PyCharm's type checker happy.
@@ -208,8 +207,7 @@ class Var(Term):
 
   @eot
   def get_ground_value(self) -> Optional[Any]:
-    Trail_End_Var = self.trail_end( )
-    return Trail_End_Var.get_ground_value( ) if Trail_End_Var.is_ground( ) else None
+    return self.get_ground_value( ) if self.is_ground( ) else None
 
   # Can't use @eot. Generates an infinite recursive loop.
   def is_ground(self) -> bool:
