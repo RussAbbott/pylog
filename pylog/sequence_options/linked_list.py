@@ -155,13 +155,13 @@ class LinkedList(SuperSequence):
   #         yield
 
   # @staticmethod
-  # def members(es: List, A_List):
+  # def members(Es: List, A_List):
   #   """ Do all elements of es appear in A_List (in any order). """
-  #   if not es:
+  #   if not Es:
   #     yield
   #   elif len(A_List) > 0:
-  #     for _ in A_List.has_member(es[0]):
-  #       yield from LinkedList.members(es[1:], A_List)
+  #     for _ in A_List.has_member(Es[0]):
+  #       yield from LinkedList.members(Es[1:], A_List)
   #
   # @staticmethod
   # def next_to(E1, E2, Es):

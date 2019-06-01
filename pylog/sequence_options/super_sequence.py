@@ -17,11 +17,28 @@ class SuperSequence(Structure):
   def __len__(self):
     pass
 
+  def has_adjacent_members(self, E1, E2):
+    pass
+
+  def has_contiguous_sublist(self, As):
+    pass
+
+  def has_member(self, E: Term):
+    pass
+
+  def has_members(self, Es: List[Term]):
+    pass
+
   def head(self) -> Term:
     pass
 
   def tail(self) -> SuperSequence:
     pass
+
+
+def is_contiguous_in(As: List, Zs: SuperSequence):
+  """ Can As be unified with a segment of Zs? """
+  yield from Zs.has_contiguous_sublist(As)
 
 
 def is_subsequence(As: List, Zs: SuperSequence):
@@ -46,3 +63,28 @@ def is_subsequence(As: List, Zs: SuperSequence):
                      lambda: is_subsequence(As, Zs[1:])
                      ]):
       yield
+
+
+def member(E: Term, A_List: SuperSequence):
+  """ Is E in A_List? """
+  yield from A_List.has_member(E)
+  # if len(A_List) > 0:
+  #   for _ in forany([lambda: unify(E, A_List.head( )),
+  #                    lambda: member(E, A_List.tail( ))]):
+  #     yield
+
+
+def members(Es: List, A_List: SuperSequence):
+  """ Do all elements of es appear in A_List (in any order). """
+  yield from A_List.has_members(Es)
+  #
+  # if not Es:
+  #   yield
+  # elif len(A_List) > 0:
+  #   for _ in A_List.has_member(Es[0]):
+  #     yield from LinkedList.members(Es[1:], A_List)
+
+
+def next_to(E1: Term, E2: Term, Es: SuperSequence):
+  """ Are E1 and E2 are next to each other in Es. """
+  yield from Es.has_adjacent_members(E1, E2)
