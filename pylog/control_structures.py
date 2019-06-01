@@ -1,4 +1,4 @@
-from inspect import getmembers
+# from inspect import getmembers
 from typing import Generator
 
 from logic_variables import eot, Ground, unify, unify_pairs, Var
