@@ -2,6 +2,7 @@ from control_structures import forall, print_sf
 from logic_variables import n_Vars, unify
 
 from examples.puzzles import Puzzle_Item, run_puzzle
+from sequence_options.super_sequence import is_contiguous_in, member, members, next_to
 
 """ 
     =================================================================================================================
@@ -64,31 +65,31 @@ def zebra_problem(Houses):
 
   for _ in forall([
     # 1. The English live in the red house.
-    lambda: Houses.has_member(House(nationality='English', color='red')),
+    lambda: member(House(nationality='English', color='red'), Houses),
     # lambda: print_sf(f'After 1: {Houses}', 'Succeed'),
     
     # 2. The Spanish have a dog.
-    lambda: Houses.has_member(House(nationality='Spanish', pet='dog')),
+    lambda: member(House(nationality='Spanish', pet='dog'), Houses),
     # lambda: print_sf(f'After 2: {Houses}', 'Succeed'),
     
     # 3. They drink coffee in the green house.
-    lambda: Houses.has_member(House(drink='coffee', color='green')),
+    lambda: member(House(drink='coffee', color='green'), Houses),
     # lambda: print_sf(f'After 3: {Houses}', 'Succeed'),
     
     # 4. The Ukrainians drink tea.
-    lambda: Houses.has_member(House(nationality='Ukrainians', drink='tea')),
+    lambda: member(House(nationality='Ukrainians', drink='tea'), Houses),
     # lambda: print_sf(f'After 4: {Houses}', 'Succeed'),
     
     # 5. The green house is immediately to the right of the white house.
-    lambda: Houses.has_contiguous_sublist([House(color='white'), House(color='green')]),
+    lambda: is_contiguous_in([House(color='white'), House(color='green')], Houses),
     # lambda: print_sf(f'After 5: {Houses}', 'Succeed'),
     
     # 6. The Old Gold smokers have snails.
-    lambda: Houses.has_member(House(smoke='Old Gold', pet='snails')),
+    lambda: member(House(smoke='Old Gold', pet='snails'), Houses),
     # lambda: print_sf(f'After 6: {Houses}', 'Succeed'),
     
     # 7. They smoke Kool in the yellow house.
-    lambda: Houses.has_member(House(smoke='Kool', color='yellow')),
+    lambda: member(House(smoke='Kool', color='yellow'), Houses),
     # lambda: print_sf(f'After 7: {Houses}', 'Succeed'),
     
     # 8. They drink milk in the middle house.
@@ -101,28 +102,28 @@ def zebra_problem(Houses):
     # lambda: print_sf(f'After 9: {Houses}', 'Succeed'),
     
     # 10. The Chesterfield smokers live next to the fox.
-    lambda: Houses.has_adjacent_members(House(smoke='Chesterfield'), House(pet='fox')),
+    lambda: next_to(House(smoke='Chesterfield'), House(pet='fox'), Houses),
     # lambda: print_sf(f'After 10: {Houses}', 'Succeed'),
     
     # 11. They smoke Kool in the house next to the horse.
-    lambda: Houses.has_adjacent_members(House(smoke='Kool'), House(pet='horse')),
+    lambda: next_to(House(smoke='Kool'), House(pet='horse'), Houses),
     # lambda: print_sf(f'After 11: {Houses}', 'Succeed'),
     
     # 12. The Lucky smokers drink juice.
-    lambda: Houses.has_member(House(drink='juice', smoke='Lucky')),
+    lambda: member(House(drink='juice', smoke='Lucky'), Houses),
     # lambda: print_sf(f'After 12: {Houses}', 'Succeed'),
     
     # 13. The Japanese smoke Parliament.
-    lambda: Houses.has_member(House(nationality='Japanese', smoke='Parliament')),
+    lambda: member(House(nationality='Japanese', smoke='Parliament'), Houses),
     # lambda: print_sf(f'After 13: {Houses}', 'Succeed'),
     
     # 14. The Norwegians live next to the blue house.
-    lambda: Houses.has_adjacent_members(House(nationality='Norwegians'), House(color='blue')),
+    lambda: next_to(House(nationality='Norwegians'), House(color='blue'), Houses),
 
     lambda: print_sf(f'After 14: {Houses}', 'Succeed'),
 
     # Fill in unmentioned properties.
-    lambda: Houses.has_members([House(pet='zebra'), House(drink='water')]),
+    lambda: members([House(pet='zebra'), House(drink='water')], Houses),
   ]):
     yield
 
@@ -141,8 +142,8 @@ if __name__ == '__main__':
 
   def additional_answer(Houses):
     (Nat1, Nat2) = n_Vars(2)
-    for _ in Houses.has_members([House(nationality=Nat1, pet='zebra'),
-                                 House(nationality=Nat2, drink='water')]):
+    for _ in members([House(nationality=Nat1, pet='zebra'),
+                      House(nationality=Nat2, drink='water')], Houses):
       ans = f'\n\tThe {Nat1} both own a zebra and drink water.' if Nat1 == Nat2 else \
             f'\n\tThe {Nat1} own a zebra, and the {Nat2} drink water.'
       print(ans)
