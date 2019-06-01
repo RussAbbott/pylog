@@ -1,3 +1,4 @@
+from inspect import getmembers
 from typing import Generator
 
 from logic_variables import eot, Ground, unify, unify_pairs, Var
@@ -181,7 +182,10 @@ def would_succeed(f):
   """
   def would_succeed_wrapper(*args, **kwargs):
     succeeded = False
-    for _ in f(*args, **kwargs):
+    # print(hasattr(f, '__self__'))
+    # members = getmembers(f)
+    # print(members)
+    for _ in f(*args, **kwargs):   # f.__self__.f(*args, **kwargs) if hasattr(f, '__self__') else f(*args, **kwargs):
       succeeded = True
 
     if succeeded:

@@ -2,7 +2,7 @@ from __future__ import annotations
 from functools import wraps
 from inspect import isgeneratorfunction
 from numbers import Number
-from typing import Any, Generator, Iterable, List, Optional, Sequence, Sized, Tuple
+from typing import Any, Generator, Iterable, List, Optional, Sequence, Sized, Tuple, Union
 
 """
 Developed by Ian Piumarta as the "unify" library (http://www.ritsumei.ac.jp/~piumarta/pl/src/unify.py) for a
@@ -135,24 +135,8 @@ class Ground(Term):
 
   def is_ground(self) -> bool:
     return True
-  #
-  # def incr_and_return(self) -> Any:
-  #   self._ground_value += 1
-  #   return self._ground_value
 
 
-# class Container(Ground):
-#   def get_contents(self) -> Any:
-#     return self._ground_value
-#
-#   def incr_and_return(self) -> Any:
-#     self._ground_value += 1
-#     return self._ground_value
-#
-#   def set_contents(self, value: Any):
-#     self._ground_value = value
-#
-#
 class Structure(Term):
   """
   self.functor is the functor
@@ -199,6 +183,18 @@ class Var(Term):
     # self.trail_next points to the next element on the trail, if any.
     self.trail_next = None
     super().__init__()
+
+  def __getattr__(self, item):
+    self_eot = self.trail_end()
+    if self is not self_eot:
+      return self_eot.__getattribute__(item)
+
+  # Apparently __getattr__ is not called for calls to __getitem__ when __getitem__ is missing
+  def __getitem__(self, key: Union[int, slice]):
+    self_eot = self.trail_end()
+    if self is not self_eot and hasattr(self_eot, '__getitem__'):
+      return self_eot.__getitem__(key)
+
 
   def __len__(self):
     self_eot = self.trail_end()

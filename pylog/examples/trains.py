@@ -14,11 +14,19 @@ lines = {
 }
 
 
-def best_route(Start: Union[Ground, Var], Route: Var, End: Union[Ground, Var]):
+def best_route(Start: Ground, Route: Var, End: Ground):
   """
   The best route is defined to be the one that passes the fewest intermediate stations.
+
+  A Route will be: [Station, (Line, Dist), Station, (Line, Dist), ..., Station].
+  Ignoring Dist, this will be the sequence of stations and lines to take from Start to End.
+  The Dist components are the number of intermediate stations on the associated line.
+
+  The best route uses the fewest lines, and of routes using the same lines, the fewest total Dist values.
   """
+  # Look for routes that use the fewest lines.
   for i in range(len(lines)):
+    # The middle sequence is the intermediate lines and stations.
     legs = [Start, *n_Vars(2*i+1), End]
     # If it succeeds, chain will instantiate legs to
     #         [Station, (Line, int), Station, (Line, int), ... , Station]

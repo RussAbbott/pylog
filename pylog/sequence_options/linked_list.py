@@ -68,62 +68,110 @@ class LinkedList(SuperSequence):
     ground_args = [arg.get_ground_value() for arg in args_list]
     return ground_args
 
-  def head(self) -> Term:
-    return self.args[0]
+  def has_adjacent_members(self, E1, E2):
+    """ E1 and E2 are next to each other in Es. """
+    # yield from self.next_to(E1, E2, self)
+    for _ in forany([
+      lambda: self.has_contiguous_sublist([E1, E2]),
+      lambda: self.has_contiguous_sublist([E2, E1]),
+    ]):
+      yield
 
-  @staticmethod
-  def is_contiguous_in(As: List, Zs: LinkedList):
-    """ Can As be unified with a segment of Zs? """
+  def has_contiguous_sublist(self, As: List):
+    """ Can As be unified with a segment of this list? """
+    # yield from self.is_contiguous_in(As, self)
     As = LinkedList(As)
-    (len_As, lenZs) = (len(As), len(Zs))
+    (len_As, len_self) = (len(As), len(self))
     if len_As == 0:
       yield  # Succeed once.
-    elif len_As > lenZs:
+    elif len_As > len_self:
       return  # Fail.
     else:
       (Xs, Ys) = n_Vars(2)
-      # Succeed if we can find a way to divide Zs into Xs and Ys so that As is an initial sublist of Ys.
-      for _ in forall([lambda: append(Xs, Ys, Zs),
+      # Succeed if we can find a way to divide self into Xs and Ys so that As is an initial sublist of Ys.
+      for _ in forall([lambda: append(Xs, Ys, self),
                        lambda: append(As, Var( ), Ys)
                        ]):
         yield
 
+  def has_member(self, E: Term):
+    """ Is e in this list? """
+    # yield from self.member(E, self)
+    self_eot = self.trail_end()
+    if isinstance(self_eot, Var):
+      for _ in unify(self_eot, LinkedList((Var( ), Var( )))):
+        yield from self_eot.has_member(E)
+    else:
+      if len(self_eot) > 0:
+        for _ in forany([lambda: unify(E, self_eot.head( )),
+                         lambda: self_eot.tail( ).has_member(E)]):
+          yield
+
+  def has_members(self, Es: List):
+    """ Do all elements of Es appear in this list (in any order). """
+    # yield from self.members(es, self)
+    if not Es:
+      yield
+    elif len(self) > 0:
+      for _ in self.has_member(Es[0]):
+        yield from self.has_members(Es[1:])
+
+  def head(self) -> Term:
+    return self.args[0]
+
+  # @staticmethod
+  # def is_contiguous_in(As: List, Zs: LinkedList):
+  #   """ Can As be unified with a segment of Zs? """
+  #   As = LinkedList(As)
+  #   (len_As, lenZs) = (len(As), len(Zs))
+  #   if len_As == 0:
+  #     yield  # Succeed once.
+  #   elif len_As > lenZs:
+  #     return  # Fail.
+  #   else:
+  #     (Xs, Ys) = n_Vars(2)
+  #     # Succeed if we can find a way to divide Zs into Xs and Ys so that As is an initial sublist of Ys.
+  #     for _ in forall([lambda: append(Xs, Ys, Zs),
+  #                      lambda: append(As, Var( ), Ys)
+  #                      ]):
+  #       yield
+  #
   def is_empty(self) -> bool:
     # An empty list has no args, i.e., no head or tail.
     return not self.args
 
   # @eot  Get a strange error message when this is un-commented.
-  @staticmethod
-  def member(e: Term, A_List):
-    """ Is e in A_List? """
-    A_List = A_List.trail_end()
-    if isinstance(A_List, Var):
-      for _ in unify(A_List, LinkedList((Var( ), Var( )))):
-        yield from LinkedList.member(e, A_List)
-    else:
-      if len(A_List) > 0:
-        for _ in forany([lambda: unify(e, A_List.head( )),
-                         lambda: LinkedList.member(e, A_List.tail( ))]):
-          yield
+  # @staticmethod
+  # def member(e: Term, A_List):
+  #   """ Is e in A_List? """
+  #   A_List = A_List.trail_end()
+  #   if isinstance(A_List, Var):
+  #     for _ in unify(A_List, LinkedList((Var( ), Var( )))):
+  #       yield from LinkedList.member(e, A_List)
+  #   else:
+  #     if len(A_List) > 0:
+  #       for _ in forany([lambda: unify(e, A_List.head( )),
+  #                        lambda: LinkedList.member(e, A_List.tail( ))]):
+  #         yield
 
-  @staticmethod
-  def members(es: List, A_List):
-    """ Do all elements of es appear in A_List (in any order). """
-    if not es:
-      yield
-    elif len(A_List) > 0:
-      for _ in LinkedList.member(es[0], A_List):
-        yield from LinkedList.members(es[1:], A_List)
-
-  @staticmethod
-  def next_to(E1, E2, Es):
-    """ E1 and E2 are next to each other in Es. """
-    for _ in forany([
-      lambda: LinkedList.is_contiguous_in([E1, E2], Es),
-      lambda: LinkedList.is_contiguous_in([E2, E1], Es),
-    ]):
-      yield
-
+  # @staticmethod
+  # def members(es: List, A_List):
+  #   """ Do all elements of es appear in A_List (in any order). """
+  #   if not es:
+  #     yield
+  #   elif len(A_List) > 0:
+  #     for _ in A_List.has_member(es[0]):
+  #       yield from LinkedList.members(es[1:], A_List)
+  #
+  # @staticmethod
+  # def next_to(E1, E2, Es):
+  #   """ E1 and E2 are next to each other in Es. """
+  #   for _ in forany([
+  #     lambda: LinkedList.is_contiguous_in([E1, E2], Es),
+  #     lambda: LinkedList.is_contiguous_in([E2, E1], Es),
+  #   ]):
+  #     yield
+  #
   def prefix_and_tail(self) -> Tuple[List[Term], Any]:
     """ Get the initial list of objects and either the tail if it is a Var or [] if it is not a Var. """
     if self.is_empty():
@@ -209,6 +257,11 @@ if __name__ == '__main__':
     print(f'\nA: {A}\nA[3:7]: {A37}\nA[4:11:2]: {A4810}')
     print( )
 
+  print(f'A[:4]: {A[:4]}')
+  A_tail = A.tail()
+  print(f'A.tail()[:3]: {A_tail[:3]}')
+  print(f'A.tail().tail()[:2]: {A.tail().tail()[:2]}')
+
   print(f'\nemptyLinkedList: {emptyLinkedList}')
 
   Xs = LinkedList([*range(10)])
@@ -242,21 +295,21 @@ if __name__ == '__main__':
     print(f'Given: E: {E}, L: {L}')
 
     print(f'?- LinkedList.member(E, L)')
-    for _ in LinkedList.member(E, L):
+    for _ in L.has_member(E):
       print(f'E = {E}')
 
-  lst = LinkedList( [*map(Ground, [1, 2, 3, 2, 1])] )
+  A_List = LinkedList( [*map(Ground, [1, 2, 3, 2, 1])] )
   E_Sub = [Ground(2), Var( )]
   linkedlistE_Sub = LinkedList(E_Sub)
   print(linkedlistE_Sub)
-  print(f'\nE_Sub: {linkedlistE_Sub}\n?- is_contiguous_in(E_Sub, {lst})')
-  for _ in LinkedList.is_contiguous_in(E_Sub, lst):
+  print(f'\nE_Sub: {linkedlistE_Sub}\n?- is_contiguous_in(E_Sub, {A_List})')
+  for _ in A_List.has_contiguous_sublist(E_Sub):
     print(f'E_Sub: {linkedlistE_Sub}')
 
   E_Sub = [Var( ), Ground(2)]
   linkedlistE_Sub = LinkedList(E_Sub)
-  print(f'\nE_Sub: {linkedlistE_Sub}\n?- is_contiguous_in(E_Sub, {lst})')
-  for _ in LinkedList.is_contiguous_in(E_Sub, lst):
+  print(f'\nE_Sub: {linkedlistE_Sub}\n?- is_contiguous_in(E_Sub, {A_List})')
+  for _ in A_List.has_contiguous_sublist(E_Sub):
     print(f'E_Sub: {linkedlistE_Sub}')
 
   X = Ground('abc')
@@ -388,13 +441,13 @@ if __name__ == '__main__':
 
   Unclosed_List3 = LinkedList((Var( ), Var( )))
   limit1 = 4
-  for _ in LinkedList.member(Ground(5), Unclosed_List3):
+  for _ in Unclosed_List3.has_member(Ground(5)):
     if limit1 <= 0:
       break
     limit1 -= 1
     print(Unclosed_List3)
     limit2 = 2
-    for _ in LinkedList.member(Ground(9), Unclosed_List3):
+    for _ in Unclosed_List3.has_member(Ground(9)):
       if limit2 <= 0:
         break
       limit2 -= 1

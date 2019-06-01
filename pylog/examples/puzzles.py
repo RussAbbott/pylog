@@ -53,7 +53,7 @@ def run_puzzle(problem: Callable, ListType: Type, Answer_List: SuperSequence, ad
   inp = None  # needed below at this block level
   from timeit import default_timer as timer
   (start1, end1, start2, end2) = (timer( ), None, None, None)
-  for _ in problem(Answer_List, ListType):
+  for _ in problem(Answer_List):
     end1 = timer( )
     print('\nSolution: ')
     for (index, student) in enumerate(Answer_List):

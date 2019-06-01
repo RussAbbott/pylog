@@ -41,50 +41,90 @@ class PySequence(SuperSequence):
   def get_ground_value(self) -> tuple:
     return self.functor(arg.get_ground_value() for arg in self.args)
 
-  def head(self):
-    return self[0]
-
-  @staticmethod
-  def is_contiguous_in(As: List, Zs: PySequence):
-    """ Can As be unified with a contiguous segment of Zs? """
-    (lenAs, len_Zs) = (len(As), len(Zs))
-    if lenAs == 0:
-      yield  # Succeed
-    elif lenAs > len_Zs:
-      return  # Fail.
-    else:
-      for i in range(len_Zs - lenAs + 1):
-        # Succeed for each Zs segment that can be unified with As.
-        for _ in unify_sequences(As, Zs.args[i:i+lenAs]):
-          yield
-
-  @staticmethod
-  def member(E: Term, A_List):
-    """ Is E in A_List? """
-    if len(A_List) > 0:
-      for _ in forany([lambda: unify(E, A_List.head( )),
-                       lambda: PySequence.member(E, A_List.tail( ))]):
-        yield
-
-  @staticmethod
-  def members(Es: List, A_List: PySequence):
-    """ Do all elements of Es appear in A_List (in any order). """
-    if not Es:
-      yield
-    else:  # len(A_List) > 0:
-      for _ in PySequence.member(Es[0], A_List):
-        yield from PySequence.members(Es[1:], A_List)
-
-  @staticmethod
-  def next_to(E1: Term, E2: Term, Es: PySequence):
+  def has_adjacent_members(self, E1, E2):
     """ Are E1 and E2 are next to each other in Es. """
+    # yield from self.next_to(E1, E2, self)
     for _ in forany([
-      lambda: PySequence.is_contiguous_in([E1, E2], Es),
-      lambda: PySequence.is_contiguous_in([E2, E1], Es),
+      lambda: self.has_contiguous_sublist([E1, E2]),
+      lambda: self.has_contiguous_sublist([E2, E1]),
     ]):
       yield
 
-  def tail(self):
+  def has_contiguous_sublist(self, As: List):
+    """ Can As be unified with a contiguous segment of this list? """
+    # yield from self.is_contiguous_in(As, self)
+    (len_As, len_self) = (len(As), len(self))
+    if len_As == 0:
+      yield  # Succeed
+    elif len_As > len_self:
+      return  # Fail.
+    else:
+      for i in range(len_self - len_As + 1):
+        # Succeed for each self segment that can be unified with As.
+        for _ in unify_sequences(As, self.args[i:i+len_As]):
+          yield
+
+  def has_member(self, E: Term):
+    """ Is E in A_List? """
+    # yield from self.member(E, self)
+    if len(self) > 0:
+      for _ in forany([lambda: unify(E, self.head( )),
+                       lambda: self.tail( ).has_member(E)]):
+        yield
+
+  def has_members(self, Es: List):
+    """ Do all elements of Es appear in this list (in any order). """
+    # yield from self.members(Es, self)
+    if not Es:
+      yield
+    elif len(self) > 0:
+      for _ in self.has_member(Es[0]):
+        yield from self.has_members(Es[1:])
+
+  def head(self):
+    return self[0]
+
+  # @staticmethod
+  # def is_contiguous_in(As: List, Zs: PySequence):
+  #   """ Can As be unified with a contiguous segment of Zs? """
+  #   (lenAs, len_Zs) = (len(As), len(Zs))
+  #   if lenAs == 0:
+  #     yield  # Succeed
+  #   elif lenAs > len_Zs:
+  #     return  # Fail.
+  #   else:
+  #     for i in range(len_Zs - lenAs + 1):
+  #       # Succeed for each Zs segment that can be unified with As.
+  #       for _ in unify_sequences(As, Zs.args[i:i+lenAs]):
+  #         yield
+
+  # @staticmethod
+  # def member(E: Term, A_List):
+  #   """ Is E in A_List? """
+  #   if len(A_List) > 0:
+  #     for _ in forany([lambda: unify(E, A_List.head( )),
+  #                      lambda: PySequence.member(E, A_List.tail( ))]):
+  #       yield
+  #
+  # @staticmethod
+  # def members(Es: List, A_List: PySequence):
+  #   """ Do all elements of Es appear in A_List (in any order). """
+  #   if not Es:
+  #     yield
+  #   else:  # len(A_List) > 0:
+  #     for _ in A_List.has_member(Es[0]):
+  #       yield from PySequence.members(Es[1:], A_List)
+  #
+  # @staticmethod
+  # def next_to(E1: Term, E2: Term, Es: PySequence):
+  #   """ Are E1 and E2 are next to each other in Es. """
+  #   for _ in forany([
+  #     lambda: PySequence.is_contiguous_in([E1, E2], Es),
+  #     lambda: PySequence.is_contiguous_in([E2, E1], Es),
+  #   ]):
+  #     yield
+  #
+  def tail(self) -> PySequence:
     return self.__class__(self.args[1:])
 
   def to_python_list(self):
