@@ -3,7 +3,7 @@ from typing import Any, List, Tuple, Union
 
 from control_structures import forall, forany
 from logic_variables import eot, Ground, n_Vars, Term, unify, unify_pairs, Var
-from sequence_options.super_sequence import is_subsequence,  SuperSequence
+from sequence_options.super_sequence import is_a_subsequence_of,  SuperSequence
 
 
 class LinkedList(SuperSequence):
@@ -68,15 +68,15 @@ class LinkedList(SuperSequence):
     ground_args = [arg.get_ground_value() for arg in args_list]
     return ground_args
 
-  def has_adjacent_members(self, E1, E2):
-    """ E1 and E2 are next to each other in Es. """
-    # yield from self.next_to(E1, E2, self)
-    for _ in forany([
-      lambda: self.has_contiguous_sublist([E1, E2]),
-      lambda: self.has_contiguous_sublist([E2, E1]),
-    ]):
-      yield
-
+  # def has_adjacent_members(self, E1, E2):
+  #   """ E1 and E2 are next to each other in Es. """
+  #   # yield from self.next_to(E1, E2, self)
+  #   for _ in forany([
+  #     lambda: self.has_contiguous_sublist([E1, E2]),
+  #     lambda: self.has_contiguous_sublist([E2, E1]),
+  #   ]):
+  #     yield
+  #
   def has_contiguous_sublist(self, As: List):
     """ Can As be unified with a segment of this list? """
     # yield from self.is_contiguous_in(As, self)
@@ -107,15 +107,15 @@ class LinkedList(SuperSequence):
                          lambda: self_eot.tail( ).has_member(E)]):
           yield
 
-  def has_members(self, Es: List):
-    """ Do all elements of Es appear in this list (in any order). """
-    # yield from self.members(es, self)
-    if not Es:
-      yield
-    elif len(self) > 0:
-      for _ in self.has_member(Es[0]):
-        yield from self.has_members(Es[1:])
-
+  # def has_members(self, Es: List):
+  #   """ Do all elements of Es appear in this list (in any order). """
+  #   # yield from self.members(es, self)
+  #   if not Es:
+  #     yield
+  #   elif len(self) > 0:
+  #     for _ in self.has_member(Es[0]):
+  #       yield from self.has_members(Es[1:])
+  #
   def head(self) -> Term:
     return self.args[0]
 
@@ -278,11 +278,11 @@ if __name__ == '__main__':
   Xs = list(map(Ground, range(9)))
   Sub_Xs = [Ground(1), Var( ), Ground(4), Var( ), Ground(8)]
   print(f'\nLinkedList(Sub_Xs): {LinkedList(Sub_Xs)}, LinkedList(Xs): {LinkedList(Xs)}')
-  for _ in is_subsequence(Sub_Xs, LinkedList(Xs)):
+  for _ in is_a_subsequence_of(Sub_Xs, LinkedList(Xs)):
     print(f'\tLinkedList(Sub_Xs): {LinkedList(Sub_Xs)}')
   Sub_Xs = [Ground(1), Var( ), Ground(8), Var( ), Ground(7)]
   print(f'\nLinkedList(Sub_Xs): {LinkedList(Sub_Xs)}, LinkedList(Xs): {LinkedList(Xs)}')
-  for _ in is_subsequence(Sub_Xs, LinkedList(Xs)):
+  for _ in is_a_subsequence_of(Sub_Xs, LinkedList(Xs)):
     print(f'\tLinkedList(Sub_Xs): {LinkedList(Sub_Xs)}')
 
   (Start, Pivot, End) = n_Vars(3)

@@ -41,15 +41,15 @@ class PySequence(SuperSequence):
   def get_ground_value(self) -> tuple:
     return self.functor(arg.get_ground_value() for arg in self.args)
 
-  def has_adjacent_members(self, E1, E2):
-    """ Are E1 and E2 are next to each other in Es. """
-    # yield from self.next_to(E1, E2, self)
-    for _ in forany([
-      lambda: self.has_contiguous_sublist([E1, E2]),
-      lambda: self.has_contiguous_sublist([E2, E1]),
-    ]):
-      yield
-
+  # def has_adjacent_members(self, E1, E2):
+  #   """ Are E1 and E2 are next to each other in Es. """
+  #   # yield from self.next_to(E1, E2, self)
+  #   for _ in forany([
+  #     lambda: self.has_contiguous_sublist([E1, E2]),
+  #     lambda: self.has_contiguous_sublist([E2, E1]),
+  #   ]):
+  #     yield
+  #
   def has_contiguous_sublist(self, As: List):
     """ Can As be unified with a contiguous segment of this list? """
     # yield from self.is_contiguous_in(As, self)
@@ -72,15 +72,15 @@ class PySequence(SuperSequence):
                        lambda: self.tail( ).has_member(E)]):
         yield
 
-  def has_members(self, Es: List):
-    """ Do all elements of Es appear in this list (in any order). """
-    # yield from self.members(Es, self)
-    if not Es:
-      yield
-    elif len(self) > 0:
-      for _ in self.has_member(Es[0]):
-        yield from self.has_members(Es[1:])
-
+  # def has_members(self, Es: List):
+  #   """ Do all elements of Es appear in this list (in any order). """
+  #   # yield from self.members(Es, self)
+  #   if not Es:
+  #     yield
+  #   elif len(self) > 0:
+  #     for _ in self.has_member(Es[0]):
+  #       yield from self.has_members(Es[1:])
+  #
   def head(self):
     return self[0]
 
