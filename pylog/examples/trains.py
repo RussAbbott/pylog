@@ -27,14 +27,14 @@ def best_route(Start: Ground, Route: Var, End: Ground):
   # Look for routes that use the fewest lines.
   for i in range(len(lines)):
     # The middle sequence is the intermediate lines and stations.
-    legs = [Start, *n_Vars(2*i+1), End]
+    legs = (Start, *n_Vars(2*i+1), End)
     # If it succeeds, chain will instantiate legs to
     #         [Station, (Line, int), Station, (Line, int), ... , Station]
     # Once legs is instantiated, must take the ground values so that the
     # collection of legs can be processed in the next step.
     # If the ground values aren't taken, the legs variables will lose
     # their values when backtracking through chain.
-    route_options = [[elt.get_ground_value() for elt in legs] for _ in chain(*legs)]
+    route_options = [ [elt.get_ground_value() for elt in legs] for _ in chain(*legs) ]
     # Once we find at least one chain from Start to End, find the best of them and quit.
     if route_options:
       routes_with_totals = map(sum_distances, route_options)
@@ -46,7 +46,7 @@ def best_route(Start: Ground, Route: Var, End: Ground):
       # return
 
 
-def chain(*legs: List[Term]):
+def chain(*legs: Tuple[Term]):
   """
   Can we get from the first station to the last? If so, which lines and
   which intermediate stations should we use?
@@ -54,15 +54,21 @@ def chain(*legs: List[Term]):
          All but the first and last may be variables.
   :return:
   """
+  # print(f'-> chain({[str(leg) for leg in legs]})?')
   if len(legs) == 0 or len(legs) == 2:
     # fail
+    # print(f'XX chain({[str(leg) for leg in legs]}?')
     pass
   elif len(legs) == 1:  # Have arrived at our destination
     # succeed
+    # print(f'<- chain({[str(leg) for leg in legs]}?')
     yield
   else:  # len(legs) >= 3. Take the next leg.
     for _ in connected(*legs[:3]):
       # Drop the first two elements, i.e., [Station, Line], and recurse.
+      # for _ in chain(*legs[2:]):
+        # print(f'<- chain({[str(leg) for leg in legs]}?')
+        # yield
       yield from chain(*legs[2:])
 
 
@@ -72,19 +78,18 @@ def connected(S1: Union[Ground, Var], Line_Dist: Union[Var, PyTuple], S2: Union[
   If so, which line is it, and how many stations are between them?
   Line_Dist will be unified with (Line, count_of_stations)
   """
-  # print(f'-> connected({A}, {LD}, {B})?')
+  # print(f'-> connected({S1}, {Line_Dist}, {S2})?')
   if S1 != S2:
     Line = Var()
     for _ in forall([lambda: has_station(Line, S1),
                      lambda: has_station(Line, S2)]):
-      # Test again since A or B may have started as Var's
+      # Test again since S1 or S2 may have started as Var's
       if S1 != S2:
         stations = lines[Line.get_ground_value()]
         pos1 = stations.index(S1.get_ground_value())
         pos2 = stations.index(S2.get_ground_value())
-        # print(f'<- connected({A}, {Line_Dist}, {B})?')
         yield from unify(Line_Dist, PyTuple( (Line, Ground(abs(pos1 - pos2))) ) )
-  # print(f'XX connected({A}, {LD}, {B})?')
+  # print(f'XX connected({S1}, {Line_Dist}, {S2})?')
 
 
 def has_station(L: Union[Ground, Var], S: Union[Ground, Var]):
@@ -104,8 +109,9 @@ def sum_distances(legs: [Union[str, Tuple[str, int]]]) -> ([str], int):
   :param legs: Each leg is either a station or a (line, dist) tuple.
   :return: (legs, total_dist), where legs drops the internal distances along each line
   """
+  # print(f'-> sum_distances({[str(leg) for leg in legs]})?')
 
-  def split_elts(chnDist: Tuple[List[str], int], elt: Union[str, Tuple[str, int]]) -> Tuple[List[str], int]:
+  def split_elts(chnDist: Tuple[tuple, int], elt: Union[str, Tuple[str, int]]) -> Tuple[tuple, int]:
     """
     This is the reduce function.
 
@@ -114,11 +120,13 @@ def sum_distances(legs: [Union[str, Tuple[str, int]]]) -> ([str], int):
     add the dist to the existing dist.
     """
     (chn, dist) = chnDist
-    new_chn = chn + [(elt[0] if isinstance(elt, tuple) else elt)]
+    new_chn = chn + ( (elt[0] if isinstance(elt, tuple) else elt), )
     new_dist = dist + elt[1] if isinstance(elt, tuple) else dist
     return (new_chn, new_dist)
 
-  (new_chain, total_dist) = reduce( split_elts, legs, ([], 0) )
+  (new_chain, total_dist) = reduce( split_elts, legs, ((), 0) )
+  # print(f'<- sum_distances: {(new_chain, total_dist)}')
+
   return (new_chain, total_dist)
 
 

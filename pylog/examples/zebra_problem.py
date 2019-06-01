@@ -4,13 +4,6 @@ from logic_variables import n_Vars, unify
 from examples.puzzles import Puzzle_Item, run_puzzle
 from sequence_options.super_sequence import is_contiguous_in, member, members, next_to_in
 
-""" 
-    =================================================================================================================
-      This and the scholarship problem are both written so that they can use either LinkedLists or one of the
-      PySequence options: PyList or PyTuple.
-    =================================================================================================================
-"""
-
 """
 One version of the famous Zebra problem. (All versions are structurally similar, but the names are often different.)
 
@@ -47,6 +40,13 @@ Solution:
   
   The Japanese own a zebra, and the Norwegians drink water.
 
+"""
+
+""" 
+    =================================================================================================================
+      This and the scholarship problem are both written so that they can use either LinkedLists or one of the
+      PySequence options: PyList or PyTuple.
+    =================================================================================================================
 """
 
 
