@@ -182,10 +182,7 @@ def would_succeed(f):
   """
   def would_succeed_wrapper(*args, **kwargs):
     succeeded = False
-    # print(hasattr(f, '__self__'))
-    # members = getmembers(f)
-    # print(members)
-    for _ in f(*args, **kwargs):   # f.__self__.f(*args, **kwargs) if hasattr(f, '__self__') else f(*args, **kwargs):
+    for _ in f(*args, **kwargs):
       succeeded = True
 
     if succeeded:
