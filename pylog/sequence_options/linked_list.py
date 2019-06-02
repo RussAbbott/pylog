@@ -1,9 +1,9 @@
 from __future__ import annotations
-from typing import Any, List, Tuple, Union
+from typing import Any, List, Sized, Tuple, Union
 
 from control_structures import forall, forany
 from logic_variables import eot, Ground, n_Vars, Term, unify, unify_pairs, Var
-from sequence_options.super_sequence import is_a_subsequence_of,  SuperSequence
+from sequence_options.super_sequence import is_a_subsequence_of,  member, SuperSequence
 
 
 class LinkedList(SuperSequence):
@@ -21,7 +21,6 @@ class LinkedList(SuperSequence):
     args = self.args_from_pyList(list_or_tuple) if isinstance(list_or_tuple, list) else \
            list_or_tuple if isinstance(list_or_tuple, tuple) else \
            self.args_from_pyList(list(list_or_tuple))  # Run list_or_tuple to get a list if it's a generator.
-    # super( ) is the Structure class. Create a structure with functor [ ] and *args as args.
     # args will either have two elements or none -- if we are creating an empty list.
     super().__init__( ('linkedList', *args) )
 
@@ -50,7 +49,7 @@ class LinkedList(SuperSequence):
   def __str__(self):
     (prefix, tail) = self.prefix_and_tail( )
     valuesString = self.values_string(prefix)
-    result = f'[{valuesString}' + (']' if not tail else f' | {tail}]')
+    result = f'[{valuesString}' + (f' | {tail}]' if isinstance(tail, Var) else ']' )
     return result
 
   @staticmethod
@@ -68,15 +67,6 @@ class LinkedList(SuperSequence):
     ground_args = [arg.get_ground_value() for arg in args_list]
     return ground_args
 
-  # def has_adjacent_members(self, E1, E2):
-  #   """ E1 and E2 are next to each other in Es. """
-  #   # yield from self.next_to(E1, E2, self)
-  #   for _ in forany([
-  #     lambda: self.has_contiguous_sublist([E1, E2]),
-  #     lambda: self.has_contiguous_sublist([E2, E1]),
-  #   ]):
-  #     yield
-  #
   def has_contiguous_sublist(self, As: List):
     """ Can As be unified with a segment of this list? """
     # yield from self.is_contiguous_in(As, self)
@@ -94,84 +84,47 @@ class LinkedList(SuperSequence):
                        ]):
         yield
 
-  def has_member(self, E: Term):
-    """ Is e in this list? """
-    # yield from self.member(E, self)
-    self_eot = self.trail_end()
-    if isinstance(self_eot, Var):
-      for _ in unify(self_eot, LinkedList((Var( ), Var( )))):
-        yield from self_eot.has_member(E)
+  @staticmethod
+  def member(E: Term, A_List: Union[LinkedList, Var]):
+    """ Is E in A_List? """
+    A_List = A_List.trail_end( )
+    if isinstance(A_List, Var):
+      for _ in unify(A_List, LinkedList((Var( ), Var( )))):
+        yield from LinkedList.member(E, A_List)
     else:
-      if len(self_eot) > 0:
-        for _ in forany([lambda: unify(E, self_eot.head( )),
-                         lambda: self_eot.tail( ).has_member(E)]):
+      assert isinstance(A_List, Sized)
+      if len(A_List) > 0:
+        for _ in forany([lambda: unify(E, A_List.head( )),
+                         lambda: LinkedList.member(E, A_List.tail( ))]):
           yield
 
-  # def has_members(self, Es: List):
-  #   """ Do all elements of Es appear in this list (in any order). """
-  #   # yield from self.members(es, self)
-  #   if not Es:
-  #     yield
-  #   elif len(self) > 0:
-  #     for _ in self.has_member(Es[0]):
-  #       yield from self.has_members(Es[1:])
-  #
+  def has_member(self, E: Term):
+    """ Is e in this list? """
+    yield from LinkedList.member(E, self)
+    # if self.is_empty():
+    #   return
+    # (prefix, tail) = self.prefix_and_tail()
+    # # Is this a closed list?
+    # if not isinstance(tail, Var):
+    #   for _ in forany([lambda: unify(E, self.head( )),
+    #                    lambda: member(E, self.tail( ))]):
+    #     yield
+    #
+    # # This is an open list.
+    # else:
+    #   yield from LinkedList.member(E, self)
+      # for _ in unify(tail, LinkedList((Var( ), Var( )))):
+      #   self_tail_var_eot = self_tail_var.trail_end()
+      #   assert isinstance(self_tail_var_eot, LinkedList)
+      #   yield from member(E, self_tail_var_eot)
+
   def head(self) -> Term:
     return self.args[0]
 
-  # @staticmethod
-  # def is_contiguous_in(As: List, Zs: LinkedList):
-  #   """ Can As be unified with a segment of Zs? """
-  #   As = LinkedList(As)
-  #   (len_As, lenZs) = (len(As), len(Zs))
-  #   if len_As == 0:
-  #     yield  # Succeed once.
-  #   elif len_As > lenZs:
-  #     return  # Fail.
-  #   else:
-  #     (Xs, Ys) = n_Vars(2)
-  #     # Succeed if we can find a way to divide Zs into Xs and Ys so that As is an initial sublist of Ys.
-  #     for _ in forall([lambda: append(Xs, Ys, Zs),
-  #                      lambda: append(As, Var( ), Ys)
-  #                      ]):
-  #       yield
-  #
   def is_empty(self) -> bool:
     # An empty list has no args, i.e., no head or tail.
     return not self.args
 
-  # @eot  Get a strange error message when this is un-commented.
-  # @staticmethod
-  # def member(e: Term, A_List):
-  #   """ Is e in A_List? """
-  #   A_List = A_List.trail_end()
-  #   if isinstance(A_List, Var):
-  #     for _ in unify(A_List, LinkedList((Var( ), Var( )))):
-  #       yield from LinkedList.member(e, A_List)
-  #   else:
-  #     if len(A_List) > 0:
-  #       for _ in forany([lambda: unify(e, A_List.head( )),
-  #                        lambda: LinkedList.member(e, A_List.tail( ))]):
-  #         yield
-
-  # @staticmethod
-  # def members(Es: List, A_List):
-  #   """ Do all elements of es appear in A_List (in any order). """
-  #   if not Es:
-  #     yield
-  #   elif len(A_List) > 0:
-  #     for _ in A_List.has_member(Es[0]):
-  #       yield from LinkedList.members(Es[1:], A_List)
-  #
-  # @staticmethod
-  # def next_to(E1, E2, Es):
-  #   """ E1 and E2 are next to each other in Es. """
-  #   for _ in forany([
-  #     lambda: LinkedList.is_contiguous_in([E1, E2], Es),
-  #     lambda: LinkedList.is_contiguous_in([E2, E1], Es),
-  #   ]):
-  #     yield
-  #
   def prefix_and_tail(self) -> Tuple[List[Term], Any]:
     """ Get the initial list of objects and either the tail if it is a Var or [] if it is not a Var. """
     if self.is_empty():
@@ -189,7 +142,7 @@ class LinkedList(SuperSequence):
 
   def to_python_list(self) -> Union[list, Tuple[list, Var]]:
     (prefix, tail) = self.prefix_and_tail()
-    return prefix if not tail else (prefix, tail)
+    return (prefix, tail) if isinstance(tail, Var) else prefix
 
 
 emptyLinkedList = LinkedList([])
@@ -249,6 +202,12 @@ def append(Xs: Union[LinkedList, Var], Ys: Union[LinkedList, Var], Zs: Union[Lin
 
 if __name__ == '__main__':
 
+  Empty = LinkedList([])
+  print(Empty)
+  E = Ground(3)
+  for _ in member(E, Empty):
+    print(f'Error')
+
   A = LinkedList((Var( ), Var( )))
   A4810 = A[4:11:2]
   A37 = A[3:7]
@@ -295,7 +254,7 @@ if __name__ == '__main__':
     print(f'Given: E: {E}, L: {L}')
 
     print(f'?- LinkedList.member(E, L)')
-    for _ in L.has_member(E):
+    for _ in member(E, L):
       print(f'E = {E}')
 
   A_List = LinkedList( [*map(Ground, [1, 2, 3, 2, 1])] )
@@ -363,7 +322,8 @@ if __name__ == '__main__':
   (Xs, Ys, Zs) = (LinkedList([1, 2, 3]), Var(), Var())
   print(f'\nGiven: Ys: {Ys}, Zs: {Zs}\n?- append({Xs}, Ys, Zs); ')
   for _ in append(Xs, Ys, Zs):
-    print(f'Ys = {Ys};\nZs = {Zs}')
+    print(f'Ys = {Ys}')
+    print(f'Zs = {Zs}')
 
   """
   Expected output:
@@ -440,14 +400,15 @@ if __name__ == '__main__':
           f'Unclosed_List2: {Unclosed_List2}; len(Unclosed_List2): {len(Unclosed_List2)}')
 
   Unclosed_List3 = LinkedList((Var( ), Var( )))
+  print('\nStarting to call member on an open-ended list.')
   limit1 = 4
-  for _ in Unclosed_List3.has_member(Ground(5)):
+  for _ in member(Ground(5), Unclosed_List3):
     if limit1 <= 0:
       break
     limit1 -= 1
     print(Unclosed_List3)
     limit2 = 2
-    for _ in Unclosed_List3.has_member(Ground(9)):
+    for _ in member(Ground(9), Unclosed_List3):
       if limit2 <= 0:
         break
       limit2 -= 1
