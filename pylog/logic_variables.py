@@ -199,7 +199,7 @@ class Var(Term):
     self_eot = self.trail_end()
     # To make PyCharm's type checker happy.
     assert isinstance(self_eot, Sized)
-    return len(self_eot) if hasattr(self_eot, '__len__') else None
+    return None if not hasattr(self_eot, '__len__') or self == self_eot else len(self_eot)
 
   def _has_trail_next(self) -> bool:
     # Is this the end of the trail?
