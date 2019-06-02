@@ -85,7 +85,7 @@ class LinkedList(SuperSequence):
         yield
 
   def has_member(self, E: Term):
-    """ Is e in this list? """
+    """ Is E in this list? """
     yield from LinkedList.member(E, self)
 
   def head(self) -> Term:
@@ -190,18 +190,17 @@ def append(Xs: Union[LinkedList, Var], Ys: Union[LinkedList, Var], Zs: Union[Lin
 
 if __name__ == '__main__':
 
-  Empty = LinkedList([])
-  print(Empty)
+  print(emptyLinkedList)
   E = Ground(3)
-  for _ in member(E, Empty):
-    print(f'Error')
+  for _ in member(E, emptyLinkedList):
+    print(f'Error: should not get here.')
 
   A = LinkedList((Var( ), Var( )))
-  A4810 = A[4:11:2]
+  A112 = A[4:11:2]
   A37 = A[3:7]
-  print(f'\nA: {A}\nA[3:7]: {A37}\nA[4:11:2]: {A4810}')
+  print(f'\nA: {A}\nA[3:7]: {A37}\nA[4:11:2]: {A112}')
   for _ in unify(A37, LinkedList('ABCD')):
-    print(f'\nA: {A}\nA[3:7]: {A37}\nA[4:11:2]: {A4810}')
+    print(f'\nA: {A}\nA[3:7]: {A37}\nA[4:11:2]: {A112}')
     print( )
 
   print(f'A[:4]: {A[:4]}')
