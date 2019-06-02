@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Any, List, Sized, Tuple, Union
+from typing import Any, List, Tuple, Union
 
 from control_structures import forall, forany
 from logic_variables import eot, Ground, n_Vars, Term, unify, unify_pairs, Var
@@ -84,39 +84,9 @@ class LinkedList(SuperSequence):
                        ]):
         yield
 
-  @staticmethod
-  def member(E: Term, A_List: Union[LinkedList, Var]):
-    """ Is E in A_List? """
-    A_List = A_List.trail_end( )
-    if isinstance(A_List, Var):
-      for _ in unify(A_List, LinkedList((Var( ), Var( )))):
-        yield from LinkedList.member(E, A_List)
-    else:
-      assert isinstance(A_List, Sized)
-      if len(A_List) > 0:
-        for _ in forany([lambda: unify(E, A_List.head( )),
-                         lambda: LinkedList.member(E, A_List.tail( ))]):
-          yield
-
   def has_member(self, E: Term):
     """ Is e in this list? """
     yield from LinkedList.member(E, self)
-    # if self.is_empty():
-    #   return
-    # (prefix, tail) = self.prefix_and_tail()
-    # # Is this a closed list?
-    # if not isinstance(tail, Var):
-    #   for _ in forany([lambda: unify(E, self.head( )),
-    #                    lambda: member(E, self.tail( ))]):
-    #     yield
-    #
-    # # This is an open list.
-    # else:
-    #   yield from LinkedList.member(E, self)
-      # for _ in unify(tail, LinkedList((Var( ), Var( )))):
-      #   self_tail_var_eot = self_tail_var.trail_end()
-      #   assert isinstance(self_tail_var_eot, LinkedList)
-      #   yield from member(E, self_tail_var_eot)
 
   def head(self) -> Term:
     return self.args[0]
@@ -124,6 +94,24 @@ class LinkedList(SuperSequence):
   def is_empty(self) -> bool:
     # An empty list has no args, i.e., no head or tail.
     return not self.args
+
+  @staticmethod
+  def member(E: Term, A_List: Union[LinkedList, Var]):
+    """
+    Is E in A_List?
+    Since A_List may be open-ended, A_List.tail() may be a Var, and we won't be able to dispatch on it.
+    """
+    A_List = A_List.trail_end( )
+    if isinstance(A_List, Var):
+      for _ in unify(A_List, LinkedList((Var( ), Var( )))):
+        yield from LinkedList.member(E, A_List)
+    else:
+      # To keep PyCharm happy.
+      assert isinstance(A_List, LinkedList)
+      if not A_List.is_empty():
+        for _ in forany([lambda: unify(E, A_List.head( )),
+                         lambda: LinkedList.member(E, A_List.tail( ))]):
+          yield
 
   def prefix_and_tail(self) -> Tuple[List[Term], Any]:
     """ Get the initial list of objects and either the tail if it is a Var or [] if it is not a Var. """
