@@ -16,13 +16,13 @@ lines = {
 
 def best_route(Start: Ground, Route: Var, End: Ground):
   """
-  The best route is defined to be the one that passes the fewest intermediate stations.
+  The best route is defined to be the one that uses the fewest lines and that passes the fewest intermediate stations.
 
   A Route will be: [Station, (Line, Dist), Station, (Line, Dist), ..., Station].
   Ignoring Dist, this will be the sequence of stations and lines to take from Start to End.
   The Dist components are the number of intermediate stations on the associated line.
 
-  The best route uses the fewest lines, and of routes using the same lines, the fewest total Dist values.
+  The best route uses the fewest lines, and of routes using the same number of lines, the fewest total Dist values.
   """
   # Look for routes that use the fewest lines.
   for i in range(len(lines)):
@@ -109,7 +109,6 @@ def sum_distances(legs: [Union[str, Tuple[str, int]]]) -> ([str], int):
   :param legs: Each leg is either a station or a (line, dist) tuple.
   :return: (legs, total_dist), where legs drops the internal distances along each line
   """
-  # print(f'-> sum_distances({[str(leg) for leg in legs]})?')
 
   def split_elts(chnDist: Tuple[tuple, int], elt: Union[str, Tuple[str, int]]) -> Tuple[tuple, int]:
     """
@@ -124,6 +123,7 @@ def sum_distances(legs: [Union[str, Tuple[str, int]]]) -> ([str], int):
     new_dist = dist + elt[1] if isinstance(elt, tuple) else dist
     return (new_chn, new_dist)
 
+  # print(f'-> sum_distances({[str(leg) for leg in legs]})?')
   (new_chain, total_dist) = reduce( split_elts, legs, ((), 0) )
   # print(f'<- sum_distances: {(new_chain, total_dist)}')
 
@@ -139,7 +139,7 @@ if __name__ == '__main__':
     print(f'  Including transfer stations, if any, you will pass {stations_passed - 1} intermediate stations')
 
 
-  for (_A, _B) in [("Takatsuki", "Yamashina"),  # Direct
+  for (s1, s2) in [("Takatsuki", "Yamashina"),  # Direct
                    ("Takatsuki", "Kyoto"),      # Direct
                    ("Yamashina", "Sakamoto"),   # Direct
                    ("Yamashina", "Ishiyama"),   # Direct
@@ -156,10 +156,10 @@ if __name__ == '__main__':
                    ("Zeze", "Kusatsu"),         # Two-changes
                    ]:
 
-    (A, B) = (Ground(_A), Ground(_B))
+    (S1, S2) = (Ground(s1), Ground(s2))
     # Use Route in Prolog style to pass back the route.
     # In this case it's simply a basket in which the best route is conveyed.
     Route = Var( )
-    for _ in best_route(A, Route, B):
-      print(f'\nFind a best route (passing the fewest intermediate stations) from {A} to {B}: ')
+    for _ in best_route(S1, Route, S2):
+      print(f'\nFind a best route (passing the fewest intermediate stations) from {S1} to {S2}: ')
       print_route( *Route.trail_end().get_ground_value() )
