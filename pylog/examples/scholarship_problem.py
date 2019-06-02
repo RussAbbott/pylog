@@ -12,12 +12,12 @@ Prolog solution provided at that site.
 
                         ----------------------------------------------------------------
 
-There are 4 students: Carrie, Erma, Amy and Tracy. 
+There are 4 students: Amy, Carrie, Erma, and Tracy. 
 Each has one scholarship and one major subject.  
-The available scholarships are: 25000, 30000, 35000 and 40000 USD. 
-The available majors are: Astronomy, English, Philosophy, Comp Sci. 
+The available scholarships are: $25,000, $30,000, $35,000 and $40,000. 
+The available majors are: Astronomy, Comp Sci, English, and Philosophy. 
 
-Using the following clues, find which student has which scholarship and studies which subject.
+Using the following clues, determine which student has which scholarship and studies which subject.
 
 1. The student who studies Astronomy gets a smaller scholarship than Amy.
 2. Amy studies either English or Philosophy.
@@ -136,11 +136,11 @@ if __name__ == '__main__':
 
   """ Select either LinkedList or a PySequence (PyList or PyTuple) as the ListType. """
 
-  # from sequence_options.linked_list import LinkedList
-  # ListType = LinkedList
-  #
-  from sequence_options.sequences import PyList  # or PyTuple
-  ListType = PyList  # or PyTuple
+  from sequence_options.linked_list import LinkedList
+  ListType = LinkedList
+
+  # from sequence_options.sequences import PyList  # or PyTuple
+  # ListType = PyList  # or PyTuple
 
   """ additional_answer function, if any """
 
