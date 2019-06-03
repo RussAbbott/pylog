@@ -71,7 +71,11 @@ for _ in isEven(i)
 
 succeeds/fails for a given `i`, the list comprehension completes/fails to complete the iteration for that `i` and includes/does not include `i` in the generated list.  
 
-## Logic variables and unification 
+## Implementing logic variables and unification in Python
+
+*To be written*
+
+## Implementing Prolog backtracking in Python 
 
 *To be written*
 
