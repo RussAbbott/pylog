@@ -123,6 +123,8 @@ However, since Prolog uses identifiers that begin with an upper case letter for 
 
 * Berger, Shai (2004) [Pythologic](http://code.activestate.com/recipes/303057-pythologic-prolog-syntax-in-python/)
 
+* Delord, Christophe (2009) [PyLog](http://cdsoft.fr/pylog/index.html)
+
 * Meyers, Chris (2015) [Prolog in Python](http://www.openbookproject.net/py4fun/countClick.php?dest=prolog/intro.html)
 * A bunch of links in this [Stack Overflow question](https://stackoverflow.com/questions/49101342/implementing-the-prolog-unification-algorithm-in-python-backtracking)
 
