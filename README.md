@@ -129,7 +129,7 @@ However, since Prolog uses identifiers that begin with an upper case letter for 
 
 * Frederiksen, Bruce Frederiksen (2011) [Pyke](http://pyke.sourceforge.net/)
 
-* Maxime, Istasse (2016) [Prology: Logic programming for Python 3](https://github.com/mistasse/Prology)
+* Maxime, Istasse (2016) [Prology: Logic programming for Python3](https://github.com/mistasse/Prology)
 
 * Meyers, Chris (2015) [Prolog in Python](http://www.openbookproject.net/py4fun/countClick.php?dest=prolog/intro.html)
 
