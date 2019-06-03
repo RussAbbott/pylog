@@ -1,3 +1,20 @@
+## Abstract (outline from [The Programming Journal]())
+
+* _Context: What is the broad context of the work? What is the importance of the general research area?_ <br/><br/>
+Pylog examines the integration of two distinct programming language paradigms: the modern general purpose programming paradigm, which often includes features of procedural programming, OO programming, Functional programming, and meta- programming, represented by Python and logic programming, represented by Prolog. Logic programming includeds two significant features that are missing from modern general purpose languages: logic variables (and unification) and built-in depth-first search (often called backtracking). Pylog illustrates how thee two features can be implemented in and integated into Python. 
+
+* _Inquiry: What problem or question does the paper address? How has this problem or question been addressed by others (if at all)?_ <br/><br/>
+
+* _Approach: What was done that unveiled new knowledge?_ <br/><br/>
+
+* _Knowledge: What new facts were uncovered? If the research was not results oriented, what new capabilities are enabled by the work?_ <br/><br/>
+
+* _Grounding: What argument, feasibility proof, artifacts, or results and evaluation support this work?_ <br/><br/>
+
+* _Importance: Why does this work matter?_ <br/><br/>
+
+## Introduction
+
 Prolog, a programming language derived from logic, was developed in the 1970s. It became very popular during the 1980s as an AI language, especially in Japan as part of their [5th generation project](https://www.nytimes.com/1992/06/05/business/fifth-generation-became-japan-s-lost-generation.html). 
 
 Prolog went out of favor because [it was difficult to trace the execution of Prolog programs](https://synthese.wordpress.com/2010/08/21/prologs-death/)—which made debugging very challenging.
