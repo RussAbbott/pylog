@@ -118,3 +118,7 @@ scholarship_problem: control_structures, logic_variables, puzzles, super_sequenc
 For the most part, Python identifier names follow PEP 8 conventions: all lower case, with underscores between words; no camel case except for class names.
 
 However, since Prolog uses identifiers that begin with an upper case letter for Prolog variables, Python identifiers used as Prolog variables begin with upper case letters.
+
+## Previous work
+
+* Meyers, Chris (2015) [Prolog in Python](http://www.openbookproject.net/py4fun/countClick.php?dest=prolog/intro.html)
