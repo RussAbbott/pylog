@@ -123,6 +123,8 @@ However, since Prolog uses identifiers that begin with an upper case letter for 
 
 * Berger, Shai (2004) [Pythologic](http://code.activestate.com/recipes/303057-pythologic-prolog-syntax-in-python/)
 
+* Bolz, Carl Friedrich (2007) [A Prolog Interpreter in Python](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.121.8625&rep=rep1&type=pdf)
+
 * Delord, Christophe (2009) [PyLog](http://cdsoft.fr/pylog/index.html)
 
 * Frederiksen, Bruce Frederiksen (2011) [Pyke](http://pyke.sourceforge.net/)
