@@ -20,14 +20,13 @@ class SuperSequence(Structure):
   def has_contiguous_sublist(self, As):
     pass
 
-  def has_member(self, E: Term):
-    pass
-
   def head(self) -> Term:
     pass
 
   def is_empty(self) -> bool:
     # An empty list has no args, i.e., no head or tail.
+    # A linked list with a variable tail will also have a head, which itself may be a Var.
+    # There is no way to represent a LinkedList is nothing but a variable tail. It is just a simple Var.
     return not self.args
 
   def tail(self) -> SuperSequence:
@@ -70,25 +69,28 @@ def member(E: Term, A_List: Union[SuperSequence, Var]):
   """
   Is E in A_List?
   """
-  # If A_List is empty, fail.
+  # If A_List is empty, it can't have a member. So fail.
   if A_List.is_empty():
     return
 
-  # The following is an implicit 'or'. Either unify E with A_List.head() or call member on the A_List.tail().
+  # The following is an implicit 'or'. Either unify E with A_List.head() or call member(E, A_List.tail()).
 
   # The first case is easy.
   for _ in unify(E, A_List.head( )):
     yield
 
-  # Call member on the tail. Since A_List may be open-ended, A_List.tail() may be a Var.
-  # In that case, must instantiate it to LinkedList( (Var, Var) ).
+  # The second case--member(E, A_List.tail())--is trickier.
+  # Since A_List may be an open-ended LinkedList, A_List.tail() may be a Var.
+  # In that case, we must first instantiate A_List.tail() to LinkedList( (Var, Var) ).
   A_List_Tail = A_List.tail()
-  # A_List_New_Tail is A_List_Tail in most cases.
+  # Create A_List_New_Tail to be unified with A_List_Tail.
+  # A_List_New_Tail will be A_List_Tail in most cases.
   # But if isinstance(A_List_Tail, Var), make A_List_New_Tail = LinkedList( (Var( ), Var( )) ).
   # In either case, unify A_List_Tail with A_List_New_Tail and call member(E, A_List_New_Tail).
-  # An issue is that we can't import LinkedList since that would create an import cycle. Instead
-  # we use type(A_List), which will be LinkedList if A_List_Tail is a Var.
+  # An issue is that we can't import LinkedList since that would create an import cycle.
+  # Instead use type(A_List), which will be LinkedList if A_List_Tail is a Var.
   A_List_New_Tail = type(A_List)((Var( ), Var( ))) if isinstance(A_List_Tail, Var) else A_List_Tail
+  # If A_List_New_Tail is A_List_Tail, this unify does nothing.
   for _ in unify(A_List_New_Tail, A_List_Tail):
     yield from member(E, A_List_New_Tail)
 
@@ -96,7 +98,6 @@ def member(E: Term, A_List: Union[SuperSequence, Var]):
 @eot
 def members(Es: List, A_List: SuperSequence):
   """ Do all elements of es appear in A_List (in any order). """
-  # yield from A_List.has_members(Es)
   # No more to look up. We're done.
   if not Es:
     yield
@@ -107,7 +108,6 @@ def members(Es: List, A_List: SuperSequence):
 
 def next_to_in(E1: Term, E2: Term, Es: SuperSequence):
   """ Are E1 and E2 are next to each other in Es. """
-  # yield from Es.has_adjacent_members(E1, E2)
   for _ in forany([
                    lambda: is_contiguous_in([E1, E2], Es),
                    lambda: is_contiguous_in([E2, E1], Es),

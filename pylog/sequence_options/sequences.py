@@ -43,7 +43,6 @@ class PySequence(SuperSequence):
 
   def has_contiguous_sublist(self, As: List):
     """ Can As be unified with a contiguous segment of this list? """
-    # yield from self.is_contiguous_in(As, self)
     (len_As, len_self) = (len(As), len(self))
     if len_As == 0:
       yield  # Succeed
@@ -51,18 +50,19 @@ class PySequence(SuperSequence):
       return  # Fail.
     else:
       for i in range(len_self - len_As + 1):
-        # Succeed for each self segment that can be unified with As.
+        # Succeed for each segment of self that can be unified with As.
+        # This is the same strategy used in the LinkedList version. Just much more straightforward.
         for _ in unify_sequences(As, self.args[i:i+len_As]):
           yield
 
-  def has_member(self, E: Term):
-    """ Is E in A_List? """
-    # yield from self.member(E, self)
-    if len(self) > 0:
-      for _ in forany([lambda: unify(E, self.head( )),
-                       lambda: self.tail( ).has_member(E)]):
-        yield
-
+  # def has_member(self, E: Term):
+  #   """ Is E in A_List? """
+  #   # yield from self.member(E, self)
+  #   if len(self) > 0:
+  #     for _ in forany([lambda: unify(E, self.head( )),
+  #                      lambda: self.tail( ).has_member(E)]):
+  #       yield
+  #
   def head(self):
     return self[0]
 
