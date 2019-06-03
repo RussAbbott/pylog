@@ -16,8 +16,6 @@ lines = {
 
 def best_route(Start: Ground, Route: Var, End: Ground):
   """
-  The best route is defined to be the one that uses the fewest lines and that passes the fewest intermediate stations.
-
   A Route will be: [Station, (Line, Dist), Station, (Line, Dist), ..., Station].
   Ignoring Dist, this will be the sequence of stations and lines to take from Start to End.
   The Dist components are the number of intermediate stations on the associated line.
@@ -28,17 +26,16 @@ def best_route(Start: Ground, Route: Var, End: Ground):
   for i in range(len(lines)):
     # The middle sequence is the intermediate lines and stations.
     legs = (Start, *n_Vars(2*i+1), End)
-    # If it succeeds, route will instantiate legs to
+    # If route(*legs) succeeds, route will instantiate legs to
     #         [Station, (Line, int), Station, (Line, int), ... , Station]
-    # Once legs is instantiated, must take the ground values so that the
-    # collection of legs can be processed in the next step.
-    # If the ground values aren't taken, the legs variables will lose
-    # their values when backtracking through route.
+    # Once legs is instantiated, must take the ground values so that the collection
+    # of routes remains instantiated after the list comprehension terminates.
     route_options = [ [elt.get_ground_value() for elt in legs] for _ in route(*legs) ]
     # Once we find at least one route from Start to End, find the best of them and quit.
     if route_options:
       routes_with_totals = map(sum_distances, route_options)
       best_option = min(routes_with_totals, key=lambda routeDist: routeDist[1])
+      # best_option will be a simple list. Make it a Ground object so that it can be unified with Route.
       yield from unify(Route, Ground(best_option))
       # break or return prevents backtracking, i.e., looking for alternative (and possibly longer) routes.
       # Has an effect similar to a cut (!) in Prolog.
@@ -132,11 +129,18 @@ def sum_distances(legs: [Union[str, Tuple[str, int]]]) -> ([str], int):
 
 if __name__ == '__main__':
 
+  def s(nbr):
+    return '' if nbr == 1 else 's'
+
   def print_route(stations_and_lines: List[str], stations_passed: int):
-    for i in range(len(stations_and_lines) // 2):
+    nbr_lines = len(stations_and_lines) // 2
+    for i in range(nbr_lines):
       (station, line, next_station) = stations_and_lines[2*i:2*i+3]
       print(f'\tFrom {station} take the {line} line to {next_station}.')
-    print(f'  Including transfer stations, if any, you will pass {stations_passed - 1} intermediate stations')
+
+    transfer_stns_insert = f', including {nbr_lines -1} transfer station{s(nbr_lines -1)}' if nbr_lines > 1 else ''
+    print(f'This route uses {nbr_lines} line{s(nbr_lines)} and ', end='')
+    print(f'passes {stations_passed - 1} intermediate station{s(stations_passed - 1)}{transfer_stns_insert}.')
 
 
   for (s1, s2) in [("Takatsuki", "Yamashina"),  # Direct
@@ -161,5 +165,6 @@ if __name__ == '__main__':
     # In this case it's simply a basket in which the best route is conveyed.
     Route = Var( )
     for _ in best_route(S1, Route, S2):
-      print(f'\nFind a best route (passing the fewest intermediate stations) from {S1} to {S2}: ')
+      print(f'\nA route from {S1} to {S2} that uses fewest lines ', end='')
+      print(f'and of those that passes fewest intermediate stations:')
       print_route( *Route.trail_end().get_ground_value() )
