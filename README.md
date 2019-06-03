@@ -13,11 +13,11 @@
 <dd>Pylon is available as a logic programming library for use in Python software.</dd>
 
 <dt>Grounding: What argument, feasibility proof, artifacts, or results and evaluation support this work?</dt>
-<dd>Pylog demonstrates by its existence and functionality that the goal of integrating logic variables backtracking and can be achieved.</dd>
+<dd>Pylog demonstrates by its existence and functionality that the goal of integrating logic variables and backtracking with Python can be achieved.</dd>
 
 <dt>Importance: Why does this work matter?</dt>
-<dd>TBD
-<dt>
+<dd>This work demonstrates the power and elegance of well-designed software. 
+<dd>
 </dl>
 
 ## Introduction
