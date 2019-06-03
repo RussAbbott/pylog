@@ -133,7 +133,7 @@ However, since Prolog uses identifiers that begin with an upper case letter for 
 
 * Meyers, Chris (2015) [Prolog in Python](http://www.openbookproject.net/py4fun/countClick.php?dest=prolog/intro.html)
 
-* Orsini, Francesc, Paolo Frasconi, Luc De Raedt (2017) [kProbLog: an algebraic Prolog for machine learning](https://link.springer.com/article/10.1007/s10994-017-5668-y)
+* Orsini, Francesc, Paolo Frasconi, Luc De Raedt (2017) [kProbLog: an algebraic Prolog for machine learning](https://link.springer.com/article/10.1007/s10994-017-5668-y) (This seems more like a discussion of the implementation of kProbLog in Python rather than an integraton of the two.)
 
 * Thompson, Jeff Thompson (2017) [Yield Prolog](http://yieldprolog.sourceforge.net/)
 
