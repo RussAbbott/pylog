@@ -2,7 +2,7 @@ from __future__ import annotations
 from functools import wraps
 from inspect import isgeneratorfunction
 from numbers import Number
-from typing import Any, Generator, Iterable, List, Optional, Sequence, Sized, Tuple, Union
+from typing import Any, Iterable, List, Optional, Sequence, Sized, Tuple, Union
 
 """
 Developed by Ian Piumarta as the "unify" library (http://www.ritsumei.ac.jp/~piumarta/pl/src/unify.py) for a
@@ -307,26 +307,15 @@ def unify_sequences(seq_1: Sequence, seq_2: Sequence):
 
 if __name__ == '__main__':
 
-  V = Var()
-
-  print(isgeneratorfunction(V.get_ground_value))
-
-  print(V.get_ground_value())
-
-  print(f'{Structure(  (list, 1, 2, 3) ) }')
-
-  print(Ground(1) == Ground(1))
-
   A = Ground('abc')
   B = Var( )
   C = Var( )
   D = Ground('def')
-  print(f'\na. A: {A}; B: {B}; C: {C}; D: {D}')
-
+  print(f'\nA: {A}; B: {B}; C: {C}; D: {D}')
+  print(f'Attempting: unify_pairs([(A, B), (B, C), (C, D)]).  A, B, C, D will all be the same if it succeeds.')
   for _ in unify_pairs([(A, B), (B, C), (C, D)]):
     print(f'b. A: {A}; B: {B}; C: {C}; D: {D}')
-  print(f'c. A: {A}; B: {B}; C: {C}; D: {D}')
-  print('b. should not have printed.')
+  print('As expected, unify_pairs fails -- because A and D have distinct Ground values.')
 
   A = Var( )
   B = Var( )
@@ -335,51 +324,43 @@ if __name__ == '__main__':
 
   print(f'\n1. A: {A}; B: {B}; C: {C}; D: {D}')  # With while: A: A; B: _12. With if: A: A; B: A.
   for _ in unify(A, B):
-    print(f'2a. A: {A}; B: {B}; C: {C}; D: {D}')  # With while: A: A; B: _12. With if: A: A; B: A.
+    print(f'2a. After unify(A, B).  A: {A}; B: {B}; C: {C}; D: {D}')  # With while: A: A; B: _12. With if: A: A; B: A.
     for _ in unify(A, C):
-      print(f'2b. A: {A}; B: {B}; C: {C}; D: {D}')  # With while: A: A; B: _12. With if: A: A; B: A.
+      print(f'2b. After unify(A, C). A: {A}; B: {B}; C: {C}; D: {D}')  # With while: A: A; B: _12. With if: A: A; B: A.
       for _ in unify(A, D):
-        print(f'2c. A: {A}; B: {B}; C: {C}; D: {D}')  # With while: A: A; B: _12. With if: A: A; B: A.
-  print(f'3. A: {A}; B: {B}; C: {C}; D: {D}')  # With while: A: A; B: _12. With if: A: A; B: A.
+        print(f'2c. After unify(A, D). A: {A}; B: {B}; C: {C}; D: {D}')  # With while: A: A; B: _12. With if: A: A; B: A.
+  print(f'3. Outside the scope of all unifies. A: {A}; B: {B}; C: {C}; D: {D}')  # With while: A: A; B: _12. With if: A: A; B: A.
 
   print('End first test\n')
 
   """
-  Expected output
-
-  A: A; B: _3
-  A: A; B: A
-  A: A; B: _3
-
-  1. Y1: [abc, _5], Y2: [_9, _9]
-  2. Y1: [abc, abc], Y2: [abc, abc]
-  3. Y1: [abc, _5], Y2: [_9, _9]  
-
+  A: abc; B: _2; C: _3; D: def
+  Attempting: unify_pairs([(A, B), (B, C), (C, D)]).  A, B, C, D will all be the same if it succeeds.
+  As expected, unify_pairs fails.
+  
+  1. A: _5; B: _6; C: _7; D: def
+  2a. After unify(A, B).  A: _6; B: _6; C: _7; D: def
+  2b. After unify(A, C). A: _7; B: _7; C: _7; D: def
+  2c. After unify(A, D). A: def; B: def; C: def; D: def
+  3. Outside the scope of all unifies. A: _5; B: _6; C: _7; D: def
   End first test
   """
 
   A = Var( )
   B = Var( )
   C = Var( )
+  D = Ground('xyz')
 
-  print(f'1. A: {A}, B: {B}, C: {C}')
+  print(f'1. A: {A}, B: {B}, C: {C}, D: {D}')
   for _ in unify_pairs([(A, B), (B, C)]):
-    print(f'2. A: {A}, B: {B}, C: {C}')
-    print(f'3. A.eot: {A.trail_end( )}, '
-          f'B.eot: {B.trail_end( )}, '
-          f'C.eot: {C.trail_end( )}')  # => A.eot: _6, B.eot: _6, C.eot: _6
+    print(f'2. After unify_pairs([(A, B), (B, C)]):. A: {A}, B: {B}, C: {C}, D: {D}')
 
-    D = Ground('xyz')
     for _ in unify(D, B):
-      print(
-        f'4. A: {A}, A.eot: {A.trail_end( )}, '
-        f'B: {B}, B.eot: {B.trail_end( )}, '
-        f'C: {C}, C.eot: {C.trail_end( )}, '
-        f'D: {D}, D.eot: {D.trail_end( )}'  # => A.eot: xyz, B.eot: xyz, C.eot: xyz, D.eot: xyz
+      print('3. After unify(D, B): A: {A}, B: {B}, C: {C}, D: {D}'  # => A.eot: xyz, B.eot: xyz, C.eot: xyz, D.eot: xyz
       )
 
-    print(f'\n5. No longer unified with D. A: {A}, B: {B}, C: {C}')  # => A: xyz, B: xyz, C: xyz, D: xyz
-  print(f'6. No longer unified with each other. A: {A}, B: {B}, C: {C}')  # => A: xyz, B: xyz, C: xyz, D: xyz
+    print(f'\n4. No longer unified with D. A: {A}, B: {B}, C: {C}')  # => A: xyz, B: xyz, C: xyz, D: xyz
+  print(f'5. No longer unified with each other. A: {A}, B: {B}, C: {C}')  # => A: xyz, B: xyz, C: xyz, D: xyz
   print('\nEnd second test\n')
 
   """
@@ -396,115 +377,16 @@ if __name__ == '__main__':
   End second test
   """
 
-  def is_even(i: int) -> Generator[None, None, None]:
-    is_even = Var( )
-    # Can serve as a guard. But unlike an if-statement, when it succeeds,
-    # will go on to the rest of the program on the next "next()" call.
-    # To prevent that put return after yield. Try it with and without the return.
-    # Note that "After yield" is printed before the next i. The program doesn't
-    # Stop after yield. It continues on until the program either terminates or
-    # encounters another yield.
-    # Note also that in all cases, wf backs out of its unification with i % 2
-    # Before getting to the Rest of the Program.
-    print(f'\nBefore unify with ({i} % 2). is_even: {is_even}')
-    for _ in (unify(is_even, Ground(not bool(i % 2)))):
-      print(f'Before unify with 0. is_even: {is_even}')
-      for _ in (unify(is_even, Ground(True))):
-        print("Before yield.")
-        yield is_even
-        print("After yield. Stops here if return is uncommented.")
-        # return
-      print(f'Outside unify with 0. is_even: {is_even}')
-    print(f'Outside unify with i % 2. is_even: {is_even}')
-
-
-  evens = [(i, isEvn, isEvn.trail_end( ).get_ground_value( )) for i in range(3) for isEvn in is_even(i)]
-  evens_str = [(a, f'{type(b).__name__}({b.trail_end( ).get_ground_value( )})', c) for (a, b, c) in evens]
-  print(f'\nevens: {evens_str}\n')
-  print('End of fourth test')
-
-  """
-  Expected output:
-
-  Before unify with (0 % 2). is_even: _20
-  Before unify with 0. is_even: True
-  Before yield.
-  After yield. Stops here if return is uncommented.
-  Outside unify with 0. is_even: True
-  Outside unify with i % 2. is_even: _20
-
-  Before unify with (1 % 2). is_even: _23
-  Before unify with 0. is_even: False
-  Outside unify with 0. is_even: False
-  Outside unify with i % 2. is_even: _23
-
-  Before unify with (2 % 2). is_even: _26
-  Before unify with 0. is_even: True
-  Before yield.
-  After yield. Stops here if return is uncommented.
-  Outside unify with 0. is_even: True
-  Outside unify with i % 2. is_even: _26
-
-  evens: [(0, 'Var(None)', True), (2, 'Var(None)', True)]
-
-  print('End fourth test\n')
-  """
-
-  # Simple unification examples.
-  X = Ground(1)
-  Y = Ground(2)
-  print(f'\na. X: {X}, Ys: {Y}')
-  for _ in unify(X, Y):
-    print(f'\nb. X: {X}, Ys: {Y}')
-  print('Output b. should not have printed. \nDone 1')
-  print(f'c. X: {X}, Ys: {Y}')
-
-  print(f'd. {Var()}, {Var()}')
   X = Var( )
+  Y = Var( )
+  Z = Var( )
+  print(f'X: {X}, Y: {Y}, Z: {Z}')
   for _ in unify(Ground('abc'), X):
-    Y = Var( )
-    Z = Var( )
-    print(f'\n1. X: {X}, Y: {Y}, Z: {Z}')  # => abc
+    print(f'After unify(Ground("abc"), X): 1. X: {X}, Y: {Y}, Z: {Z}')  # => abc
     for _ in unify(X, Y):
-      print(f'2. X: {X}, Y: {Y}, Z: {Z}')  # => abc
+      print(f'After unify(X, Y): X: {X}, Y: {Y}, Z: {Z}')  # => abc
       for _ in unify(Z, Y):
-        print(f'3. X: {X}, Y: {Y}, Z: {Z}')  # => abc
-      print(f'4. X: {X}, Y: {Y}, Z: {Z}')  # => abc
-    print(f'5. X: {X}, Y: {Y}, Z: {Z}')  # => abc
+        print(f'After unify(Z, Y): X: {X}, Y: {Y}, Z: {Z}')  # => abc
+      print(f'Outside unify(Z, Y): X: {X}, Y: {Y}, Z: {Z}')  # => abc
+    print(f'Outside unify(X, Y): X: {X}, Y: {Y}, Z: {Z}')  # => abc
 
-    print(f'\nAgain')
-    print(f'6. X: {X}, Y: {Y}, Z: {Z}')  # => _2
-    for _ in unify(Y, X):
-      print(f'7. X: {X}, Y: {Y}, Z: {Z}')  # => abc
-      for _ in unify(Y, Z):
-        print(f'8. X: {X}, Y: {Y}, Z: {Z}')  # => abc
-
-
-"""
-Expected output:
-
-a. X: 1, Ys: 2
-Done 1
-
-c. X: 1, Ys: _5
-d. X: 1, Ys: 1
-e. X: 1, Ys: _5
-f. _6, _7
-
-1. X: abc, Y: _10, Z: _11
-2. X: abc, Y: abc, Z: _11
-3. X: abc, Y: abc, Z: abc
-4. X: abc, Y: abc, Z: _11
-5. X: abc, Y: _10, Z: _11
-
-Again
-6. X: abc, Y: _10, Z: _11
-7. X: abc, Y: abc, Z: _11
-8. X: abc, Y: abc, Z: abc
-
-9. Y1: [abc, _12], Y2: [_17, _17]
-10. Y1: [abc, abc], Y2: [abc, abc]
-11. Y1: [abc, _12], Y2: [_17, _17]
-
-End test
-"""
