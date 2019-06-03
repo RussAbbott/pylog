@@ -84,35 +84,35 @@ class LinkedList(SuperSequence):
                        ]):
         yield
 
-  def has_member(self, E: Term):
-    """ Is E in this list? """
-    yield from LinkedList.member(E, self)
+  # def has_member(self, E: Term):
+  #   """ Is E in this list? """
+  #   yield from LinkedList.member(E, self)
 
   def head(self) -> Term:
     return self.args[0]
 
-  def is_empty(self) -> bool:
-    # An empty list has no args, i.e., no head or tail.
-    return not self.args
-
-  @staticmethod
-  def member(E: Term, A_List: Union[LinkedList, Var]):
-    """
-    Is E in A_List?
-    Since A_List may be open-ended, A_List.tail() may be a Var, and we won't be able to dispatch on it.
-    """
-    A_List = A_List.trail_end( )
-    if isinstance(A_List, Var):
-      for _ in unify(A_List, LinkedList((Var( ), Var( )))):
-        yield from LinkedList.member(E, A_List)
-    else:
-      # To keep PyCharm happy.
-      assert isinstance(A_List, LinkedList)
-      if not A_List.is_empty():
-        for _ in forany([lambda: unify(E, A_List.head( )),
-                         lambda: LinkedList.member(E, A_List.tail( ))]):
-          yield
-
+  # def is_empty(self) -> bool:
+  #   # An empty list has no args, i.e., no head or tail.
+  #   return not self.args
+  #
+  # @staticmethod
+  # def member(E: Term, A_List: Union[LinkedList, Var]):
+  #   """
+  #   Is E in A_List?
+  #   Since A_List may be open-ended, A_List.tail() may be a Var, and we won't be able to dispatch on it.
+  #   """
+  #   A_List = A_List.trail_end( )
+  #   if isinstance(A_List, Var):
+  #     for _ in unify(A_List, LinkedList((Var( ), Var( )))):
+  #       yield from LinkedList.member(E, A_List)
+  #   else:
+  #     # To keep PyCharm happy.
+  #     assert isinstance(A_List, LinkedList)
+  #     if not A_List.is_empty():
+  #       for _ in forany([lambda: unify(E, A_List.head( )),
+  #                        lambda: LinkedList.member(E, A_List.tail( ))]):
+  #         yield
+  #
   def prefix_and_tail(self) -> Tuple[List[Term], Any]:
     """ Get the initial list of objects and either the tail if it is a Var or [] if it is not a Var. """
     if self.is_empty():

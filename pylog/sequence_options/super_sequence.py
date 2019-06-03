@@ -1,8 +1,8 @@
 from __future__ import annotations
-from typing import List, Union
+from typing import List, Sized, Union
 
 from control_structures import forany, forall
-from logic_variables import eot, Structure, unify, Term
+from logic_variables import eot, Structure, unify, Term, Var
 
 
 class SuperSequence(Structure):
@@ -17,20 +17,18 @@ class SuperSequence(Structure):
   def __len__(self):
     pass
 
-  # def has_adjacent_members(self, E1, E2):
-  #   pass
-  #
   def has_contiguous_sublist(self, As):
     pass
 
   def has_member(self, E: Term):
     pass
 
-  # def has_members(self, Es: List[Term]):
-  #   pass
-  #
   def head(self) -> Term:
     pass
+
+  def is_empty(self) -> bool:
+    # An empty list has no args, i.e., no head or tail.
+    return not self.args
 
   def tail(self) -> SuperSequence:
     pass
@@ -68,9 +66,31 @@ def is_a_subsequence_of(As: List, Zs: SuperSequence):
 
 
 @eot
-def member(E: Term, A_List: SuperSequence):
-  """ Is E in A_List? """
-  yield from A_List.has_member(E)
+def member(E: Term, A_List: Union[SuperSequence, Var]):
+  """
+  Is E in A_List?
+  """
+  # If A_List is empty, fail.
+  if A_List.is_empty():
+    return
+
+  # The following is an implicit 'or'. Either unify E with A_List.head() or call member on the A_List.tail().
+
+  # The first case is easy.
+  for _ in unify(E, A_List.head( )):
+    yield
+
+  # Call member on the tail. Since A_List may be open-ended, A_List.tail() may be a Var.
+  # In that case, must instantiate it to LinkedList( (Var, Var) ).
+  A_List_Tail = A_List.tail()
+  # A_List_New_Tail is A_List_Tail in most cases.
+  # But if isinstance(A_List_Tail, Var), make A_List_New_Tail = LinkedList( (Var( ), Var( )) ).
+  # In either case, unify A_List_Tail with A_List_New_Tail and call member(E, A_List_New_Tail).
+  # An issue is that we can't import LinkedList since that would create an import cycle. Instead
+  # we use type(A_List), which will be LinkedList if A_List_Tail is a Var.
+  A_List_New_Tail = type(A_List)((Var( ), Var( ))) if isinstance(A_List_Tail, Var) else A_List_Tail
+  for _ in unify(A_List_New_Tail, A_List_Tail):
+    yield from member(E, A_List_New_Tail)
 
 
 @eot
