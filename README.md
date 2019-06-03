@@ -1,18 +1,24 @@
 ## Abstract (outline from [The Programming Journal]())
 
-* _Context: What is the broad context of the work? What is the importance of the general research area?_ <br/><br/>
-Pylog examines the integration of two distinct programming language paradigms: the modern general purpose programming paradigm, which often includes features of procedural programming, OO programming, Functional programming, and meta- programming, represented by Python and logic programming, represented by Prolog. Logic programming includeds two significant features that are missing from modern general purpose languages: _logic variables (and unification)_ and built-in _depth-first search (often called backtracking)_. Pylog illustrates how these two features can be implemented in and integated into Python. 
+<dl><dt>Context: What is the broad context of the work? What is the importance of the general research area_</dt>
+<dd>Pylog examines the integration of two distinct programming language paradigms: the modern general purpose programming paradigm, which often includes features of procedural programming, OO programming, Functional programming, and meta- programming, represented by Python and logic programming, represented by Prolog. Logic programming includeds two significant features that are missing from modern general purpose languages: _logic variables (and unification)_ and built-in _depth-first search (often called backtracking)_. Pylog illustrates how these two features can be implemented in and integated into Python. </dd>
 
-* _Inquiry: What problem or question does the paper address? How has this problem or question been addressed by others (if at all)?_ <br/><br/> The primary issue addressed in the paper-and in Pylog itself-is how logic variables and backtracking can be integrated cleanly into a Python framework. 
+<dt>Inquiry: What problem or question does the paper address? How has this problem or question been addressed by others (if at all)?</dt>
+<dd>The primary issue addressed in the paper-and in Pylog itself-is how logic variables and backtracking can be integrated cleanly into a Python framework.</dd>
 
-* _Approach: What was done that unveiled new knowledge?_ <br/><br/>Pylog, exhibits the integration mentined above. The paper discusses-and Pylon demonstrates-how logic variables and backtracking can be interwoven with standard Python data structures and control structures.
+<dt>Approach: What was done that unveiled new knowledge?</dt>
+<dd>Pylog, exhibits the integration mentined above. The paper discusses-and Pylon demonstrates-how logic variables and backtracking can be interwoven with standard Python data structures and control structures.</dd>
 
-* _Knowledge: What new facts were uncovered? If the research was not results oriented, what new capabilities are enabled by the work?_ <br/><br/> Pylon is available as a logic programming library for use in Python software.
+<dt>Knowledge: What new facts were uncovered? If the research was not results oriented, what new capabilities are enabled by the work?</dt>
+<dd>Pylon is available as a logic programming library for use in Python software.</dd>
 
-* _Grounding: What argument, feasibility proof, artifacts, or results and evaluation support this work?_ <br/><br/>Pylog demonstrates by its existence and functionality that the goal of integrating logic variables backtracking and can be achieved.
+<dt>Grounding: What argument, feasibility proof, artifacts, or results and evaluation support this work?</dt>
+<dd>Pylog demonstrates by its existence and functionality that the goal of integrating logic variables backtracking and can be achieved.</dd>
 
-* _Importance: Why does this work matter?_ <br/><br/>
-
+<dt>Importance: Why does this work matter?</dd>
+TBD
+<dt>
+</dl>
 ## Introduction
 
 Prolog, a programming language derived from logic, was developed in the 1970s. It became very popular during the 1980s as an AI language, especially in Japan as part of their [5th generation project](https://www.nytimes.com/1992/06/05/business/fifth-generation-became-japan-s-lost-generation.html). 
