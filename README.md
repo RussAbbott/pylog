@@ -129,6 +129,8 @@ However, since Prolog uses identifiers that begin with an upper case letter for 
 
 * Meyers, Chris (2015) [Prolog in Python](http://www.openbookproject.net/py4fun/countClick.php?dest=prolog/intro.html)
 
-* A bunch of links in this [Stack Overflow question](https://stackoverflow.com/questions/49101342/implementing-the-prolog-unification-algorithm-in-python-backtracking)
+* A bunch of links in these Stack Overflow questions.
+ * [Implementing the Prolog Unification algorithm in Python? Backtracking](https://stackoverflow.com/questions/49101342/implementing-the-prolog-unification-algorithm-in-python-backtracking)
+ * [Relational/Logic Programming in Python?](https://stackoverflow.com/questions/1917607/relational-logic-programming-in-python)
 
 
