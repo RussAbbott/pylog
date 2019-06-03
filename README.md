@@ -15,10 +15,11 @@
 <dt>Grounding: What argument, feasibility proof, artifacts, or results and evaluation support this work?</dt>
 <dd>Pylog demonstrates by its existence and functionality that the goal of integrating logic variables backtracking and can be achieved.</dd>
 
-<dt>Importance: Why does this work matter?</dd>
-TBD
+<dt>Importance: Why does this work matter?</dt>
+<dd>TBD
 <dt>
 </dl>
+
 ## Introduction
 
 Prolog, a programming language derived from logic, was developed in the 1970s. It became very popular during the 1980s as an AI language, especially in Japan as part of their [5th generation project](https://www.nytimes.com/1992/06/05/business/fifth-generation-became-japan-s-lost-generation.html). 
