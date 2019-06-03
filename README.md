@@ -1,15 +1,15 @@
 ## Abstract (outline from [The Programming Journal]())
 
 * _Context: What is the broad context of the work? What is the importance of the general research area?_ <br/><br/>
-Pylog examines the integration of two distinct programming language paradigms: the modern general purpose programming paradigm, which often includes features of procedural programming, OO programming, Functional programming, and meta- programming, represented by Python and logic programming, represented by Prolog. Logic programming includeds two significant features that are missing from modern general purpose languages: logic variables (and unification) and built-in depth-first search (often called backtracking). Pylog illustrates how thee two features can be implemented in and integated into Python. 
+Pylog examines the integration of two distinct programming language paradigms: the modern general purpose programming paradigm, which often includes features of procedural programming, OO programming, Functional programming, and meta- programming, represented by Python and logic programming, represented by Prolog. Logic programming includeds two significant features that are missing from modern general purpose languages: _logic variables (and unification)_ and built-in _depth-first search (often called backtracking)_. Pylog illustrates how these two features can be implemented in and integated into Python. 
 
-* _Inquiry: What problem or question does the paper address? How has this problem or question been addressed by others (if at all)?_ <br/><br/>
+* _Inquiry: What problem or question does the paper address? How has this problem or question been addressed by others (if at all)?_ <br/><br/> The primary issue addressed in the paper-and in Pylog itself-is how logic variables and backtracking can be integrated cleanly into a Python framework. 
 
-* _Approach: What was done that unveiled new knowledge?_ <br/><br/>
+* _Approach: What was done that unveiled new knowledge?_ <br/><br/>Pylog, exhibits the integration mentined above. The paper discusses-and Pylon demonstrates-how logic variables and backtracking can be interwoven with standard Python data structures and control structures.
 
-* _Knowledge: What new facts were uncovered? If the research was not results oriented, what new capabilities are enabled by the work?_ <br/><br/>
+* _Knowledge: What new facts were uncovered? If the research was not results oriented, what new capabilities are enabled by the work?_ <br/><br/> Pylon is available as a logic programming library for use in Python software.
 
-* _Grounding: What argument, feasibility proof, artifacts, or results and evaluation support this work?_ <br/><br/>
+* _Grounding: What argument, feasibility proof, artifacts, or results and evaluation support this work?_ <br/><br/>Pylog demonstrates by its existence and functionality that the goal of integrating logic variables backtracking and can be achieved.
 
 * _Importance: Why does this work matter?_ <br/><br/>
 
