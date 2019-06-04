@@ -170,7 +170,7 @@ However, since Prolog uses identifiers that begin with an upper case letter for 
 
 * Santini, Claudio (2018) [Pampy: The Pattern Matching for Python you always dreamed of](https://github.com/santinic/pampy)  
 
-* Thompson, Jeff Thompson (2017) [Yield Prolog](http://yieldprolog.sourceforge.net/)
+* Thompson, Jeff (2017) [Yield Prolog](http://yieldprolog.sourceforge.net/)
 
 * A bunch of links in these Stack Overflow questions.
   * [Implementing the Prolog Unification algorithm in Python? Backtracking](https://stackoverflow.com/questions/49101342/implementing-the-prolog-unification-algorithm-in-python-backtracking)
