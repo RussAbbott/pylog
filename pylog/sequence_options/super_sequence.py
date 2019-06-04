@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import List, Sized, Union
+from typing import List, Union
 
 from control_structures import forany, forall
 from logic_variables import eot, Structure, unify, Term, Var

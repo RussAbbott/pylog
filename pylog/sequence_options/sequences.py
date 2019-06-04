@@ -1,8 +1,7 @@
 from __future__ import annotations
 from typing import List, Union
 
-from control_structures import forany
-from logic_variables import eot, Ground, n_Vars, Term, unify, unify_pairs, unify_sequences, Var
+from logic_variables import eot, Ground, n_Vars, unify, unify_pairs, unify_sequences, Var
 from sequence_options.super_sequence import SuperSequence
 
 
