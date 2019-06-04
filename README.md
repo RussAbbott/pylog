@@ -166,6 +166,10 @@ However, since Prolog uses identifiers that begin with an upper case letter for 
 
 * Orsini, Francesc, Paolo Frasconi, Luc De Raedt (2017) [kProbLog: an algebraic Prolog for machine learning](https://link.springer.com/article/10.1007/s10994-017-5668-y) (This seems more like a theoreticl discussion of  kProbLog, which was implementated in Python, rather than an integraton of Python and Prolog. It's a worthwhile distinction to make. One can implement Prolog in any general purpose language. Pylog is notable because it integrates Python and Prolog.)
 
+* Python Foundation [re: Regular expression operations](https://docs.python.org/3/library/re.html)
+
+* Santini, Claudio (2018) [Pampy: The Pattern Matching for Python you always dreamed of](https://github.com/santinic/pampy)  
+
 * Thompson, Jeff Thompson (2017) [Yield Prolog](http://yieldprolog.sourceforge.net/)
 
 * A bunch of links in these Stack Overflow questions.
