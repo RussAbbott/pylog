@@ -364,8 +364,10 @@ if __name__ == '__main__':
     for _ in unify(A, C):
       print(f'2b. After unify(A, C). A: {A}; B: {B}; C: {C}; D: {D}')  # With while: A: A; B: _12. With if: A: A; B: A.
       for _ in unify(A, D):
-        print(f'2c. After unify(A, D). A: {A}; B: {B}; C: {C}; D: {D}')  # With while: A: A; B: _12. With if: A: A; B: A.
-  print(f'3. Outside the scope of all unifies. A: {A}; B: {B}; C: {C}; D: {D}')  # With while: A: A; B: _12. With if: A: A; B: A.
+        print(f'2c. After unify(A, D). A: {A}; B: {B}; C: {C}; D: {D}')  # =>
+                                                                      # With while: A: A; B: _12. With if: A: A; B: A.
+  print(f'3. Outside the scope of all unifies. A: {A}; B: {B}; C: {C}; D: {D}')  # =>
+                                                                      # With while: A: A; B: _12. With if: A: A; B: A.
 
   print('End first test\n')
 
@@ -393,7 +395,7 @@ if __name__ == '__main__':
 
     for _ in unify(D, B):
       print('3. After unify(D, B): A: {A}, B: {B}, C: {C}, D: {D}'  # => A.eot: xyz, B.eot: xyz, C.eot: xyz, D.eot: xyz
-      )
+            )
 
     print(f'\n4. No longer unified with D. A: {A}, B: {B}, C: {C}')  # => A: xyz, B: xyz, C: xyz, D: xyz
   print(f'5. No longer unified with each other. A: {A}, B: {B}, C: {C}')  # => A: xyz, B: xyz, C: xyz, D: xyz
@@ -425,4 +427,3 @@ if __name__ == '__main__':
         print(f'After unify(Z, Y): X: {X}, Y: {Y}, Z: {Z}')  # => abc
       print(f'Outside unify(Z, Y): X: {X}, Y: {Y}, Z: {Z}')  # => abc
     print(f'Outside unify(X, Y): X: {X}, Y: {Y}, Z: {Z}')  # => abc
-
