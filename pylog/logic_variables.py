@@ -149,10 +149,14 @@ class Structure(Term):
 
   def __eq__(self, other: Term) -> bool:
     other_eot = other.trail_end()
-    return (isinstance(other_eot, Structure) and
+    return (other_eot is self or
+            isinstance(other_eot, Structure) and
             self.functor == other_eot.functor and
             len(self.args) == len(other_eot.args) and
             all([selfArg == other_eotArg for (selfArg, other_eotArg) in zip(self.args, other_eot.args)]))
+
+  def __getitem__(self, key: Union[int, slice]):
+    return self.args[key]
 
   # noinspection PySimplifyBooleanCheck
   def __str__(self):
@@ -427,3 +431,56 @@ if __name__ == '__main__':
         print(f'After unify(Z, Y): X: {X}, Y: {Y}, Z: {Z}')  # => abc
       print(f'Outside unify(Z, Y): X: {X}, Y: {Y}, Z: {Z}')  # => abc
     print(f'Outside unify(X, Y): X: {X}, Y: {Y}, Z: {Z}')  # => abc
+  print('\nEnd third test\n')
+
+  V1 = Var()
+  T1 = Structure( ('t', 1, V1, V1))
+  V2 = Var()
+  V3 = Var()
+  T2 = Structure( ('t', V2, V2, V3))
+
+  print(f'V1: {V1}, V2: {V2}, V3: {V3}, ')
+  print(f'T1: t(1, V1, V1), T2: t(V2, V2, V3)')
+  for _ in unify(T1, T2):
+    print('After unify(T1, T2):')
+    print(f'V1: {V1}, V2: {V2}, V3: {V3}, ')
+    print(f'T1: {T1}, T2: {T2}')
+    print('End of fourth test.')
+
+  """
+  Expected output
+  
+  T1: t(1, 1, 1), T2: t(1, 1, 1)
+  V1: 1, V2: 1, V3: 1, 
+  End of fourth test.
+
+  """
+
+  V4 = Var()
+  T4 = Structure( ('t', 1, V4))
+  print(f'\nV4: {V4}')
+  print(f'T4: t(1, V4)')
+  for _ in unify(T4, V4):
+    print('After unify(T4, V4):')
+    print(f'V4[0]: {V4[0]}')
+    print(f'V4[1] is T4: {V4[1] is T4}')
+    print(f'V4[1] == T4: {V4[1] == T4}, because: V4[1].trail_end() is T4: {V4[1].trail_end() is T4}')
+    print('An attempt to print T4 or V4 will produce "RecursionError: maximum recursion depth exceeded"')
+    print('\nEnd of fifth test.')
+
+
+  """
+  Expected output
+
+  V4: _23
+  T4: t(1, V4)
+  After unify(T4, V4):
+  V4[0]: 1
+  V4[1] is T4: False
+  V4[1] == T4: True, because: V4[1].trail_end() is T4: True
+  An attempt to print T4 or V4 will produce "RecursionError: maximum recursion depth exceeded"
+  
+  End of fifth test.
+
+  """
+
