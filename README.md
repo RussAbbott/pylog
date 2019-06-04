@@ -168,6 +168,10 @@ However, since Prolog uses identifiers that begin with an upper case letter for 
 
 * Python Foundation [re: Regular expression operations](https://docs.python.org/3/library/re.html)
 
+* Rocklin, Matthew (2015) [Unification](https://github.com/mrocklin/unification)
+
+* Rocklin, Matthew (2019) [kanren: Logic Programming in Python](https://github.com/logpy/logpy/)
+
 * Santini, Claudio (2018) [Pampy: The Pattern Matching for Python you always dreamed of](https://github.com/santinic/pampy)  
 
 * Thompson, Jeff (2017) [Yield Prolog](http://yieldprolog.sourceforge.net/)
