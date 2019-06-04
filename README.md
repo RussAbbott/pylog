@@ -3,7 +3,7 @@
 <dl><dt>Context: What is the broad context of the work? What is the importance of the general research area_</dt>
 <dd>Pylog inhabits three contexts.<br/><br/>
  
-**a)** Pylog examines the integration of two distinct programming language paradigms: (i) the modern general purpose programming paradigm, which often includes features of procedural programming, OO programming, Functional programming, and meta- programming, here represented by Python, and (ii) logic programming, represented by Prolog. 
+**a)** Pylog examines the integration of two distinct programming language paradigms: (i) the modern general purpose programming paradigm, which often includes features of procedural programming, object-oriented programming, functional programming, and meta-programming, here represented by Python, and (ii) logic programming, represented by Prolog. 
 
 Logic programming includes two significant features that are missing from modern general purpose languages: _(i) logic variables (and unification)_ and built-in _(ii) depth-first search (often called backtracking)_. Pylog illustrates how these two features can be implemented in and integated into Python. 
 
