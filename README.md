@@ -117,7 +117,7 @@ pylog                            -- Root directory
     examples                     -- A directory of example pylog programs
         n_queens.py              -- The traditional n-queens problem. Uses minimal pylog features but illustrates the pylog style.
         puzzles.py               -- A file containing information common to the scholarship_problem and the zebra_problem
-        scholarship_problem.py   -- A traditional Prolog logic puzzle--less complex than the zebra problem
+        scholarship_problem.py   -- A traditional Prolog logic puzzle—less complex than the zebra problem
         trains.py                -- A revised version of the train example from Piumarta
         zebra_problem.py         -- The well-known logic puzzle often solved with Prolog
     sequence_options             -- A directory of options for lists and sequences
