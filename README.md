@@ -1,11 +1,15 @@
 ## Abstract (outline from [The Programming Journal]())
 
 <dl><dt>Context: What is the broad context of the work? What is the importance of the general research area_</dt>
-<dd>Pylog examines the integration of two distinct programming language paradigms: (a) the modern general purpose programming paradigm, which often includes features of procedural programming, OO programming, Functional programming, and meta- programming, here represented by Python and (b) logic programming, represented by Prolog. 
+<dd>Pylog inhabits three contexts.
+ 
+1. Pylog examines the integration of two distinct programming language paradigms: (a) the modern general purpose programming paradigm, which often includes features of procedural programming, OO programming, Functional programming, and meta- programming, here represented by Python, and (b) logic programming, represented by Prolog. 
 
 Logic programming includes two significant features that are missing from modern general purpose languages: _(i) logic variables (and unification)_ and built-in _(ii) depth-first search (often called backtracking)_. Pylog illustrates how these two features can be implemented in and integated into Python. 
 
-Pylog also demonstrates the breadth and broad applicability of Python. Although Python is now the widely used programming language for teaching introductory programming, it has developed into a very widely used programming language. One of the reasons for its popularity is the range of capabilities it offers-most of which are not used in elementary programming classes or for the sort of scripting applications with which it is often associated. Pylog makes effective use of many of those capabilities.  
+2. Pylog also demonstrates the breadth and broad applicability of Python. Although Python is now the widely used programming language for teaching introductory programming, it has developed into a very widely used programming language. One of the reasons for its popularity is the range of capabilities it offers-most of which are not used in elementary programming classes or for the sort of scripting applications with which it is often associated. Pylog makes effective use of many of those capabilities.  
+
+3. Pylog examplifies programming at its best. Pylog is first-of-all a programming exercise: How can the primary features of logic programming be integrated with Python? Seconly, Pylog uses features of Python in ways that were both intended and innovative. The overall result is software that is worth studying.
 </dd>
 
 <dt>Inquiry: What problem or question does the paper address? How has this problem or question been addressed by others (if at all)?</dt>
