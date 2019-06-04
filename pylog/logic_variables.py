@@ -468,7 +468,6 @@ if __name__ == '__main__':
     print('An attempt to print T4 or V4 will produce "RecursionError: maximum recursion depth exceeded"')
     print('\nEnd of fifth test.')
 
-
   """
   Expected output
 
@@ -483,4 +482,3 @@ if __name__ == '__main__':
   End of fifth test.
 
   """
-
