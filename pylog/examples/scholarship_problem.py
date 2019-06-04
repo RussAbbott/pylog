@@ -3,7 +3,8 @@ from logic_variables import Var
 
 from sequence_options.super_sequence import is_contiguous_in, is_a_subsequence_of, member, members
 
-from examples.puzzles import Puzzle_Item, run_puzzle, SimpleCounter
+from examples.puzzles import run_puzzle, SimpleCounter
+from logic_variables import StructureItem
 
 """
 A puzzle from GeekOverdose: https://geekoverdose.wordpress.com/2015/10/31/solving-logic-puzzles-in-prolog-puzzle-1-of-3/
@@ -44,15 +45,14 @@ No more.
 """
 
 
-class Student(Puzzle_Item):
+class Student(StructureItem):
 
-  def __init__(self, name=None, major=None, scholarship=None):
-    functor = type(self).__name__.lower( )
+  def __init__(self, name=None, major=None, scholarship=None, first_arg_as_str_functor=True):
     name = self.make_property(name)
     major = self.make_property(major)
     scholarship = self.make_property(scholarship)
-    # Create a Structure for this Student.
-    super( ).__init__((functor, name, major, scholarship))
+    # Create a StructureItem for this Student.
+    super( ).__init__((name, major, scholarship), first_arg_as_str_functor)
 
 
 def scholarship_problem(Students):

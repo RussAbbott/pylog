@@ -1,7 +1,8 @@
 from control_structures import forall, print_sf
 from logic_variables import n_Vars, unify
 
-from examples.puzzles import Puzzle_Item, run_puzzle
+from examples.puzzles import run_puzzle
+from logic_variables import StructureItem
 from sequence_options.super_sequence import is_contiguous_in, member, members, next_to_in
 
 """
@@ -50,15 +51,16 @@ Solution:
 """
 
 
-class House(Puzzle_Item):
-  def __init__(self, nationality=None, smoke=None, pet=None, drink=None, color=None):
+class House(StructureItem):
+  def __init__(self, nationality=None, smoke=None, pet=None, drink=None, color=None, first_arg_as_str_functor=True):
     functor = type(self).__name__.lower()
     nationality = self.make_property(nationality)
     smoke = self.make_property(smoke)
     pet = self.make_property(pet)
     drink = self.make_property(drink)
     color = self.make_property(color)
-    super( ).__init__( (functor, nationality, smoke, pet, drink, color) )
+    # Create a StructureItem for this House.
+    super( ).__init__( (functor, nationality, smoke, pet, drink, color), first_arg_as_str_functor)
 
 
 def zebra_problem(Houses):
