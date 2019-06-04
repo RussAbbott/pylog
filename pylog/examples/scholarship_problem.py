@@ -52,7 +52,7 @@ class Student(StructureItem):
     major = self.make_property(major)
     scholarship = self.make_property(scholarship)
     # Create a StructureItem for this Student.
-    super( ).__init__((name, major, scholarship), first_arg_as_str_functor)
+    super( ).__init__( (name, major, scholarship), first_arg_as_str_functor)
 
 
 def scholarship_problem(Students):

@@ -59,7 +59,7 @@ class House(StructureItem):
     drink = self.make_property(drink)
     color = self.make_property(color)
     # Create a StructureItem for this House.
-    super( ).__init__( (nationality, smoke, pet, drink, color), first_arg_as_str_functor=False)
+    super( ).__init__( (nationality, smoke, pet, drink, color), first_arg_as_str_functor)
 
 
 def zebra_problem(Houses):
