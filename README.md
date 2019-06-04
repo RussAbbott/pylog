@@ -164,7 +164,7 @@ However, since Prolog uses identifiers that begin with an upper case letter for 
 
 * Meyers, Chris (2015) [Prolog in Python](http://www.openbookproject.net/py4fun/countClick.php?dest=prolog/intro.html)
 
-* Orsini, Francesc, Paolo Frasconi, Luc De Raedt (2017) [kProbLog: an algebraic Prolog for machine learning](https://link.springer.com/article/10.1007/s10994-017-5668-y) (This seems more like a theoreticl discussion of  kProbLog, which was implementated in Python, rather than an integraton of Python and Prolog. It's a worthwhile distinction to make. One can implement Prolog in any general purpose language. Pylog is notable because it integrates Python and Prolog.)
+* Orsini, Francesc, Paolo Frasconi, Luc De Raedt (2017) [kProbLog: an algebraic Prolog for machine learning](https://link.springer.com/article/10.1007/s10994-017-5668-y) (This seems more like a theoretical discussion of kProbLog, which was implementated in Python, rather than an integraton of Python and Prolog. It's a worthwhile distinction to make. One can implement Prolog in any general purpose language. Pylog is notable because it integrates Python and Prolog.)
 
 * Python Foundation [re: Regular expression operations](https://docs.python.org/3/library/re.html)
 
