@@ -5,7 +5,7 @@
  
 1. Pylog examines the integration of two distinct programming language paradigms: (a) the modern general purpose programming paradigm, which often includes features of procedural programming, OO programming, Functional programming, and meta- programming, here represented by Python, and (b) logic programming, represented by Prolog. 
 
-Logic programming includes two significant features that are missing from modern general purpose languages: _(i) logic variables (and unification)_ and built-in _(ii) depth-first search (often called backtracking)_. Pylog illustrates how these two features can be implemented in and integated into Python. 
+<blockquote>Logic programming includes two significant features that are missing from modern general purpose languages: _(i) logic variables (and unification)_ and built-in _(ii) depth-first search (often called backtracking)_. Pylog illustrates how these two features can be implemented in and integated into Python. </blockquote>
 
 2. Pylog also demonstrates the breadth and broad applicability of Python. Although Python is now the widely used programming language for teaching introductory programming, it has developed into a very widely used programming language. One of the reasons for its popularity is the range of capabilities it offers-most of which are not used in elementary programming classes or for the sort of scripting applications with which it is often associated. Pylog makes effective use of many of those capabilities.  
 
