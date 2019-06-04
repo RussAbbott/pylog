@@ -482,3 +482,7 @@ if __name__ == '__main__':
   End of fifth test.
 
   """
+
+  T5 = Structure( ('t', *range(10)) )
+  print(f'T5 = Structure( ("t", *range(10)) ): {T5}')
+  print(f'tuple(x.get_ground_value() for x in T5[3:8]): { tuple(x.get_ground_value() for x in T5[3:8]) }')
