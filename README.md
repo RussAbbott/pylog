@@ -10,7 +10,7 @@ Logic programming includes two significant features that are missing from modern
 
 **b)** Pylog also demonstrates the breadth and broad applicability of Python. Although Python is now the widely used programming language for teaching introductory programming, it has developed into a very widely used programming language. One of the reasons for its popularity is the range of capabilities it offers-most of which are not used in elementary programming classes or for the sort of scripting applications with which it is often associated. Pylog makes effective use of many of those capabilities.  
 
-**c)** Pylog examplifies programming at its best. Pylog is first-of-all a programming exercise: How can the primary features of logic programming be integrated with Python? Seconly, Pylog uses features of Python in ways that were both intended and innovative. The overall result is software that is worth studying.
+**c)** Pylog examplifies programming at its best. Pylog is first-of-all a programming exercise: How can the primary features of logic programming be integrated with Python? Seconly, Pylog uses features of Python in ways that aere both intended and innovative. The overall result is software worth studying.
 </dd>
 
 <dt>Inquiry: What problem or question does the paper address? How has this problem or question been addressed by others (if at all)?</dt>
