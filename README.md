@@ -11,7 +11,7 @@
 </dd>
 
 <dt>Inquiry: What problem or question does the paper address? How has this problem or question been addressed by others (if at all)?</dt>
-<dd>The primary issue addressed in the paper-and in Pylog itself-is how logic variables and backtracking can be integrated cleanly into a Python framework. A fair amount of work has been done in this area: see <i>Related Work</i>. Most of it has been preliminary in one way or another. Pylog is the first complete system (as far as we know) to achieve the goal of integration.</dd>
+<dd>The primary issue addressed in the paper-and in Pylog itself-is how logic variables and backtracking can be integrated cleanly into a Python framework. A fair amount of work has been done in this area: see <i>Related Work</i>. Most of it has been incomoplete in one way or another. Pylog is the first complete system (as far as we know) to achieve the goal of integration.</dd>
 
 <dt>Approach: What was done that unveiled new knowledge?</dt>
 <dd>Pylog, exhibits the integration mentined above. The paper discusses-and Pylon demonstrates-how logic variables and backtracking can be interwoven with standard Python data structures and control structures.</dd>
