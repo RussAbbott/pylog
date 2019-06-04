@@ -1,10 +1,9 @@
 from control_structures import would_succeed, forall, forany, print_sf
-from logic_variables import Var
+from logic_variables import StructureItem, Var
 
 from sequence_options.super_sequence import is_contiguous_in, is_a_subsequence_of, member, members
 
 from examples.puzzles import run_puzzle, SimpleCounter
-from logic_variables import StructureItem
 
 """
 A puzzle from GeekOverdose: https://geekoverdose.wordpress.com/2015/10/31/solving-logic-puzzles-in-prolog-puzzle-1-of-3/

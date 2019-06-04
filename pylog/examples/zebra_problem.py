@@ -1,8 +1,7 @@
 from control_structures import forall, print_sf
-from logic_variables import n_Vars, unify
+from logic_variables import n_Vars, StructureItem, unify
 
 from examples.puzzles import run_puzzle
-from logic_variables import StructureItem
 from sequence_options.super_sequence import is_contiguous_in, member, members, next_to_in
 
 """
