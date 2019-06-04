@@ -1,4 +1,4 @@
-## Abstract (outline from [The Programming Journal]())
+## Abstract (outline from [The Programming Journal](https://programming-journal.org/cfp/))
 
 <dl><dt>Context: What is the broad context of the work? What is the importance of the general research area_</dt>
 <dd>Pylog inhabits three programming contexts.<br/><br/>
@@ -7,7 +7,7 @@
 
 **b)** Pylog demonstrates the breadth and broad applicability of Python. Although Python is now the most widely used programming language for teaching introductory programming, it has also become very widely used for sophisticated programming tasks. One of the reasons for its popularity is the range of capabilities it offers—most of which are not used in elementary programming classes or for the sort of scripting applications with which Python is often associated. Pylog makes effective use of many of those capabilities.  
 
-**c)** Pylog examplifies programming at its best. Pylog is first-of-all a programming exercise: How can the primary features of logic programming be integrated with Python? Seconly, Pylog uses features of Python in ways that aere both intended and innovative. The overall result is software worth studying.
+**c)** Pylog examplifies programming at its best. Pylog is first-of-all a programming exercise: How can the primary features of logic programming be integrated with Python? Secondly, Pylog uses features of Python in ways that aere both intended and innovative. The overall result is software worth studying. From the perspective of [The Programming Journal](https://programming-journal.org/cfp/), it would fit into its Art-of-Programming category.
 </dd>
 
 <dt>Inquiry: What problem or question does the paper address? How has this problem or question been addressed by others (if at all)?</dt>
