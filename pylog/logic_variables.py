@@ -142,7 +142,7 @@ class Structure(Term):
   self.functor is the functor
   self.args is a tuple of args
   """
-  def __init__(self, term: Tuple = ( None, () )):
+  def __init__(self, term: Tuple = ( None, () ) ):
     self.functor = term[0]
     self.args = tuple(map(self.ensure_is_logic_variable, term[1:]))
     super().__init__()
@@ -172,6 +172,42 @@ class Structure(Term):
   def values_string(values: Iterable):
     result = ', '.join(map(str, values))
     return result
+
+
+class StructureItem(Structure):
+  """
+  A utility class for building Structure-based items.
+  """
+
+  def __init__(self, args, first_arg_as_str_functor=False):
+    self.first_arg_as_str_functor = first_arg_as_str_functor
+    functor = type(self).__name__.lower( )
+    super().__init__( (functor, *args) )
+
+  def __str__(self):
+    all_args_uninstantiated = all(isinstance(arg.trail_end(), Var) for arg in self.args)
+    if all_args_uninstantiated:
+      # If all the args are uninstantiated, print a simple underscore.
+      return '_'
+    elif self.first_arg_as_str_functor:
+      # If first_arg_as_str_functor, use the first arg as the functor for printing.
+      args_str = ', '.join(map(str, self.args[1:]))
+      result = f'{self.args[0]}({args_str})'
+      return result
+    else:
+      # Use default Structure __str__( )
+      return super().__str__( )
+
+  @staticmethod
+  def make_property(prop):
+    """
+      Applied to each argument in a term.
+      Applies Ground to those that are not already Terms.
+      If the property is None, create a Var for it.
+    """
+    return Var() if prop is None else \
+                    prop if isinstance(prop, Term) else \
+                    Ground(prop)
 
 
 class Var(Term):
