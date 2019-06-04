@@ -135,13 +135,12 @@ logic_variables: none
 control_structures: logic_variables
 
 super_sequence: control_structures, logic_variables
-linked_list and sequences: control_structures, logic_variables, super_sequence
+linked_list and sequences: logic_variables, super_sequence
 
 n_queens: logic_variables, sequences
-trains: control_structures, logic_variables, 
-puzzle: logic_variables, super_sequence
-zebra_problem: control_structures, logic_variables, puzzles
-scholarship_problem: control_structures, logic_variables, puzzles, super_sequence
+trains: control_structures, logic_variables, sequences
+puzzle: super_sequence
+scholarship_problem and zebra_problem: control_structures, logic_variables, puzzles, super_sequence
 
 ```
 ## Naming conventions
