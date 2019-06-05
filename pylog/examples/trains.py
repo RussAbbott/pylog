@@ -28,9 +28,9 @@ def best_route(Start: PyValue, Route: Var, End: PyValue):
     legs = (Start, *n_Vars(2*i+1), End)
     # If route(*legs) succeeds, route will instantiate legs to
     #         [Station, (Line, int), Station, (Line, int), ... , Station]
-    # Once legs is instantiated, must take the ground values so that the collection
+    # Once legs is instantiated, must take the py_values so that the collection
     # of routes remains instantiated after the list comprehension terminates.
-    route_options = [ [elt.get_ground_value() for elt in legs] for _ in route(*legs) ]
+    route_options = [ [elt.get_py_value() for elt in legs] for _ in route(*legs) ]
     # Once we find at least one route from Start to End, find the best of them and quit.
     if route_options:
       routes_with_totals = map(sum_distances, route_options)
@@ -56,9 +56,9 @@ def connected(S1: Union[PyValue, Var], Line_Dist: Union[Var, PyTuple], S2: Union
                      lambda: has_station(Line, S2)]):
       # Test again since S1 or S2 may have started as Var's
       if S1 != S2:
-        stations = lines[Line.get_ground_value()]
-        pos1 = stations.index(S1.get_ground_value())
-        pos2 = stations.index(S2.get_ground_value())
+        stations = lines[Line.get_py_value()]
+        pos1 = stations.index(S1.get_py_value())
+        pos2 = stations.index(S2.get_py_value())
         yield from unify(Line_Dist, PyTuple( (Line, PyValue(abs(pos1 - pos2))) ) )
   # print(f'XX connected({S1}, {Line_Dist}, {S2})?')
 
@@ -167,4 +167,4 @@ if __name__ == '__main__':
     for _ in best_route(S1, Route, S2):
       print(f'\nA route from {S1} to {S2} that uses fewest lines ', end='')
       print(f'and of those that passes fewest intermediate stations:')
-      print_route( *Route.trail_end().get_ground_value() )
+      print_route( *Route.trail_end().get_py_value() )
