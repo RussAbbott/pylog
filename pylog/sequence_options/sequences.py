@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import List, Union
 
-from logic_variables import eot, Ground, n_Vars, unify, unify_pairs, unify_sequences, Var
+from logic_variables import eot, PyValue, n_Vars, unify, unify_pairs, unify_sequences, Var
 from sequence_options.super_sequence import SuperSequence
 
 
@@ -128,8 +128,8 @@ if __name__ == '__main__':
   print(PyTuple( (1, 2, 3) ))
   print(PyList( [1, 2, 3] ))
 
-  Xs = PyList(['Python'])  # list(map(Ground, range(3)))
-  Ys = PyList([Ground('Q')])  # [Ground(i+3) for i in range(3)]
+  Xs = PyList(['Python'])  # list(map(PyValue, range(3)))
+  Ys = PyList([PyValue('Q')])  # [PyValue(i+3) for i in range(3)]
   Zs = Var()
 
   print(f'\nappend({Xs}, {Ys}, {Zs})')
@@ -155,11 +155,11 @@ if __name__ == '__main__':
   X = tuple(n_Vars(15))
   Y = X[4:8]
   print(f'\nX: {PyTuple(X)}, Y: {PyTuple(Y)}')
-  for _ in unify_sequences(Y, tuple(map(Ground, ['A', 'B', 'C', 'D']))):
-    print(f"unify_sequences(Y, tuple(map(Ground, ['A', 'B', 'C', 'D']))) => X: {PyTuple(X)}, Y: {PyTuple(Y)}")
+  for _ in unify_sequences(Y, tuple(map(PyValue, ['A', 'B', 'C', 'D']))):
+    print(f"unify_sequences(Y, tuple(map(PyValue, ['A', 'B', 'C', 'D']))) => X: {PyTuple(X)}, Y: {PyTuple(Y)}")
 
   B = tuple(n_Vars(8))
   print(f'\nB: {PyTuple(B)}')
 
-  for _ in unify(B[3], Ground('XYZ')):
-    print(f"unify(B[3], Ground('XYZ')) => B: {PyTuple(B)}")
+  for _ in unify(B[3], PyValue('XYZ')):
+    print(f"unify(B[3], PyValue('XYZ')) => B: {PyTuple(B)}")

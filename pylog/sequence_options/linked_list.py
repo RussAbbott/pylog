@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import Any, List, Tuple, Union
 
 from control_structures import forall, forany
-from logic_variables import eot, Ground, n_Vars, Term, unify, unify_pairs, Var
+from logic_variables import eot, PyValue, n_Vars, Term, unify, unify_pairs, Var
 from sequence_options.super_sequence import is_a_subsequence_of,  member, SuperSequence
 
 
@@ -165,7 +165,7 @@ def append(Xs: Union[LinkedList, Var], Ys: Union[LinkedList, Var], Zs: Union[Lin
 if __name__ == '__main__':
 
   print(emptyLinkedList)
-  E = Ground(3)
+  E = PyValue(3)
   for _ in member(E, emptyLinkedList):
     print(f'Error: should not get here.')
 
@@ -195,12 +195,12 @@ if __name__ == '__main__':
     Xs[-1, 3, -1]: [9, 7, 5, 3]
     Xs[5]: 5
   """
-  Xs = list(map(Ground, range(9)))
-  Sub_Xs = [Ground(1), Var( ), Ground(4), Var( ), Ground(8)]
+  Xs = list(map(PyValue, range(9)))
+  Sub_Xs = [PyValue(1), Var( ), PyValue(4), Var( ), PyValue(8)]
   print(f'\nLinkedList(Sub_Xs): {LinkedList(Sub_Xs)}, LinkedList(Xs): {LinkedList(Xs)}')
   for _ in is_a_subsequence_of(Sub_Xs, LinkedList(Xs)):
     print(f'\tLinkedList(Sub_Xs): {LinkedList(Sub_Xs)}')
-  Sub_Xs = [Ground(1), Var( ), Ground(8), Var( ), Ground(7)]
+  Sub_Xs = [PyValue(1), Var( ), PyValue(8), Var( ), PyValue(7)]
   print(f'\nLinkedList(Sub_Xs): {LinkedList(Sub_Xs)}, LinkedList(Xs): {LinkedList(Xs)}')
   for _ in is_a_subsequence_of(Sub_Xs, LinkedList(Xs)):
     print(f'\tLinkedList(Sub_Xs): {LinkedList(Sub_Xs)}')
@@ -218,21 +218,21 @@ if __name__ == '__main__':
     for _ in member(E, L):
       print(f'E = {E}')
 
-  A_List = LinkedList( [*map(Ground, [1, 2, 3, 2, 1])] )
-  E_Sub = [Ground(2), Var( )]
+  A_List = LinkedList( [*map(PyValue, [1, 2, 3, 2, 1])] )
+  E_Sub = [PyValue(2), Var( )]
   linkedlistE_Sub = LinkedList(E_Sub)
   print(linkedlistE_Sub)
   print(f'\nE_Sub: {linkedlistE_Sub}\n?- is_contiguous_in(E_Sub, {A_List})')
   for _ in A_List.has_contiguous_sublist(E_Sub):
     print(f'E_Sub: {linkedlistE_Sub}')
 
-  E_Sub = [Var( ), Ground(2)]
+  E_Sub = [Var( ), PyValue(2)]
   linkedlistE_Sub = LinkedList(E_Sub)
   print(f'\nE_Sub: {linkedlistE_Sub}\n?- is_contiguous_in(E_Sub, {A_List})')
   for _ in A_List.has_contiguous_sublist(E_Sub):
     print(f'E_Sub: {linkedlistE_Sub}')
 
-  X = Ground('abc')
+  X = PyValue('abc')
   Z1 = Var( )
   Y1 = LinkedList([X, Z1])
 
@@ -351,7 +351,7 @@ if __name__ == '__main__':
       print(f'5b. unify(E, B) => E: {E}, E_EoT.head(): {E_EoT.head( )}, E_EoT.tail(): {E_EoT.tail( )}\n')
 
   # The empty LinkedList is a LinkedList ith no arguments.
-  head = Ground('head')
+  head = PyValue('head')
   Unclosed_List1 = LinkedList((head, Var( )))
   print(f'6. Unclosed_List1: {Unclosed_List1}, len(Unclosed_List1): {len(Unclosed_List1)}')
   Unclosed_List2 = LinkedList((Var( ), Var( )))
@@ -363,13 +363,13 @@ if __name__ == '__main__':
   Unclosed_List3 = LinkedList((Var( ), Var( )))
   print('\nStarting to call member on an open-ended list.')
   limit1 = 4
-  for _ in member(Ground(5), Unclosed_List3):
+  for _ in member(PyValue(5), Unclosed_List3):
     if limit1 <= 0:
       break
     limit1 -= 1
     print(Unclosed_List3)
     limit2 = 2
-    for _ in member(Ground(9), Unclosed_List3):
+    for _ in member(PyValue(9), Unclosed_List3):
       if limit2 <= 0:
         break
       limit2 -= 1
