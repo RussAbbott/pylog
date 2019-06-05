@@ -180,13 +180,13 @@ class Structure(Term):
 
 class StructureItem(Structure):
   """
-  A utility class for building Structure-based items.
+  A utility class for building and displaying Structure-based items.
   """
 
   def __init__(self, args, first_arg_as_str_functor=False):
     self.first_arg_as_str_functor = first_arg_as_str_functor
     functor = type(self).__name__.lower( )
-    super().__init__( (functor, *args) )
+    super().__init__( (functor, *map(StructureItem.make_property, args)) )
 
   def __str__(self):
     all_args_uninstantiated = all(isinstance(arg.trail_end(), Var) for arg in self.args)
@@ -487,7 +487,7 @@ if __name__ == '__main__':
   print(f'\nT5 = Structure( ("g", 1, 2, 3) ): {T5}')
   T6 = Structure( ('t', *range(4), T5, *range(5, 9)) )
   print(f'T6 = Structure( ("t", *range(4), T5, *range(5, 9) ): {T6}')
-  print(f'(", ".join(str(x) for x in T6[3:8])): ({", ".join(str(x) for x in T6[3:8])})')
+  print(f'(", ".join(map(str, T6[3:8]))): ({", ".join(map(str, T6[3:8]))})')
   print(f'tuple(x.get_ground_value( ) for x in T6[4][1:3]): { tuple(x.get_ground_value() for x in T6[4][1:3]) }')
   print('\nEnd of sixth test.')
 
@@ -496,7 +496,7 @@ if __name__ == '__main__':
   
   T5 = Structure( ("g", 1, 2, 3) ): g(1, 2, 3)
   T6 = Structure( ("t", *range(4), T5, *range(5, 9) ): t(0, 1, 2, 3, g(1, 2, 3), 5, 6, 7, 8)
-  (", ".join(str(x) for x in T6[3:8])): (3, g(1, 2, 3), 5, 6, 7)
+  (", ".join(map(str, T6[3:8]))): (3, g(1, 2, 3), 5, 6, 7)
   tuple(x.get_ground_value( ) for x in T6[4][1:3]): (2, 3)
   
   End of sixth test.
