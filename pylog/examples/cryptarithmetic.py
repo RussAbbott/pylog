@@ -14,7 +14,7 @@ def add_digits(carry_in: int, d1: int, d2: int, d_sum: int, Carry_Out: Var):
     yield from unify(Carry_Out, PyValue(c))
 
 
-def digits(Vars: List[Var]):
+def get_py_values(Vars: List[Var]):
   return [v.get_py_value() for v in Vars]
 
 
@@ -44,7 +44,8 @@ def solve(Carries: List[Var], Term1: List[Var], Term2: List[Var], Total: List[Va
       yield
     else:
       for digits_out in instantiate_all([Term1[index], Term2[index], Total[index]], digits_in, Non_Zero_Vars):
-        (carry_in, d1, d2, d_sum) = [d.get_py_value() for d in [Carries[index], Term1[index], Term2[index], Total[index]] ]
+        (carry_in, d1, d2, d_sum) = [d.get_py_value()
+                                     for d in [Carries[index], Term1[index], Term2[index], Total[index]] ]
         for _ in add_digits(carry_in, d1, d2, d_sum, Carries[index-1]):
           yield from solve_aux(index-1, digits_out)
     
@@ -54,7 +55,7 @@ def solve(Carries: List[Var], Term1: List[Var], Term2: List[Var], Total: List[Va
 if __name__ == '__main__':
 
   def sol_to_string(sol):
-    return ''.join([str(c) for c in digits(sol)])
+    return ''.join([str(c) for c in get_py_values(sol)])
 
   """
   SEND    = [ ,  , S, E, N, D]
@@ -65,8 +66,8 @@ if __name__ == '__main__':
 
   (S, E, N, D, M, O, R, Y) = n_Vars(8)
   Z = PyValue(' ')
-  send =  [Z, Z, S, E, N, D]
-  more =  [Z, Z, M, O, R, E]
+  send = [ Z, Z, S, E, N, D]
+  more = [ Z, Z, M, O, R, E]
   money = [Z, M, O, N, E, Y]
   carries = [*list(n_Vars(5)), PyValue(0)]
   print(f'\n   SEND\n+  MORE\n{"-" * (len(money) + 1)}\n  MONEY')
