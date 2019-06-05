@@ -132,6 +132,10 @@ class PyValue(Term):
   def get_py_value(self) -> Any:
     return self._py_value
 
+  @staticmethod
+  def get_py_values(Vars: List[Var]):
+    return [v.get_py_value( ) for v in Vars]
+
   def has_a_py_value(self) -> bool:
     return True
 
