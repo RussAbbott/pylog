@@ -207,11 +207,11 @@ class StructureItem(Structure):
     """
       Applied to each argument in a term.
       Applies Ground to those that are not already Terms.
-      If the property is None, create a Var for it.
+      If a property is None, create a Var for it.
     """
     return Var() if prop is None else \
-                    prop if isinstance(prop, Term) else \
-                    Ground(prop)
+           prop if isinstance(prop, Term) else \
+           Ground(prop)
 
 
 class Var(Term):
