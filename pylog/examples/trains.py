@@ -2,7 +2,7 @@ from functools import reduce
 from typing import List, Tuple, Union
 
 from control_structures import forall
-from logic_variables import Ground, n_Vars, Term, unify, unify_pairs, Var
+from logic_variables import PyValue, n_Vars, Term, unify, unify_pairs, Var
 
 from sequence_options.sequences import PyTuple
 
@@ -14,7 +14,7 @@ lines = {
 }
 
 
-def best_route(Start: Ground, Route: Var, End: Ground):
+def best_route(Start: PyValue, Route: Var, End: PyValue):
   """
   A Route will be: [Station, (Line, Dist), Station, (Line, Dist), ..., Station].
   Ignoring Dist, this will be the sequence of stations and lines to take from Start to End.
@@ -35,15 +35,15 @@ def best_route(Start: Ground, Route: Var, End: Ground):
     if route_options:
       routes_with_totals = map(sum_distances, route_options)
       best_option = min(routes_with_totals, key=lambda routeDist: routeDist[1])
-      # best_option will be a simple list. Make it a Ground object so that it can be unified with Route.
-      yield from unify(Route, Ground(best_option))
+      # best_option will be a simple list. Make it a PyValue object so that it can be unified with Route.
+      yield from unify(Route, PyValue(best_option))
       # break or return prevents backtracking, i.e., looking for alternative (and possibly longer) routes.
       # Has an effect similar to a cut (!) in Prolog.
       break
       # return
 
 
-def connected(S1: Union[Ground, Var], Line_Dist: Union[Var, PyTuple], S2: Union[Ground, Var]):
+def connected(S1: Union[PyValue, Var], Line_Dist: Union[Var, PyTuple], S2: Union[PyValue, Var]):
   """
   Are stations S1 and S2 connected on the same train line?
   If so, which line is it, and how many stations are between them?
@@ -59,16 +59,16 @@ def connected(S1: Union[Ground, Var], Line_Dist: Union[Var, PyTuple], S2: Union[
         stations = lines[Line.get_ground_value()]
         pos1 = stations.index(S1.get_ground_value())
         pos2 = stations.index(S2.get_ground_value())
-        yield from unify(Line_Dist, PyTuple( (Line, Ground(abs(pos1 - pos2))) ) )
+        yield from unify(Line_Dist, PyTuple( (Line, PyValue(abs(pos1 - pos2))) ) )
   # print(f'XX connected({S1}, {Line_Dist}, {S2})?')
 
 
-def has_station(L: Union[Ground, Var], S: Union[Ground, Var]):
+def has_station(L: Union[PyValue, Var], S: Union[PyValue, Var]):
   # print(f'-> has_station({L}, {S})?')
   for line in lines:
     for station in lines[line]:
-      for _ in unify_pairs([(L, Ground(line)),
-                            (S, Ground(station))]):
+      for _ in unify_pairs([(L, PyValue(line)),
+                            (S, PyValue(station))]):
         # print(f'<- has_station({L}, {S})')
         yield
   # print(f'XX has_station({L}, {S})')
@@ -160,7 +160,7 @@ if __name__ == '__main__':
                    ("Zeze", "Kusatsu"),         # Two-changes
                    ]:
 
-    (S1, S2) = (Ground(s1), Ground(s2))
+    (S1, S2) = (PyValue(s1), PyValue(s2))
     # Use Route in Prolog style to pass back the route.
     # In this case it's simply a basket in which the best route is conveyed.
     Route = Var( )
