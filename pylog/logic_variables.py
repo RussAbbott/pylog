@@ -164,9 +164,9 @@ class Structure(Term):
     result = f'{self.functor}({args_str})'
     return result
 
-  def get_ground_value(self) -> Tuple:
+  def get_ground_value(self) -> Structure:
     ground_args = [arg.get_ground_value() for arg in self.args]
-    return (self.functor, *ground_args)
+    return Structure( (self.functor, *ground_args) )
 
   def is_ground(self) -> bool:
     grounded = all([arg.is_ground() for arg in self.args])
@@ -483,6 +483,21 @@ if __name__ == '__main__':
 
   """
 
-  T5 = Structure( ('t', *range(10)) )
-  print(f'T5 = Structure( ("t", *range(10)) ): {T5}')
-  print(f'tuple(x.get_ground_value() for x in T5[3:8]): { tuple(x.get_ground_value() for x in T5[3:8]) }')
+  T5 = Structure( ('g', 1, 2, 3) )
+  print(f'\nT5 = Structure( ("g", 1, 2, 3) ): {T5}')
+  T6 = Structure( ('t', *range(4), T5, *range(5, 9)) )
+  print(f'T6 = Structure( ("t", *range(4), T5, *range(5, 9) ): {T6}')
+  print(f'(", ".join(str(x) for x in T6[3:8])): ({", ".join(str(x) for x in T6[3:8])})')
+  print(f'tuple(x.get_ground_value( ) for x in T6[4][1:3]): { tuple(x.get_ground_value() for x in T6[4][1:3]) }')
+  print('\nEnd of sixth test.')
+
+  """
+  Expected output
+  
+  T5 = Structure( ("g", 1, 2, 3) ): g(1, 2, 3)
+  T6 = Structure( ("t", *range(4), T5, *range(5, 9) ): t(0, 1, 2, 3, g(1, 2, 3), 5, 6, 7, 8)
+  (", ".join(str(x) for x in T6[3:8])): (3, g(1, 2, 3), 5, 6, 7)
+  tuple(x.get_ground_value( ) for x in T6[4][1:3]): (2, 3)
+  
+  End of sixth test.
+  """
