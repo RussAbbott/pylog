@@ -47,10 +47,7 @@ No more.
 class Student(StructureItem):
 
   def __init__(self, name=None, major=None, scholarship=None, first_arg_as_str_functor=True):
-    name = self.make_property(name)
-    major = self.make_property(major)
-    scholarship = self.make_property(scholarship)
-    # Create a StructureItem for this Student.
+    # Package the properties together and create a StructureItem for this Student.
     super( ).__init__( (name, major, scholarship), first_arg_as_str_functor)
 
 
@@ -135,11 +132,11 @@ if __name__ == '__main__':
 
   """ Select either LinkedList or a PySequence (PyList or PyTuple) as the ListType. """
 
-  # from sequence_options.linked_list import LinkedList
-  # ListType = LinkedList
-  #
-  from sequence_options.sequences import PyList  # or PyTuple
-  ListType = PyList  # or PyTuple
+  from sequence_options.linked_list import LinkedList
+  ListType = LinkedList
+
+  # from sequence_options.sequences import PyList  # or PyTuple
+  # ListType = PyList  # or PyTuple
 
   """ additional_answer function, if any """
 
