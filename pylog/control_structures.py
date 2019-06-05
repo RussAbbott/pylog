@@ -1,7 +1,7 @@
 # from inspect import getmembers
 from typing import Generator
 
-from logic_variables import eot, Ground, unify, unify_pairs, Var
+from logic_variables import eot, PyValue, unify, unify_pairs, Var
 
 
 class Bool_Yield_Wrapper:
@@ -211,7 +211,7 @@ if __name__ == '__main__':
   # Yields when i is even.
   @eot
   def is_even_1(i: int) -> Generator[None, None, None]:
-    for _ in unify(Ground(True), Ground(i % 2 == 0)):
+    for _ in unify(PyValue(True), PyValue(i % 2 == 0)):
         yield
 
   # If is_even_1(i) fails to unify, for _ in is_even_1(i) fails.
@@ -222,8 +222,8 @@ if __name__ == '__main__':
   # Same as is_even_1 but includes the range generator.
   def is_even_2(n: int, Res: Var) -> Generator[None, None, None]:
     for i in range(n):
-        for _ in unify_pairs([ (Ground(i % 2 == 0), Ground(True)),
-                               (Ground(i), Res)
+        for _ in unify_pairs([ (PyValue(i % 2 == 0), PyValue(True)),
+                               (PyValue(i), Res)
                                ]):
           yield
 
@@ -250,8 +250,8 @@ if __name__ == '__main__':
   @bool_yield_wrapper
   def is_even_2_decorated(n: int, Res: Var) -> Bool_Yield_Wrapper:
     for i in range(n):
-        for _ in unify_pairs( [(Ground(i % 2 == 0), Ground(True)),
-                              (Ground(i), Res)
+        for _ in unify_pairs( [(PyValue(i % 2 == 0), PyValue(True)),
+                              (PyValue(i), Res)
                                ]):
           yield
 

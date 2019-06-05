@@ -43,7 +43,7 @@ class Term:
                                                        |
                                ------------------------------------------------
                                |                       |                      |
-                            Ground                    Var                 Structure
+                            PyValue                   Var                 Structure
                                |                                              |
                    -----------------------                              SuperSequence
                    |                     |                                    |
@@ -89,8 +89,8 @@ class Term:
 
   @staticmethod
   def ensure_is_logic_variable(x: Any) -> Term:
-    # Ground anything that is not a Term.
-    return x if isinstance(x, Term) else Ground(x)
+    # PyValue anything that is not a Term.
+    return x if isinstance(x, Term) else PyValue(x)
 
   def get_ground_value(self) -> Any:
     return None
@@ -110,7 +110,7 @@ def is_immutable(x):
   return False
 
 
-class Ground(Term):
+class PyValue(Term):
 
   """ A wrapper class for integers, strings, etc. """
 
@@ -121,11 +121,11 @@ class Ground(Term):
 
   def __eq__(self, other: Term) -> bool:
     other_eot = other.trail_end()
-    return isinstance(other_eot, Ground) and self.get_ground_value() == other_eot.get_ground_value()
+    return isinstance(other_eot, PyValue) and self.get_ground_value() == other_eot.get_ground_value()
 
   def __lt__(self, other: Term) -> bool:
     other_eot = other.trail_end()
-    return isinstance(other_eot, Ground) and self.get_ground_value() < other_eot.get_ground_value()
+    return isinstance(other_eot, PyValue) and self.get_ground_value() < other_eot.get_ground_value()
 
   def __str__(self) -> str:
     return f'{self._ground_value}'
@@ -206,12 +206,12 @@ class StructureItem(Structure):
   def make_property(prop):
     """
       Applied to each argument in a term.
-      Applies Ground to those that are not already Terms.
+      Applies PyValue to those that are not already Terms.
       If a property is None, create a Var for it.
     """
     return Var() if prop is None else \
            prop if isinstance(prop, Term) else \
-           Ground(prop)
+           PyValue(prop)
 
 
 class Var(Term):
@@ -347,20 +347,20 @@ def unify_sequences(seq_1: Sequence, seq_2: Sequence):
 
 if __name__ == '__main__':
 
-  A = Ground('abc')
+  A = PyValue('abc')
   B = Var( )
   C = Var( )
-  D = Ground('def')
+  D = PyValue('def')
   print(f'\nA: {A}; B: {B}; C: {C}; D: {D}')
   print(f'Attempting: unify_pairs([(A, B), (B, C), (C, D)]).  A, B, C, D will all be the same if it succeeds.')
   for _ in unify_pairs([(A, B), (B, C), (C, D)]):
     print(f'b. A: {A}; B: {B}; C: {C}; D: {D}')
-  print('As expected, unify_pairs fails -- because A and D have distinct Ground values.')
+  print('As expected, unify_pairs fails -- because A and D have distinct PyValue values.')
 
   A = Var( )
   B = Var( )
   C = Var( )
-  D = Ground('def')
+  D = PyValue('def')
 
   print(f'\n1. A: {A}; B: {B}; C: {C}; D: {D}')  # With while: A: A; B: _12. With if: A: A; B: A.
   for _ in unify(A, B):
@@ -391,7 +391,7 @@ if __name__ == '__main__':
   A = Var( )
   B = Var( )
   C = Var( )
-  D = Ground('xyz')
+  D = PyValue('xyz')
 
   print(f'1. A: {A}, B: {B}, C: {C}, D: {D}')
   for _ in unify_pairs([(A, B), (B, C)]):
@@ -423,8 +423,8 @@ if __name__ == '__main__':
   Y = Var( )
   Z = Var( )
   print(f'X: {X}, Y: {Y}, Z: {Z}')
-  for _ in unify(Ground('abc'), X):
-    print(f'After unify(Ground("abc"), X): 1. X: {X}, Y: {Y}, Z: {Z}')  # => abc
+  for _ in unify(PyValue('abc'), X):
+    print(f'After unify(PyValue("abc"), X): 1. X: {X}, Y: {Y}, Z: {Z}')  # => abc
     for _ in unify(X, Y):
       print(f'After unify(X, Y): X: {X}, Y: {Y}, Z: {Z}')  # => abc
       for _ in unify(Z, Y):
