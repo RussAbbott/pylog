@@ -37,8 +37,8 @@ class PySequence(SuperSequence):
     result = f'{left}{values_string}{right}'
     return result
 
-  def get_ground_value(self) -> tuple:
-    return self.functor(arg.get_ground_value() for arg in self.args)
+  def get_py_value(self) -> tuple:
+    return self.functor(arg.get_py_value() for arg in self.args)
 
   def has_contiguous_sublist(self, As: List):
     """ Can As be unified with a contiguous segment of this list? """

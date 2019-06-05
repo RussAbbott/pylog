@@ -62,10 +62,10 @@ class LinkedList(SuperSequence):
     """
     return ( ) if not pyList else ( Term.ensure_is_logic_variable(pyList[0]), LinkedList(pyList[1:]) )
 
-  def get_ground_value(self):
+  def get_py_value(self):
     args_list = self.to_python_list()
-    ground_args = [arg.get_ground_value() for arg in args_list]
-    return ground_args
+    py_value_args = [arg.get_py_value() for arg in args_list]
+    return py_value_args
 
   def has_contiguous_sublist(self, As: List):
     """ Can As be unified with a segment of this list? """
@@ -319,7 +319,7 @@ if __name__ == '__main__':
   
   """
 
-  print(f'\n?- LinkedList([Var()]).is_ground(): {LinkedList([Var( )]).is_ground( )}')
+  print(f'\n?- LinkedList([Var()]).has_a_py_value(): {LinkedList([Var( )]).has_a_py_value( )}')
   A = LinkedList([1, 2, 3])
   B_Head = Var( )
   B_Tail = Var( )
@@ -330,7 +330,7 @@ if __name__ == '__main__':
     print(f'2. A: {A}, B: {B}')
 
     B_Tail_TrailEnd = B_Tail.trail_end( )
-    C = LinkedList([0, *B_Tail_TrailEnd.get_ground_value( )])
+    C = LinkedList([0, *B_Tail_TrailEnd.get_py_value( )])
     print(f'3. C: {C}')
 
     D2 = Var( )
@@ -380,7 +380,7 @@ if __name__ == '__main__':
   """
   Expected output
   
-  LinkedList([Var()]).is_ground(): False
+  LinkedList([Var()]).has_a_py_value(): False
   1. A: [1, 2, 3], B: ('[]', '_46', '_47')
   2. A: [1, 2, 3], B: [1, 2, 3]
   3. C: [0, 2, 3]
