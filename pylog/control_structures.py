@@ -232,7 +232,7 @@ if __name__ == '__main__':
   Result = Var()
 
   # This version uses the function directly as a generator.
-  evens_2 = [Result.get_ground_value() for _ in is_even_2(7, Result)]
+  evens_2 = [Result.get_py_value() for _ in is_even_2(7, Result)]
   print(f'2. evens_2: {evens_2}')    # => 2. evens_2: [0, 2, 4, 6]
 
   evens_3 = []
@@ -244,7 +244,7 @@ if __name__ == '__main__':
   # within the BoolYIeldWrapper object as self.next, and can be retrieved that way.
   with bool_yield_wrapper(is_even_2)(9, Result) as is_even_gen_3:
     while is_even_gen_3.has_more( ):
-      evens_3.append(Result.get_ground_value())
+      evens_3.append(Result.get_py_value())
   print(f'3. evens_3: {evens_3}')    # => 3. evens_4: [0, 2, 4, 6, 8]
 
   @bool_yield_wrapper
@@ -259,14 +259,14 @@ if __name__ == '__main__':
   # Create the generator in a separate step.
   is_even_gen_4 = is_even_2_decorated(11, Result)
   while is_even_gen_4.has_more( ):
-    evens_4.append(Result.get_ground_value())
+    evens_4.append(Result.get_py_value())
   print(f'4. evens_4: {evens_4}')    # => 4. evens_4: [0, 2, 4, 6, 8, 10]
 
   evens_5 = []
   # Create the generator in a 'with' statement.
   with is_even_2_decorated(13, Result) as is_even_gen_5:
     while is_even_gen_5.has_more( ):
-      evens_5.append(Result.get_ground_value())
+      evens_5.append(Result.get_py_value())
   print(f'5. evens_5: {evens_5}')    # => 5. evens_5: [0, 2, 4, 6, 8, 10, 12]
 
   print('\nEnd of test')

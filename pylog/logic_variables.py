@@ -67,7 +67,7 @@ class Term:
   # Not sure I understand it. Not sure it's worth the trouble.
   def __eq__(self, other: Term) -> bool:
     """
-    self == other if either (a) they have the same ground value or (b) are the same variable.
+    self == other if either (a) they have the same py_value or (b) are the same variable.
     """
     # return self is other
     (self_eot, other_eot) = (self.trail_end(), other.trail_end())
@@ -82,20 +82,20 @@ class Term:
 
   def __str__(self) -> str:
     """
-    The str( ) of a Var is its ground value if is_ground( ) or its term_id otherwise.
+    The str( ) of a Var is its py_value if has_a_py_value( ) or its term_id otherwise.
     """
     self_eot = self.trail_end( )
-    return f'{self_eot}' if self_eot.is_ground( ) or isinstance(self_eot, Structure) else f'_{self_eot.term_id}'
+    return f'{self_eot}' if self_eot.has_a_py_value( ) or isinstance(self_eot, Structure) else f'_{self_eot.term_id}'
 
   @staticmethod
   def ensure_is_logic_variable(x: Any) -> Term:
     # PyValue anything that is not a Term.
     return x if isinstance(x, Term) else PyValue(x)
 
-  def get_ground_value(self) -> Any:
+  def get_py_value(self) -> Any:
     return None
 
-  def is_ground(self) -> bool:
+  def has_a_py_value(self) -> bool:
     return False
 
   def trail_end(self) -> Term:
@@ -114,26 +114,25 @@ class PyValue(Term):
 
   """ A wrapper class for integers, strings, etc. """
 
-  def __init__(self, ground_value: Optional[Any] = None ):
-    assert is_immutable(ground_value), "Only immutable elements are allowed"
-    self._ground_value = ground_value
+  def __init__(self, py_value: Optional[Any] = None ):
+    self._py_value = py_value
     super( ).__init__( )
 
   def __eq__(self, other: Term) -> bool:
     other_eot = other.trail_end()
-    return isinstance(other_eot, PyValue) and self.get_ground_value() == other_eot.get_ground_value()
+    return isinstance(other_eot, PyValue) and self.get_py_value() == other_eot.get_py_value()
 
   def __lt__(self, other: Term) -> bool:
     other_eot = other.trail_end()
-    return isinstance(other_eot, PyValue) and self.get_ground_value() < other_eot.get_ground_value()
+    return isinstance(other_eot, PyValue) and self.get_py_value() < other_eot.get_py_value()
 
   def __str__(self) -> str:
-    return f'{self._ground_value}'
+    return f'{self._py_value}'
 
-  def get_ground_value(self) -> Any:
-    return self._ground_value
+  def get_py_value(self) -> Any:
+    return self._py_value
 
-  def is_ground(self) -> bool:
+  def has_a_py_value(self) -> bool:
     return True
 
 
@@ -164,13 +163,13 @@ class Structure(Term):
     result = f'{self.functor}({args_str})'
     return result
 
-  def get_ground_value(self) -> Structure:
-    ground_args = [arg.get_ground_value() for arg in self.args]
-    return Structure( (self.functor, *ground_args) )
+  def get_py_value(self) -> Structure:
+    py_value_args = [arg.get_py_value() for arg in self.args]
+    return Structure( (self.functor, *py_value_args) )
 
-  def is_ground(self) -> bool:
-    grounded = all([arg.is_ground() for arg in self.args])
-    return grounded
+  def has_a_py_value(self) -> bool:
+    py_value_args = all([arg.has_a_py_value() for arg in self.args])
+    return py_value_args
 
   @staticmethod
   def values_string(values: Iterable):
@@ -246,14 +245,14 @@ class Var(Term):
     return self.trail_next is not None
 
   @eot
-  def get_ground_value(self) -> Optional[Any]:
-    return self.get_ground_value( ) if self.is_ground( ) else None
+  def get_py_value(self) -> Optional[Any]:
+    return self.get_py_value( ) if self.has_a_py_value( ) else None
 
   # Can't use @eot. Generates an infinite recursive loop.
-  def is_ground(self) -> bool:
-    """ Is ground if its trail end is ground """
+  def has_a_py_value(self) -> bool:
+    """ has_a_py_value if its trail end has_a_py_value """
     Trail_End_Var = self.trail_end( )
-    return not isinstance(Trail_End_Var, Var) and Trail_End_Var.is_ground()
+    return not isinstance(Trail_End_Var, Var) and Trail_End_Var.has_a_py_value()
 
   def trail_end(self):
     """
@@ -282,15 +281,15 @@ def unify(Left: Term, Right: Term):
     are unified, but they do not (yet) have a value.
   """
 
-  # If the trail_ends are equal, either because they have the same ground value or
+  # If the trail_ends are equal, either because they have the same py_value or
   # because they are the same (unbound) Var, do nothing. They are already unified.
   # yield to indicate unification success.
   if Left == Right:
     yield
 
-  # Since they are not equal, if they are both ground but have different values,
+  # Since they are not equal, if they both have_py_values but have different values,
   # they can't be unified. To indicate unification failure, terminate without a yield.
-  elif Left.is_ground( ) and Right.is_ground( ):
+  elif Left.has_a_py_value( ) and Right.has_a_py_value( ):
     pass
 
   # If at least one is a Var. Make the other an extension of its trail.
@@ -488,7 +487,7 @@ if __name__ == '__main__':
   T6 = Structure( ('t', *range(4), T5, *range(5, 9)) )
   print(f'T6 = Structure( ("t", *range(4), T5, *range(5, 9) ): {T6}')
   print(f'(", ".join(map(str, T6[3:8]))): ({", ".join(map(str, T6[3:8]))})')
-  print(f'tuple(x.get_ground_value( ) for x in T6[4][1:3]): { tuple(x.get_ground_value() for x in T6[4][1:3]) }')
+  print(f'tuple(x.get_py_value( ) for x in T6[4][1:3]): { tuple(x.get_py_value() for x in T6[4][1:3]) }')
   print('\nEnd of sixth test.')
 
   """
@@ -497,7 +496,7 @@ if __name__ == '__main__':
   T5 = Structure( ("g", 1, 2, 3) ): g(1, 2, 3)
   T6 = Structure( ("t", *range(4), T5, *range(5, 9) ): t(0, 1, 2, 3, g(1, 2, 3), 5, 6, 7, 8)
   (", ".join(map(str, T6[3:8]))): (3, g(1, 2, 3), 5, 6, 7)
-  tuple(x.get_ground_value( ) for x in T6[4][1:3]): (2, 3)
+  tuple(x.get_py_value( ) for x in T6[4][1:3]): (2, 3)
   
   End of sixth test.
   """
