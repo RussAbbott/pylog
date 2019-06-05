@@ -6,8 +6,9 @@ from logic_variables import n_Vars, PyValue, unify, Var
 def add_digits(carry_in: int, d1: Union[int, str], d2: Union[int, str], d_sum: Union[int, str], Carry_Out: Var):
   """ Add carry_in, d1, and d2. Succeed if the sum is d_sum with a carry unified with Carry_Out. """
 
-  """ Convert ' ' to 0 when adding. A utility used only by add_digits. """
-  b_to_0 = lambda c: 0 if c == ' ' else c
+  def b_to_0(c):
+    """ Convert ' ' to 0 when adding. Used only by add_digits. """
+    return 0 if c == ' ' else c
 
   total = sum([carry_in, b_to_0(d1), b_to_0(d2)])
   (c, d) = divmod(total, 10)
