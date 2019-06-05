@@ -69,6 +69,7 @@ if __name__ == '__main__':
   more =  [Z, Z, M, O, R, E]
   money = [Z, M, O, N, E, Y]
   carries = [*list(n_Vars(5)), PyValue(0)]
+  print(f'\n   SEND\n+  MORE\n{"-" * (len(money) + 1)}\n  MONEY')
   for _ in solve(carries, send, more, money, [S, M]):
     send1  = sol_to_string(send)
     more1  = sol_to_string(more)
