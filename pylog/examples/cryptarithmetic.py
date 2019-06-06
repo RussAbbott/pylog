@@ -1,4 +1,4 @@
-from typing import List, Union
+from typing import Iterable, List, Union
 
 from logic_variables import n_Vars, PyValue, unify, Var
 
@@ -16,7 +16,11 @@ def add_digits(carry_in: int, d1: Union[int, str], d2: Union[int, str], d_sum: U
     yield from unify(Carry_Out, PyValue(c))
 
 
-def solve(Carries: List[Var], Term1: List[Var], Term2: List[Var], Total: List[Var], Non_Zero_Vars: List[Var]):
+def solve(Carries: List[Var],
+          Term1: List[Union[Var, PyValue]],
+          Term2: List[Union[Var, PyValue]],
+          Total: List[Union[Var, PyValue]],
+          Non_Zero_Vars: List[Var]):
   """
   Solve the problem.
   The two embedded functions refer to the lists of Vars in the solve params.
@@ -68,33 +72,41 @@ def solve(Carries: List[Var], Term1: List[Var], Term2: List[Var], Total: List[Va
   yield from solve_aux(len(Carries)-1, list(range(10)))
 
 
+def solution_to_string(solution):
+  """ Convert a list of digits to a single number represented as a string. """
+  return ''.join([str(c) for c in PyValue.get_py_values(solution)])
+
+
+def letters_to_vars(st: Iterable, d: dict) -> List:
+  return [d[s] for s in st]
+
+
+def solve_crypto(t1: str, t2: str, total: str ):
+  var_letters = sorted(list(set(t1+t2+total)))
+  vars_dict = dict(zip(var_letters, n_Vars(len(var_letters))))
+  Z = PyValue(' ')
+  length = len(total)+1
+  T1 = [Z for _ in range((length-len(t1)))] + letters_to_vars(t1, vars_dict)
+  T2 = [Z for _ in range((length-len(t2)))] + letters_to_vars(t2, vars_dict)
+  Tot = [Z for _ in range((length-len(total)))] + letters_to_vars(total, vars_dict)
+  carries = [*list(n_Vars(length-1)), PyValue(0)]
+  print(f'\n  {t1}\n+ {t2}\n{"-" * len(total)}\n {total}')
+  non_zero_vars = letters_to_vars({t1[0], t2[0], total[0]}, vars_dict)
+  for _ in solve(carries, T1, T2, Tot, non_zero_vars):
+    # Discard the leading blanks and convert each to a string.
+    (t1_out, t2_out, tot_out) = map(solution_to_string, (T1[1:], T2[1:], Tot[1:]))
+    print(f'\n {t1_out}\n+{t2_out}\n{"-" * (len(tot_out) + 1)}\n {tot_out}')
+    want_more = input('\nMore? (y/n) > ')
+    if want_more.lower( ) != 'y':
+      break
+
+
 if __name__ == '__main__':
 
-  def solution_to_string(solution):
-    """ Convert a list of digits to a single number represented as a string. """
-    return ''.join([str(c) for c in PyValue.get_py_values(solution)])
-
-  """
-  SEND    = [ ,  , S, E, N, D]
-  MORE    = [ ,  , M, O, R, E]
-  MONEY   = [ , M, O, N, E, Y]
-  Carries is a list of Vars. The first (rightmost) one is 0.
-  Carries = [*list(n_Vars(5)), PyValue(0)]
-  Doing it this way makes all the lists--SEND, MORE, MONEY, and Carries--the same length.
-  """
-
-  (S, E, N, D, M, O, R, Y) = n_Vars(8)
-  Z = PyValue(' ')
-  send = [ Z, Z, S, E, N, D]
-  more = [ Z, Z, M, O, R, E]
-  money = [Z, M, O, N, E, Y]
-  carries = [*list(n_Vars(5)), PyValue(0)]
-  print(f'\n  SEND\n+ MORE\n{"-" * len(money)}\n MONEY')
-  # [S, M] must be constrained not to be 0 since they start numbers.
-  for _ in solve(carries, send, more, money, [S, M]):
-    # Discard the leading blanks and convert each to a string.
-    (send, more, money) = map(solution_to_string, (send[1:], more[1:], money[1:]))
-    print(f'\n {send}\n+{more}\n{"-"*(len(money)+1)}\n {money}')
-    want_more = input('\nMore? (y/n) > ')
-    if want_more.lower() != 'y':
-      break
+  # See http://bach.istc.kobe-u.ac.jp/llp/crypt.html (and links) for many! others.
+  for (t1, t2, tot) in [('SEND', 'MORE', 'MONEY'),
+                        ('BASE', 'BALL', 'GAMES'),
+                        ('SATURN', 'URANUS', 'PLANETS'),
+                        ('POTATO', 'TOMATO', 'PUMPKIN')
+                        ]:
+    solve_crypto(t1, t2, tot)
