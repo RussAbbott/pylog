@@ -110,7 +110,7 @@ succeeds/fails for a given `i`, the list comprehension completes/fails to comple
 
 *To be written*
 
-## File organization 
+## File organization (not recently updated)
 
 ```
 pylog                            -- Root directory
@@ -128,7 +128,7 @@ pylog                            -- Root directory
     logic_variables.py           -- Implementation of Prolog's logic variables
 ```
 
-## File dependencies/`imports from` relations
+## File dependencies/`imports from` relations (not recently updated)
 
 ```
 logic_variables: none
