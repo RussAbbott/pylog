@@ -81,36 +81,44 @@ def letters_to_vars(st: Iterable, d: dict) -> List:
   return [d[s] for s in st]
 
 
-def solve_crypto(t1: str, t2: str, total: str ):
-  var_letters = sorted(list(set(t1+t2+total)))
+def set_up_puzzle(t1, t2, total):
+  var_letters = sorted(list(set(t1 + t2 + total)))
   vars_dict = dict(zip(var_letters, n_Vars(len(var_letters))))
   Z = PyValue(' ')
-  length = len(total)+1
-  T1 = [Z for _ in range((length-len(t1)))] + letters_to_vars(t1, vars_dict)
-  T2 = [Z for _ in range((length-len(t2)))] + letters_to_vars(t2, vars_dict)
-  Tot = [Z for _ in range((length-len(total)))] + letters_to_vars(total, vars_dict)
-  carries = [*list(n_Vars(length-1)), PyValue(0)]
-  # print(f'\n  {t1}\n+ {t2}\n{"-" * len(total)}\n {total}')
+  length = len(total) + 1
+  T1 = [Z for _ in range((length - len(t1)))] + letters_to_vars(t1, vars_dict)
+  T2 = [Z for _ in range((length - len(t2)))] + letters_to_vars(t2, vars_dict)
+  Tot = [Z for _ in range((length - len(total)))] + letters_to_vars(total, vars_dict)
   non_zero_vars = letters_to_vars({t1[0], t2[0], total[0]}, vars_dict)
+  carries = [*list(n_Vars(length - 1)), PyValue(0)]
+  return (T1, T2, Tot, non_zero_vars, carries)
+
+
+def solve_crypto(t1: str, t2: str, total: str ):
+  (T1, T2, Tot, non_zero_vars, carries) = set_up_puzzle(t1, t2, total)
+  want_more = None
   for _ in solve(carries, T1, T2, Tot, non_zero_vars):
-    # Discard the leading blanks and convert each to a string.
+    # Discard the leading blanks and convert number each to a string.
     (t1_out, t2_out, tot_out) = map(solution_to_string, (T1[1:], T2[1:], Tot[1:]))
     print()
     print(f'  {t1}  -> {t1_out}')
     print(f'+ {t2}  -> {t2_out}')
     print(f'{"-" * (len(total)+1)}     {"-" * len(total)}')
     print(f' {total}  -> {tot_out}')
-    want_more = input('\nMore? (y/n) > ')
-    if want_more.lower( ) != 'y':
+    ans = input('\nLook for more solutions? (y/n) > ').lower( )
+    want_more = ans[0] if len(ans) > 0 else 'n'
+    if want_more != 'y':
       break
+  if want_more == 'y':
+    print('No more solutions.')
 
 
 if __name__ == '__main__':
 
-  # See http://bach.istc.kobe-u.ac.jp/llp/crypt.html (and links) for many! others.
-  for (t1, t2, tot) in [('SEND', 'MORE', 'MONEY'),
+  # See http://bach.istc.kobe-u.ac.jp/llp/crypt.html (and links) for many(!) others.
+  for puzzle in [('SEND', 'MORE', 'MONEY'),
                         ('BASE', 'BALL', 'GAMES'),
                         ('SATURN', 'URANUS', 'PLANETS'),
                         ('POTATO', 'TOMATO', 'PUMPKIN')
                         ]:
-    solve_crypto(t1, t2, tot)
+    solve_crypto(*puzzle)
