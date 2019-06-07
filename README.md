@@ -14,10 +14,10 @@
 <dd>The primary issue addressed in the paper—and in Pylog itself—is how logic variables and backtracking can be integrated cleanly into a Python framework. A fair amount of work has been done in this area: see <i>Related Work</i>. Although well done, most of it has been incomplete in one way or another. Pylog is the first complete system (as far as we know) to achieve the goal of integration.</dd>
 
 <dt>Approach: What was done that unveiled new knowledge?</dt>
-<dd>Pylog, exhibits the integration mentined above. The paper discusses—and Pylon demonstrates—how logic variables and backtracking can be interwoven with standard Python data structures and control structures.</dd>
+<dd>Pylog, exhibits the integration mentined above. The paper discusses—and Pylog demonstrates—how logic variables and backtracking can be interwoven with standard Python data structures and control structures.</dd>
 
 <dt>Knowledge: What new facts were uncovered? If the research was not results oriented, what new capabilities are enabled by the work?</dt>
-<dd>Pylon is available as a logic programming library for use in Python software.</dd>
+<dd>Pylog  is available as a logic programming library for use in Python software.</dd>
 
 <dt>Grounding: What argument, feasibility proof, artifacts, or results and evaluation support this work?</dt>
 <dd>Pylog demonstrates by its existence and functionality that the goal of integrating logic variables and backtracking with Python can be achieved.</dd>
