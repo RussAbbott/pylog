@@ -19,18 +19,26 @@ The pylog core (this file) contains the logic variable and data structure classe
 def eot(f):
   """ A decorator that takes trail_end() of all Var arguments """
 
-  def get_arg_Vars_trail_ends(args):
-    args_trail_ends = (arg.trail_end() if isinstance(arg, Var) else arg for arg in args)
+  def var_trail_end(v):
+    return v.trail_end() if isinstance(v, Var) else v
+
+  def arg_Vars_trail_ends(args):
+    args_trail_ends = (var_trail_end(arg) for arg in args)
     return args_trail_ends
+
+  def dict_Vars_trail_ends(dic):
+    dic_trail_ends = dic if not isinstance(dic, dict) else {k: var_trail_end(v) for (k, v) in dic.items()}
+    return dic_trail_ends
 
   @wraps(f)
   def eot_wrapper_gen(*args, **kwargs):
-    arg_trail_ends = get_arg_Vars_trail_ends(args)
-    yield from f(*arg_trail_ends, **kwargs)
+    arg_trail_ends = arg_Vars_trail_ends(args)
+    kwargs_trail_ends = dict_Vars_trail_ends((kwargs))
+    yield from f(*arg_trail_ends, **kwargs_trail_ends)
 
   @wraps(f)
   def eot_wrapper_non_gen(*args, **kwargs):
-    args = get_arg_Vars_trail_ends(args)
+    args = arg_Vars_trail_ends(args)
     return f(*args, **kwargs)
 
   return eot_wrapper_gen if isgeneratorfunction(f) else eot_wrapper_non_gen
@@ -69,7 +77,6 @@ class Term:
     """
     self == other if either (a) they have the same py_value or (b) are the same variable.
     """
-    # return self is other
     (self_eot, other_eot) = (self.trail_end(), other.trail_end())
     return self_eot is other_eot or \
            (self is not self_eot or other is not other_eot) and self_eot == other_eot
@@ -87,11 +94,11 @@ class Term:
     self_eot = self.trail_end( )
     return f'{self_eot}' if self_eot.has_a_py_value( ) or isinstance(self_eot, Structure) else f'_{self_eot.term_id}'
 
-  @staticmethod
-  def ensure_is_logic_variable(x: Any) -> Term:
-    # PyValue anything that is not a Term.
-    return x if isinstance(x, Term) else PyValue(x)
-
+  # @staticmethod
+  # def ensure_is_logic_variable(x: Any) -> Term:
+  #   # PyValue anything that is not a Term.
+  #   return x if isinstance(x, Term) else PyValue(x)
+  #
   def get_py_value(self) -> Any:
     return None
 
@@ -112,7 +119,7 @@ def is_immutable(x):
 
 class PyValue(Term):
 
-  """ A wrapper class for integers, strings, etc. """
+  """ A wrapper class for integers, strings, and any other Python value. """
 
   def __init__(self, py_value: Optional[Any] = None ):
     self._py_value = py_value
@@ -147,7 +154,7 @@ class Structure(Term):
   """
   def __init__(self, term: Tuple = ( None, () ) ):
     self.functor = term[0]
-    self.args = tuple(map(self.ensure_is_logic_variable, term[1:]))
+    self.args = tuple(map(ensure_is_logic_variable, term[1:]))
     super().__init__()
 
   def __eq__(self, other: Term) -> bool:
@@ -189,7 +196,7 @@ class StructureItem(Structure):
   def __init__(self, args, first_arg_as_str_functor=False):
     self.first_arg_as_str_functor = first_arg_as_str_functor
     functor = type(self).__name__.lower( )
-    super().__init__( (functor, *map(StructureItem.make_property, args)) )
+    super().__init__( (functor, *map(make_property, args)) )
 
   def __str__(self):
     all_args_uninstantiated = all(isinstance(arg.trail_end(), Var) for arg in self.args)
@@ -204,17 +211,6 @@ class StructureItem(Structure):
     else:
       # Use default Structure __str__( )
       return super().__str__( )
-
-  @staticmethod
-  def make_property(prop):
-    """
-      Applied to each argument in a term.
-      Applies PyValue to those that are not already Terms.
-      If a property is None, create a Var for it.
-    """
-    return Var() if prop is None else \
-           prop if isinstance(prop, Term) else \
-           PyValue(prop)
 
 
 class Var(Term):
@@ -265,13 +261,31 @@ class Var(Term):
     return self.trail_next.trail_end( ) if self._has_trail_next( ) else self
 
 
+# @staticmethod
+def ensure_is_logic_variable(x: Any) -> Term:
+  # PyValue anything that is not a Term.
+  return x if isinstance(x, Term) else PyValue(x)
+
+
+# @staticmethod
+def make_property(prop):
+  """
+    Applied to each argument in a term.
+    Applies PyValue to those that are not already Terms.
+    If a property is None, create a Var for it.
+  """
+  return Var( ) if prop is None else ensure_is_logic_variable(prop)  # \
+  # prop if isinstance(prop, Term) else \
+  # PyValue(prop)
+
+
 def n_Vars(n: int) -> List[Var]:
   """ Generate a list of uninstantiated variables of length n. """
   return [Var( ) for _ in range(n)]
 
 
 @eot
-def unify(Left: Term, Right: Term):
+def unify(Left: Any, Right: Any):
   """
   Unify two logic Terms.
 
@@ -285,13 +299,16 @@ def unify(Left: Term, Right: Term):
     are unified, but they do not (yet) have a value.
   """
 
+  # (Left, Right) = map(lambda v: v if isinstance(v, Term) else PyValue(v) , (Left, Right))
+  (Left, Right) = map(ensure_is_logic_variable, (Left, Right))
+
   # If the trail_ends are equal, either because they have the same py_value or
   # because they are the same (unbound) Var, do nothing. They are already unified.
   # yield to indicate unification success.
   if Left == Right:
     yield
 
-  # Since they are not equal, if they both have_py_values but have different values,
+  # Since they are not equal, if they both have_py_values (and hence have different values),
   # they can't be unified. To indicate unification failure, terminate without a yield.
   elif Left.has_a_py_value( ) and Right.has_a_py_value( ):
     pass
@@ -304,15 +321,18 @@ def unify(Left: Term, Right: Term):
     yield
     # All yields create a context in which more of the program is executed--like
     # the body of a while-loop or a for-loop. A "next()" request asks for alternatives.
-    # But there is only one functional way to do unification.
-    # So on backup, simply unlink the two and exit without a further yield.
+    # But there is only one functional way to do unification. So on "backup," unlink the
+    # two and exit without a further yield, i.e., fail.
+
+    # This is fundamental! It's what makes it possible for a Var to become un-unified outside
+    # the context in which it was unified, e.g., unifying a Var with (successive) members
+    # of a list. The first successful unification must be undone before the second can occur.
     pointsFrom.trail_next = None
 
   # If both Left and Right are Structures, they can be unified if
   # (a) they have the same functor and
   # (b) their arguments can be unified.
-  elif isinstance(Left, Structure) and isinstance(Right, Structure) and \
-       Left.functor == Right.functor:
+  elif isinstance(Left, Structure) and isinstance(Right, Structure) and Left.functor == Right.functor:
     yield from unify_sequences(Left.args, Right.args)
 
 
@@ -350,10 +370,12 @@ def unify_sequences(seq_1: Sequence, seq_2: Sequence):
 
 if __name__ == '__main__':
 
-  A = PyValue('abc')
+  # A = PyValue('abc')
+  A = 'abc'
   B = Var( )
   C = Var( )
-  D = PyValue('def')
+  # D = PyValue('def')
+  D = 'def'
   print(f'\nA: {A}; B: {B}; C: {C}; D: {D}')
   print(f'Attempting: unify_pairs([(A, B), (B, C), (C, D)]).  A, B, C, D will all be the same if it succeeds.')
   for _ in unify_pairs([(A, B), (B, C), (C, D)]):
@@ -361,9 +383,10 @@ if __name__ == '__main__':
   print('As expected, unify_pairs fails -- because A and D have distinct PyValue values.')
 
   A = Var( )
-  B = Var( )
-  C = Var( )
-  D = PyValue('def')
+  # B, C, and D are the same as above.
+  # B = Var( )
+  # C = Var( )
+  # D = PyValue('def')
 
   print(f'\n1. A: {A}; B: {B}; C: {C}; D: {D}')  # With while: A: A; B: _12. With if: A: A; B: A.
   for _ in unify(A, B):
@@ -394,7 +417,8 @@ if __name__ == '__main__':
   A = Var( )
   B = Var( )
   C = Var( )
-  D = PyValue('xyz')
+  # D = PyValue('xyz')
+  D = 'xyz'
 
   print(f'1. A: {A}, B: {B}, C: {C}, D: {D}')
   for _ in unify_pairs([(A, B), (B, C)]):
@@ -426,8 +450,10 @@ if __name__ == '__main__':
   Y = Var( )
   Z = Var( )
   print(f'X: {X}, Y: {Y}, Z: {Z}')
-  for _ in unify(PyValue('abc'), X):
-    print(f'After unify(PyValue("abc"), X): 1. X: {X}, Y: {Y}, Z: {Z}')  # => abc
+  # for _ in unify(PyValue('abc'), X):
+  for _ in unify('abc', X):
+    # print(f'After unify(PyValue("abc"), X): 1. X: {X}, Y: {Y}, Z: {Z}')  # => abc
+    print(f'After unify("abc", X): X: {X}, Y: {Y}, Z: {Z}')  # => abc
     for _ in unify(X, Y):
       print(f'After unify(X, Y): X: {X}, Y: {Y}, Z: {Z}')  # => abc
       for _ in unify(Z, Y):
