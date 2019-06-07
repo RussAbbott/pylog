@@ -13,7 +13,7 @@ def add_digits(carry_in: int, d1: Union[int, str], d2: Union[int, str], d_sum: U
   total = sum([carry_in, b_to_0(d1), b_to_0(d2)])
   (c, d) = divmod(total, 10)
   if d == b_to_0(d_sum):
-    yield from unify(Carry_Out, PyValue(c))
+    yield from unify(Carry_Out, c)
 
 
 def solve(Carries: List[Var],
@@ -23,14 +23,15 @@ def solve(Carries: List[Var],
           Non_Zero_Vars: List[Var]):
   """
   Solve the problem.
-  The two embedded functions refer to the lists of Vars in the solve params.
+  The two embedded functions below refer to the lists in solve's params.
   The lists never change, but their elements are unified with values.
-  No point is copying the lists repeatedly.
+  No point is copying the lists repeatedly. So embed the functions that refer to them.
   """
 
   def instantiate_all(Vars: List[Var], digits_in: List[int]):
     """
-    Vars are the digits we are currently adding. Unify them with digit values.
+    Vars are the digits we are currently adding, one from each term and one from the sum.
+    Unify them with digit values.
     digits-in are the digits that have not yet been assigned to a Var.
     Return (through yield) the digits that are not yet used after the new assignments.
     We do this recursively on Vars.
@@ -42,6 +43,7 @@ def solve(Carries: List[Var],
       # No more digits. Fail.
       return
     else:
+      # Get head and tail of Vars.
       [V, *Vs] = Vars
       # If V already has a value nothing to do. Go on to the next Vars.
       if isinstance(V.trail_end( ), PyValue):
@@ -50,17 +52,21 @@ def solve(Carries: List[Var],
         # Give V one of the available digits. Through "backup" all digits will be tried.
         for i in range(len(digits_in)):
           # Make sure we don't assign 0 to one of the leading digits.
-          if V not in Non_Zero_Vars or digits_in[i] != 0:
-            for _ in unify(V, digits_in[i]):  # PyValue(digits_in[i])):
+          if digits_in[i] != 0 or V not in Non_Zero_Vars:
+            for _ in unify(V, digits_in[i]):  # Don't have to wrap digits_in[i] in PyValue explicitly.
               yield from instantiate_all(Vs, digits_in[:i] + digits_in[i + 1:])
 
   def solve_aux(index: int, digits_in: List[int]):
-    """ Traditional addition. Working from right to left. """
-
-    # print(f'{index}, {digits_in}, {digits(Term1)}, {digits(Term2)}, {digits(Total)}')
-    # When we reach 0, we're done. Can't allow a carry to that position.
-    if index == 0 and Carries[0].get_py_value() == 0:
-      yield
+    """ Traditional addition: work from right to left. """
+    # When we reach 0, we're done.
+    if index == 0:
+      # Can't allow a carry to that position.
+      if Carries[0].get_py_value() == 0:
+        yield
+      else:
+        # If we reach index == 0 but have a carry to the last column fail.
+        # Won't have such a carry with only two terms. But perhaps with many terms, it might happen.
+        return
     else:
       for digits_out in instantiate_all([Term1[index], Term2[index], Total[index]], digits_in):
         # Extract the digits from the Vars.
@@ -94,7 +100,7 @@ def set_up_puzzle(t1, t2, total):
   return (T1, T2, Tot, non_zero_vars, carries)
 
 
-def solve_crypto(t1: str, t2: str, total: str ):
+def solve_crypto(t1: str, t2: str, total: str):
   (T1, T2, Tot, non_zero_vars, carries) = set_up_puzzle(t1, t2, total)
   want_more = None
   for _ in solve(carries, T1, T2, Tot, non_zero_vars):
@@ -117,8 +123,8 @@ if __name__ == '__main__':
 
   # See http://bach.istc.kobe-u.ac.jp/llp/crypt.html (and links) for many(!) others.
   for puzzle in [('SEND', 'MORE', 'MONEY'),
-                        ('BASE', 'BALL', 'GAMES'),
-                        ('SATURN', 'URANUS', 'PLANETS'),
-                        ('POTATO', 'TOMATO', 'PUMPKIN')
-                        ]:
+                 ('BASE', 'BALL', 'GAMES'),
+                 ('SATURN', 'URANUS', 'PLANETS'),
+                 ('POTATO', 'TOMATO', 'PUMPKIN')
+                 ]:
     solve_crypto(*puzzle)
