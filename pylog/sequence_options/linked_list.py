@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import Any, List, Tuple, Union
 
 from control_structures import forall, forany
-from logic_variables import eot, PyValue, n_Vars, Term, unify, unify_pairs, Var
+from logic_variables import ensure_is_logic_variable, eot, PyValue, n_Vars, Term, unify, unify_pairs, Var
 from sequence_options.super_sequence import is_a_subsequence_of,  member, SuperSequence
 
 
@@ -60,7 +60,8 @@ class LinkedList(SuperSequence):
     :param pyList: a standard Python list
     :return: (nested) args for a LinkedList, i.e, (head, tail) of pylist.
     """
-    return ( ) if not pyList else ( Term.ensure_is_logic_variable(pyList[0]), LinkedList(pyList[1:]) )
+    # return ( ) if not pyList else ( Term.ensure_is_logic_variable(pyList[0]), LinkedList(pyList[1:]) )
+    return ( ) if not pyList else ( ensure_is_logic_variable(pyList[0]), LinkedList(pyList[1:]) )
 
   def get_py_value(self):
     args_list = self.to_python_list()
