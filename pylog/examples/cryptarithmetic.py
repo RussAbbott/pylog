@@ -51,7 +51,7 @@ def solve(Carries: List[Var],
         for i in range(len(digits_in)):
           # Make sure we don't assign 0 to one of the leading digits.
           if V not in Non_Zero_Vars or digits_in[i] != 0:
-            for _ in unify(V, PyValue(digits_in[i])):
+            for _ in unify(V, digits_in[i]):  # PyValue(digits_in[i])):
               yield from instantiate_all(Vs, digits_in[:i] + digits_in[i + 1:])
 
   def solve_aux(index: int, digits_in: List[int]):
