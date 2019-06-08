@@ -89,10 +89,10 @@ class Term:
 
   def __str__(self) -> str:
     """
-    The str( ) of a Var is its py_value if has_a_py_value( ) or its term_id otherwise.
+    The str( ) of a Var is its py_value if has_py_value( ) or its term_id otherwise.
     """
     self_eot = self.trail_end( )
-    return f'{self_eot}' if self_eot.has_a_py_value( ) or isinstance(self_eot, Structure) else f'_{self_eot.term_id}'
+    return f'{self_eot}' if self_eot.has_py_value( ) or isinstance(self_eot, Structure) else f'_{self_eot.term_id}'
 
   # @staticmethod
   # def ensure_is_logic_variable(x: Any) -> Term:
@@ -102,7 +102,7 @@ class Term:
   def get_py_value(self) -> Any:
     return None
 
-  def has_a_py_value(self) -> bool:
+  def has_py_value(self) -> bool:
     return False
 
   def trail_end(self) -> Term:
@@ -143,7 +143,7 @@ class PyValue(Term):
   def get_py_values(Vars: List[Var]):
     return [v.get_py_value( ) for v in Vars]
 
-  def has_a_py_value(self) -> bool:
+  def has_py_value(self) -> bool:
     return True
 
 
@@ -178,8 +178,8 @@ class Structure(Term):
     py_value_args = [arg.get_py_value() for arg in self.args]
     return Structure( (self.functor, *py_value_args) )
 
-  def has_a_py_value(self) -> bool:
-    py_value_args = all([arg.has_a_py_value() for arg in self.args])
+  def has_py_value(self) -> bool:
+    py_value_args = all([arg.has_py_value() for arg in self.args])
     return py_value_args
 
   @staticmethod
@@ -246,13 +246,13 @@ class Var(Term):
 
   @eot
   def get_py_value(self) -> Optional[Any]:
-    return self.get_py_value( ) if self.has_a_py_value( ) else None
+    return self.get_py_value( ) if self.has_py_value( ) else None
 
   # Can't use @eot. Generates an infinite recursive loop.
-  def has_a_py_value(self) -> bool:
-    """ has_a_py_value if its trail end has_a_py_value """
+  def has_py_value(self) -> bool:
+    """ has_py_value if its trail end has_py_value """
     Trail_End_Var = self.trail_end( )
-    return not isinstance(Trail_End_Var, Var) and Trail_End_Var.has_a_py_value()
+    return not isinstance(Trail_End_Var, Var) and Trail_End_Var.has_py_value()
 
   def trail_end(self):
     """
@@ -310,8 +310,8 @@ def unify(Left: Any, Right: Any):
 
   # Since they are not equal, if they both have_py_values (and hence have different values),
   # they can't be unified. To indicate unification failure, terminate without a yield.
-  elif Left.has_a_py_value( ) and Right.has_a_py_value( ):
-    pass
+  elif Left.has_py_value( ) and Right.has_py_value( ):
+    return False
 
   # If at least one is a Var. Make the other an extension of its trail.
   # (If both are Vars, it makes no functional difference which extends which.)
@@ -336,7 +336,7 @@ def unify(Left: Any, Right: Any):
     yield from unify_sequences(Left.args, Right.args)
 
 
-def unify_pairs(tuples: List[Tuple[Term, Term]]):
+def unify_pairs(tuples: List[Tuple[Any, Any]]):
   """ Apply unify to pairs of terms. """
   if not tuples:  # If no more tuples, we are done.
     yield
