@@ -320,7 +320,7 @@ if __name__ == '__main__':
   
   """
 
-  print(f'\n?- LinkedList([Var()]).has_a_py_value(): {LinkedList([Var( )]).has_a_py_value( )}')
+  print(f'\n?- LinkedList([Var()]).has_py_value(): {LinkedList([Var( )]).has_py_value( )}')
   A = LinkedList([1, 2, 3])
   B_Head = Var( )
   B_Tail = Var( )
@@ -381,7 +381,7 @@ if __name__ == '__main__':
   """
   Expected output
   
-  LinkedList([Var()]).has_a_py_value(): False
+  LinkedList([Var()]).has_py_value(): False
   1. A: [1, 2, 3], B: ('[]', '_46', '_47')
   2. A: [1, 2, 3], B: [1, 2, 3]
   3. C: [0, 2, 3]
