@@ -32,9 +32,9 @@ def eot(f):
 
   @wraps(f)
   def eot_wrapper_gen(*args, **kwargs):
-    arg_trail_ends = arg_Vars_trail_ends(args)
+    args_trail_ends = arg_Vars_trail_ends(args)
     kwargs_trail_ends = dict_Vars_trail_ends((kwargs))
-    yield from f(*arg_trail_ends, **kwargs_trail_ends)
+    yield from f(*args_trail_ends, **kwargs_trail_ends)
 
   @wraps(f)
   def eot_wrapper_non_gen(*args, **kwargs):
@@ -89,16 +89,11 @@ class Term:
 
   def __str__(self) -> str:
     """
-    The str( ) of a Var is its py_value if has_py_value( ) or its term_id otherwise.
+    The str( ) of a Var is (a) the str of its py_value if has_py_value( ) or (b) its term_id otherwise.
     """
     self_eot = self.trail_end( )
     return f'{self_eot}' if self_eot.has_py_value( ) or isinstance(self_eot, Structure) else f'_{self_eot.term_id}'
 
-  # @staticmethod
-  # def ensure_is_logic_variable(x: Any) -> Term:
-  #   # PyValue anything that is not a Term.
-  #   return x if isinstance(x, Term) else PyValue(x)
-  #
   def get_py_value(self) -> Any:
     return None
 
@@ -110,18 +105,16 @@ class Term:
 
 
 def is_immutable(x):
-  if isinstance(x, (Number, str, bool)) or callable(x) or x is None:
-    return True
-  if isinstance(x, (frozenset, tuple)):
-    return all(is_immutable(c) for c in x)
-  return False
+  return (isinstance(x, (Number, str, bool, type(None))) or
+          isinstance(x, (frozenset, tuple)) and all(is_immutable(c) for c in x))
 
 
 class PyValue(Term):
 
-  """ A wrapper class for integers, strings, and any other Python value. """
+  """ A wrapper class for integers, strings, and other immutable Python value. """
 
-  def __init__(self, py_value: Optional[Any] = None ):
+  def __init__(self, py_value: Optional[str, Number] = None ):
+    assert is_immutable(py_value), f"Only immutable values are allowed as PyValues. {py_value} is mutable."
     self._py_value = py_value
     super( ).__init__( )
 
@@ -136,6 +129,11 @@ class PyValue(Term):
   def __str__(self) -> str:
     return f'{self._py_value}'
 
+  # This instantiates a PyValue, which had been None. This is dangerous since it mutates this object.
+  def _set_py_value(self, py_value):
+    assert is_immutable(py_value), f"Only immutable values are allowed as PyValues. {py_value} is mutable."
+    self._py_value = py_value
+
   def get_py_value(self) -> Any:
     return self._py_value
 
@@ -144,7 +142,7 @@ class PyValue(Term):
     return [v.get_py_value( ) for v in Vars]
 
   def has_py_value(self) -> bool:
-    return True
+    return self.get_py_value() is not None
 
 
 class Structure(Term):
@@ -179,7 +177,7 @@ class Structure(Term):
     return Structure( (self.functor, *py_value_args) )
 
   def has_py_value(self) -> bool:
-    py_value_args = all([arg.has_py_value() for arg in self.args])
+    py_value_args = all(arg.has_py_value() for arg in self.args)
     return py_value_args
 
   @staticmethod
@@ -302,16 +300,24 @@ def unify(Left: Any, Right: Any):
   # (Left, Right) = map(lambda v: v if isinstance(v, Term) else PyValue(v) , (Left, Right))
   (Left, Right) = map(ensure_is_logic_variable, (Left, Right))
 
-  # If the trail_ends are equal, either because they have the same py_value or
+  # If the trail_ends are equal, either because they have the same py_value (other than None) or
   # because they are the same (unbound) Var, do nothing. They are already unified.
   # yield to indicate unification success.
-  if Left == Right:
+  if Left == Right and not Left.get_py_value() is None:
     yield
 
-  # Since they are not equal, if they both have_py_values (and hence have different values),
-  # they can't be unified. To indicate unification failure, terminate without a yield.
-  elif Left.has_py_value( ) and Right.has_py_value( ):
-    return False
+  elif isinstance(Left, PyValue) and isinstance(Right, PyValue):
+    # Since they are not equal, if they are both instantiated PyValues, they can't be unified.
+    # Terminate without a yield to indicate unification failure.
+    if Left.has_py_value( ) and Right.has_py_value( ):
+      return False
+    # Now we know that they are both PyValues, and exactly one is uninstantiated. (If they
+    # were both uninstantiated, we would have Left == Right and not Left.get_py_value() is None.)
+    (assignedTo, assignedFrom) = (Left, Right) if Right.has_py_value( ) else (Right, Left)
+    assignedTo._set_py_value(assignedFrom.get_py_value())
+    yield
+    # See discussion below for why we do this.
+    assignedTo._set_py_value(None)
 
   # If at least one is a Var. Make the other an extension of its trail.
   # (If both are Vars, it makes no functional difference which extends which.)
