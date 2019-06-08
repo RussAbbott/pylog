@@ -23,7 +23,7 @@
 <dd>Pylog demonstrates by its existence and functionality that the goal of integrating logic variables and backtracking with Python can be achieved.</dd>
 
 <dt>Importance: Why does this work matter?</dt>
-<dd>This work demonstrates the power and elegance of well-designed software. 
+<dd>Python is known to be compatible with functional programming. This work shows that it is also (and simultaneously) compatible with logic programming. This work also demonstrates the power and elegance of well-designed software. 
 <dd>
 </dl>
 
