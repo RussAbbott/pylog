@@ -1,40 +1,27 @@
 from math import log10
 from typing import Generator, List
 
-from logic_variables import PyValue, unify, Var
-# from sequence_options.sequences import PyList
 
-
-def is_safe(Placement: PyValue, col: int) -> bool:
+def is_safe(placement: List[int], col: int) -> bool:
   """ Given the Placement so far, is it safe to add a queen in the next row at the col position? """
 
-  # The elements of a PyList are all Logic Variables of some sort. In this case they are all
-  # Ground(<int>) for some integer. To work with the actual integer values, we convert the PyList to
-  # a Python list and then extract the values from their Ground wrappers.
-
-  # Ground_Col_Nbr will be a Ground object containing a col number.
-  # get_py_value() extracts the actual integer.
-
-  # placement_vector: [int] = [Ground_Col_Nbr.get_py_value() for Ground_Col_Nbr in Placement.to_python_list()]
-  placement_vector: [int] = Placement.get_py_value()
-
-  row = len(placement_vector)  # the same as len(placement_vector)
+  row = len(placement)
 
   # (row, col) is the proposed position of the new queen. 
   # Assuming that (rowp, colp) is the position of a previously set queen, (row, col) is a safe placement if:
   # (a) col has not been used previously, i.e., col != colp, and
   # (b) (row, col) is not on the same diagonal as any previous queen, i.e., abs(rowp - row) != abs(colp - col).
 
-  return all([col != colp and abs(rowp - row) != abs(colp - col) for (rowp, colp) in enumerate(placement_vector)])
+  return all([col != colp and abs(rowp - row) != abs(colp - col) for (rowp, colp) in enumerate(placement)])
 
 
-def layout(placement_vector: [int], board_width: int) -> str:
-  """ Format the placement_vector for display. """
+def layout(placement: [int], board_width: int) -> str:
+  """ Format the placement for display. """
   offset = ord('a')
   # Generate the column headers.
   col_hdrs = ' '*(4+int(log10(board_width))) + \
              '  '.join([f'{chr(n+offset)}' for n in range(board_width)]) + '  col#\n'
-  display = col_hdrs + '\n'.join([one_row(r, c, board_width) for (r, c) in enumerate(placement_vector)])
+  display = col_hdrs + '\n'.join([one_row(r, c, board_width) for (r, c) in enumerate(placement)])
   return display
 
 
@@ -53,56 +40,46 @@ def place_n_queens(board_width: int):
   placed in the rth row. I.e., Placement[r] is the position of the queen in row r.
   Initially, Placement is an empty list.
 
-  This implementation uses PyList for Placement. PyList is a logic variable type that
-  mirrors Python's list.
+  This implementation uses a Python list wrapped in a PyValue for Placement. That's so that we
+  can demonstrate how to return the solution through Solution rather than through the parameter
+  in the "for _ in place_remaining_queens" statement.
+  "for Solution in place_remaining_queens" would work as well as long as place_remaining_queens
+  yields the solution rather than unifying it with Solution.
   """
-  Placement = PyValue( [] )
+  placement = []
   solutionNbr = 0
-  Solution = Var()
-  # Traditional Prolog style puts the arg that will be unified with the answer (in this case Solution) at the end.
-  for _ in place_remaining_queens(Placement, board_width, Solution):
-    # This is a typical Python for-loop: we reach this point for every solution found.
-    # The difference is that the solution is returned in the Solution parameter
-    # rather than in a variable in the fol-loop between 'for' and 'in'.
+  for solution in place_remaining_queens(placement, board_width):
     solutionNbr += 1
-    # get_py_value follows Solution's unification trail to the end and then finds the py_value.
-    # (In this case, Solution's unification trail is only one step.)
-    solution_display = layout(Solution.get_py_value(), board_width)
+    solution_display = layout(solution, board_width)
     print(f'\n{solutionNbr}.\n{solution_display}')
 
 
-def place_remaining_queens(Placement: PyValue, board_width: int, Solution: Var) -> Generator[List[int], None, None]:
+def place_remaining_queens(placement: List[int], board_width: int) -> Generator[List[int], None, None]:
   """
   Find a safe spot for a queen in the row after those in the current Placement and continue with the rest of the rows.
 
-  :param Placement: A Placement is a list of n integers. It indicates the rows, from 0 through len(Placement)-1,
+  :param placement: A placement is a list of n integers. It indicates the rows, from 0 through len(Placement)-1,
   that have non-conflicting queen column assignments. The rth integer, i.e., Placement[r], indicates the column in
   which the queen is to be placed in the rth row.
   :param board_width: the size of the board: board_width x board_width, generally 8.
-  :param Solution: the Var that will be unified with the Placement holding an answer. This is how
-  answers are generally returned in Prolog.
   """
   # The following will try all the columns as possible positions for the next queen.
   # It's what makes Prolog look like it's backtracking.
   for col in range(board_width):
     # Note that there is no 'else' for the following if. Whether or not col is a safe position,
     # we go on to the next value after processing col.
-    if is_safe(Placement, col):
-      # + is defined for PyLists to mirror + for Python lists.
-      Extended_Placement = PyValue(Placement.get_py_value() + [col])
+    if is_safe(placement, col):
+      extended_placement = placement + [col]
 
       # Have we filled the board?
-      if len(Extended_Placement.get_py_value()) == board_width:
-        # Found a solution. Unify it with Solution and indicate success by yielding.
-        yield from unify(Extended_Placement, Solution)
-        # The preceding 'yield from' line is equivalent to the following.
-        # for _ in unify(Extended_Placement, Solution):
-        #   yield
+      if len(extended_placement) == board_width:
+        # Found a solution; yield it.
+        yield extended_placement
 
       # More queens to place.
       else:
         # Find columns for the remaining queens.
-        yield from place_remaining_queens(Extended_Placement, board_width, Solution)
+        yield from place_remaining_queens(extended_placement, board_width)
         # The preceding 'yield from' line is equivalent to the following.
         # for _ in place_remaining_queens(Extended_Placement, board_width, Solution):
         #   yield
