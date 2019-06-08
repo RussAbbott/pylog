@@ -3,35 +3,35 @@ from typing import Iterable, List, Union
 from logic_variables import n_Vars, PyValue, unify, unify_pairs, Var
 
 
-def complete_column(carry_out: int, sum_dig: int,
-                    Carry_Out_Dig: Var, Tot_Dig: Var,
+def complete_column(carry_out: int, Carry_Out_Dig: Var,
+                    sum_dig: int, Sum_Dig: Var,
                     digits_in: List[int], Leading_Digits):
   """
-  If Tot_Dig (the digit in the sum for this column) is not yet instantiated, instantiate it to sum_dig 
-  (if that digit is available). If Tot_Dig is already instantiated, ensure it is consistent with the sum_dig.
+  If Sum_Dig (the digit in the sum for this column) is not yet instantiated, instantiate it to sum_dig
+  (if that digit is available). If Sum_Dig is already instantiated, ensure it is consistent with the sum_dig.
   Instantiate Carry_Out_Dig to carry_out.
   """
-  # Is Tot_Dig uninstantiated? If so, instantiate it to sum_digit if possible.
+  # Is Sum_Dig uninstantiated? If so, instantiate it to sum_digit if possible.
   # Instantiate Carry_Out_Dig, and return (yield) digits_in with sum_digit removed.
-  if not Tot_Dig.has_py_value():
+  if not Sum_Dig.has_py_value():
     try:
       # digits_in.index(sum_dig) throws a ValueError if sum_dig is not in digits_in
       i = digits_in.index(sum_dig)
       # Ensure not to instantiate any of the Leading_Digits to 0.
-      if digits_in[i] != 0 or Tot_Dig not in Leading_Digits:
-        for _ in unify_pairs([(Carry_Out_Dig, carry_out), (Tot_Dig, sum_dig)]):
+      if digits_in[i] != 0 or Sum_Dig not in Leading_Digits:
+        for _ in unify_pairs([(Carry_Out_Dig, carry_out), (Sum_Dig, sum_dig)]):
           yield digits_in[:i] + digits_in[i + 1:]
     # sum_dig is not available in digits_in. Fail.
     except ValueError:
       return
 
-  # If Tot_Dig is instantiated, is it equal to sum_digit?
+  # If Sum_Dig is instantiated, is it equal to sum_digit?
   # If so, instantiate Carry_Out_Dig and return the current digits_in.
-  elif sum_dig == Tot_Dig.get_py_value( ):
+  elif sum_dig == Sum_Dig.get_py_value( ):
     for _ in unify(Carry_Out_Dig, carry_out):
       yield digits_in
 
-  # Tot_Dig is instantiated but not to sum_digit. Fail.
+  # Sum_Dig is instantiated but not to sum_digit. Fail.
   else:
     return
 
@@ -39,7 +39,7 @@ def complete_column(carry_out: int, sum_dig: int,
 def solve(Carries: List[Var],
           Term1: List[Union[Var, PyValue]],
           Term2: List[Union[Var, PyValue]],
-          Total: List[Union[Var, PyValue]],
+          Sum: List[Union[Var, PyValue]],
           Leading_Digits: List[Var]):
   """
   Solve the problem.
@@ -62,16 +62,11 @@ def solve(Carries: List[Var],
     """
     if not Vars:
       # We have instantiated the term digits.
-      # Instantiate Tot_Dig (if possible) and Carries[index - 1]
+      # Instantiate Sum_Dig (if possible) and Carries[index - 1]
       # Completing the column is a bit more work than it might seem.
-      (carry_in, d1, d2) = (b_to_0(d.get_py_value( )) for d in [Carries[index], Term1[index], Term2[index]])
-      total = sum([carry_in, d1, d2])
-      (c, d) = divmod(total, 10)
-      yield from complete_column(c, d, Carries[index-1], Total[index], digits_in, Leading_Digits)
-
-    elif not digits_in:
-      # No more digits. Fail.
-      return
+      (carry_in, digit_1, digit_2) = (b_to_0(d.get_py_value( )) for d in [Carries[index], Term1[index], Term2[index]])
+      (carry_out, sum_dig) = divmod(sum([carry_in, digit_1, digit_2]), 10)
+      yield from complete_column(carry_out, Carries[index-1], sum_dig, Sum[index], digits_in, Leading_Digits)
 
     else:
       # Get head and tail of Vars.
@@ -114,21 +109,24 @@ def letters_to_vars(st: Iterable, d: dict) -> List:
   return [d[s] for s in st]
 
 
-def set_up_puzzle(t1, t2, total):
-  var_letters = sorted(list(set(t1 + t2 + total)))
+def set_up_puzzle(t1, t2, sum):
+  var_letters = sorted(list(set(t1 + t2 + sum)))
+  if len(var_letters) > 10:
+    print(f'Too many variables: {var_letters}')
+    return
   vars_dict = dict(zip(var_letters, n_Vars(len(var_letters))))
   Z = PyValue(' ')
-  length = len(total) + 1
+  length = len(sum) + 1
   T1 = [Z for _ in range((length - len(t1)))] + letters_to_vars(t1, vars_dict)
   T2 = [Z for _ in range((length - len(t2)))] + letters_to_vars(t2, vars_dict)
-  Tot = [Z for _ in range((length - len(total)))] + letters_to_vars(total, vars_dict)
-  non_zero_vars = letters_to_vars({t1[0], t2[0], total[0]}, vars_dict)
+  Tot = [Z for _ in range((length - len(sum)))] + letters_to_vars(sum, vars_dict)
+  non_zero_vars = letters_to_vars({t1[0], t2[0], sum[0]}, vars_dict)
   carries = [*list(n_Vars(length - 1)), PyValue(0)]
   return (T1, T2, Tot, non_zero_vars, carries)
 
 
-def solve_crypto(t1: str, t2: str, total: str):
-  (T1, T2, Tot, non_zero_vars, carries) = set_up_puzzle(t1, t2, total)
+def solve_crypto(t1: str, t2: str, sum: str):
+  (T1, T2, Tot, non_zero_vars, carries) = set_up_puzzle(t1, t2, sum)
   want_more = None
   for _ in solve(carries, T1, T2, Tot, non_zero_vars):
     # Discard the leading blanks and convert number each to a string.
@@ -136,8 +134,8 @@ def solve_crypto(t1: str, t2: str, total: str):
     print()
     print(f'  {t1}  -> {t1_out}')
     print(f'+ {t2}  -> {t2_out}')
-    print(f'{"-" * (len(total)+1)}     {"-" * len(total)}')
-    print(f' {total}  -> {tot_out}')
+    print(f'{"-" * (len(sum)+1)}     {"-" * len(sum)}')
+    print(f' {sum}  -> {tot_out}')
     ans = input('\nLook for more solutions? (y/n) > ').lower( )
     want_more = ans[0] if len(ans) > 0 else 'n'
     if want_more != 'y':
