@@ -3,37 +3,44 @@ from typing import Iterable, List, Union
 from logic_variables import n_Vars, PyValue, unify, unify_pairs, Var
 
 
-def are_we_done(carry_out: int, sum_dig: int, Tot_Dig: Var, Carry_Out_Dig: Var, digits_in: List[int], Non_Zero_Vars):
+def complete_column(carry_out: int, sum_dig: int,
+                    Carry_Out_Dig: Var, Tot_Dig: Var,
+                    digits_in: List[int], Leading_Digits):
   """
-  Instantiate If Tot_Dig is not yet instantiated, instantiate it to the sum (if that digit is available)
-  If Total[index] is already instantiated, ensure it is consistent with the sum.
-  Instantiate Carries[index - 1]
+  If Tot_Dig (the digit in the sum for this column) is not yet instantiated, instantiate it to sum_dig 
+  (if that digit is available). If Tot_Dig is already instantiated, ensure it is consistent with the sum_dig.
+  Instantiate Carry_Out_Dig to carry_out.
   """
-  # (c, d) = divmod(total, 10)
-  tot_digit_py_value = Tot_Dig.get_py_value( )
-  # If Total[index] is instantiated, is it consistent with d?
-  # If so, instantiate Carry_Out_Dig and yield the current digits_in
-  if sum_dig == tot_digit_py_value:
-    for _ in unify(Carry_Out_Dig, carry_out):
-      yield digits_in
-  # If Total[index] is not instantiated, i.e., tot_digit_py_value is None, can it be instantiated to d?
-  # If so, instantiate Tot_Dig and Carry_Out_Dig and remove d from the available digits.
-  elif tot_digit_py_value is None:
+  # Is Tot_Dig uninstantiated? If so, instantiate it to sum_digit if possible.
+  # Instantiate Carry_Out_Dig, and return (yield) digits_in with sum_digit removed.
+  if not Tot_Dig.has_py_value():
     try:
       # digits_in.index(sum_dig) throws a ValueError if sum_dig is not in digits_in
       i = digits_in.index(sum_dig)
-      if digits_in[i] != 0 or Tot_Dig not in Non_Zero_Vars:
-        for _ in unify_pairs([(Tot_Dig, sum_dig), (Carry_Out_Dig, carry_out)]):
+      # Ensure not to instantiate any of the Leading_Digits to 0.
+      if digits_in[i] != 0 or Tot_Dig not in Leading_Digits:
+        for _ in unify_pairs([(Carry_Out_Dig, carry_out), (Tot_Dig, sum_dig)]):
           yield digits_in[:i] + digits_in[i + 1:]
+    # sum_dig is not available in digits_in. Fail.
     except ValueError:
-      pass
+      return
+
+  # If Tot_Dig is instantiated, is it equal to sum_digit?
+  # If so, instantiate Carry_Out_Dig and return the current digits_in.
+  elif sum_dig == Tot_Dig.get_py_value( ):
+    for _ in unify(Carry_Out_Dig, carry_out):
+      yield digits_in
+
+  # Tot_Dig is instantiated but not to sum_digit. Fail.
+  else:
+    return
 
 
 def solve(Carries: List[Var],
           Term1: List[Union[Var, PyValue]],
           Term2: List[Union[Var, PyValue]],
           Total: List[Union[Var, PyValue]],
-          Non_Zero_Vars: List[Var]):
+          Leading_Digits: List[Var]):
   """
   Solve the problem.
   The two embedded functions below refer to the lists in solve's params.
@@ -42,66 +49,44 @@ def solve(Carries: List[Var],
   """
 
   def b_to_0(c):
-    """ Convert ' ' to 0 when adding. Used only by are_we_done. """
+    """ Convert ' ' to 0 when adding. Used only by fill_column. """
     return 0 if c == ' ' else c
 
-  def instantiate_all(Vars: List[Var], index: int, digits_in: List[int]):
+  def fill_column(Vars: List[Var], index: int, digits_in: List[int]):
     """
-    Vars are the digits we are currently adding, one from each term and one from the sum.
-    Unify them with digit values.
+    Vars are the digits in the current column to be added together, one from each term.
     digits-in are the digits that have not yet been assigned to a Var.
+    Find digits in digits_in that make the column add up properly.
     Return (through yield) the digits that are not yet used after the new assignments.
-    We do this recursively on Vars.
+    We do this recursively on Vars--even though we are currently assuming only two terms.
     """
     if not Vars:
-      # Are we done? We've instantiated the term digits.
+      # We have instantiated the term digits.
       # Instantiate Tot_Dig (if possible) and Carries[index - 1]
+      # Completing the column is a bit more work than it might seem.
       (carry_in, d1, d2) = (b_to_0(d.get_py_value( )) for d in [Carries[index], Term1[index], Term2[index]])
       total = sum([carry_in, d1, d2])
       (c, d) = divmod(total, 10)
-      yield from are_we_done(c, d, Total[index], Carries[index-1], digits_in, Non_Zero_Vars)
+      yield from complete_column(c, d, Carries[index-1], Total[index], digits_in, Leading_Digits)
+
     elif not digits_in:
       # No more digits. Fail.
       return
+
     else:
       # Get head and tail of Vars.
       [V, *Vs] = Vars
-      # If V already has a value nothing to do. Go on to the next Vars.
-      if isinstance(V.trail_end( ), PyValue):
-        yield from instantiate_all(Vs, index, digits_in)
+      # If V already has a value, nothing to do. Go on to the remaining Vars.
+      if V.has_py_value():
+        yield from fill_column(Vs, index, digits_in)
       else:
         # Give V one of the available digits. Through "backup" all digits will be tried.
         for i in range(len(digits_in)):
           # Make sure we don't assign 0 to one of the leading digits.
-          if digits_in[i] != 0 or V not in Non_Zero_Vars:
-            for _ in unify(V, digits_in[i]):  # Don't have to wrap digits_in[i] in PyValue explicitly.
-              yield from instantiate_all(Vs, index, digits_in[:i] + digits_in[i + 1:])
+          if digits_in[i] != 0 or V not in Leading_Digits:
+            for _ in unify(V, digits_in[i]):
+              yield from fill_column(Vs, index, digits_in[:i] + digits_in[i + 1:])
 
-  # def are_we_done(total: int, Tot_Dig: Var, Carry_Out_Dig: Var, digits_in: List[int]):
-  #   """
-  #   Instantiate If Total[index] is not yet instantiated, instantiate it to the sum (if that digit is available)
-  #   If Total[index] is already instantiated, ensure it is consistent with the sum.
-  #   Instantiate Carries[index - 1]
-  #   """
-  #   (c, d) = divmod(total, 10)
-  #   tot_digit_py_value = Tot_Dig.get_py_value( )
-  #   # If Total[index] is instantiated, is it consistent with d?
-  #   # If so, instantiate Carry_Out_Dig and yield the current digits_in
-  #   if d == tot_digit_py_value:
-  #     for _ in unify(Carry_Out_Dig, c):
-  #       yield digits_in
-  #   # If Total[index] is not instantiated, i.e., tot_digit_py_value is None, can it be instantiated to d?
-  #   # If so, instantiate Tot_Dig and Carry_Out_Dig and remove d from the available digits.
-  #   elif tot_digit_py_value is None:
-  #     try:
-  #       # digits_in.index(d) throws a ValueError if d is not in digits_in
-  #       i = digits_in.index(d)
-  #       if digits_in[i] != 0 or Tot_Dig not in Non_Zero_Vars:
-  #         for _ in unify_pairs([(Tot_Dig, d), (Carry_Out_Dig, c)]):
-  #           yield digits_in[:i] + digits_in[i + 1:]
-  #     except ValueError:
-  #       pass
-  #
   def solve_aux(index: int, digits_in: List[int]):
     """ Traditional addition: work from right to left. """
     # When we reach 0, we're done.
@@ -114,7 +99,7 @@ def solve(Carries: List[Var],
         # Won't have such a carry with only two terms. But it might happen with many terms,.
         return
     else:
-      for digits_out in instantiate_all([Term1[index], Term2[index]], index, digits_in):
+      for digits_out in fill_column([Term1[index], Term2[index]], index, digits_in):
           yield from solve_aux(index-1, digits_out)
     
   yield from solve_aux(len(Carries)-1, list(range(10)))
