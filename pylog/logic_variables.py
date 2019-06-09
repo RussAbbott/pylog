@@ -308,6 +308,7 @@ def unify(Left: Any, Right: Any):
     yield
 
   elif isinstance(Left, PyValue) and isinstance(Right, PyValue):
+    # If they are both PyValues, treat specially.
     yield from unify_PyValues(Left, Right)
     
   # If at least one is a Var. Make the other an extension of its trail.
@@ -335,14 +336,13 @@ def unify(Left: Any, Right: Any):
     
 # noinspection PyProtectedMember
 def unify_PyValues(Left, Right):
+  # If exactly one is instantiated, assign it's value to the other.
   if (not Left.is_instantiated() or not Right.is_instantiated()) and \
      (Left.is_instantiated( ) or Right.is_instantiated( )):
-    # Now we know that they are both PyValues, and exactly one is uninstantiated. (If they
-    # were both uninstantiated, we would have Left == Right and Left.is_instantiated().)
     (assignedTo, assignedFrom) = (Left, Right) if Right.is_instantiated( ) else (Right, Left)
     assignedTo._set_py_value(assignedFrom.get_py_value())
     yield
-    # See discussion above for why we do this.
+    # See discussion in unify above for why we do this.
     assignedTo._set_py_value(None)
 
 
