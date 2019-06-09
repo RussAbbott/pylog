@@ -320,7 +320,7 @@ if __name__ == '__main__':
   
   """
 
-  print(f'\n?- LinkedList([Var()]).is_fully_instantiated(): {LinkedList([Var( )]).is_fully_instantiated( )}')
+  print(f'\n?- LinkedList([Var()]).is_instantiated(): {LinkedList([Var( )]).is_instantiated( )}')
   A = LinkedList([1, 2, 3])
   B_Head = Var( )
   B_Tail = Var( )
@@ -381,7 +381,7 @@ if __name__ == '__main__':
   """
   Expected output
   
-  LinkedList([Var()]).is_fully_instantiated(): False
+  LinkedList([Var()]).is_instantiated(): False
   1. A: [1, 2, 3], B: ('[]', '_46', '_47')
   2. A: [1, 2, 3], B: [1, 2, 3]
   3. C: [0, 2, 3]
