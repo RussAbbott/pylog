@@ -89,16 +89,16 @@ class Term:
 
   def __str__(self) -> str:
     """
-    The str( ) of a Var is (a) the str of its py_value if is_fully_instantiated( ) or (b) its term_id otherwise.
+    The str( ) of a Var is (a) the str of its py_value if is_instantiated( ) or (b) its term_id otherwise.
     """
     self_eot = self.trail_end( )
-    return f'{self_eot}' if self_eot.is_fully_instantiated( ) or isinstance(self_eot, Structure) else \
+    return f'{self_eot}' if self_eot.is_instantiated( ) or isinstance(self_eot, Structure) else \
            f'_{self_eot.term_id}'
 
   def get_py_value(self) -> Any:
     return None
 
-  def is_fully_instantiated(self) -> bool:
+  def is_instantiated(self) -> bool:
     return False
 
   def trail_end(self) -> Term:
@@ -142,7 +142,7 @@ class PyValue(Term):
   def get_py_values(Vars: List[Var]):
     return [v.get_py_value( ) for v in Vars]
 
-  def is_fully_instantiated(self) -> bool:
+  def is_instantiated(self) -> bool:
     return self.get_py_value() is not None
 
 
@@ -177,8 +177,8 @@ class Structure(Term):
     py_value_args = [arg.get_py_value() for arg in self.args]
     return Structure( (self.functor, *py_value_args) )
 
-  def is_fully_instantiated(self) -> bool:
-    py_value_args = all(arg.is_fully_instantiated() for arg in self.args)
+  def is_instantiated(self) -> bool:
+    py_value_args = all(arg.is_instantiated() for arg in self.args)
     return py_value_args
 
   @staticmethod
@@ -245,13 +245,13 @@ class Var(Term):
 
   @eot
   def get_py_value(self) -> Optional[Any]:
-    return self.get_py_value( ) if self.is_fully_instantiated( ) else None
+    return self.get_py_value( ) if self.is_instantiated( ) else None
 
   # Can't use @eot. Generates an infinite recursive loop.
-  def is_fully_instantiated(self) -> bool:
-    """ is_fully_instantiated if its trail end is_fully_instantiated """
+  def is_instantiated(self) -> bool:
+    """ is_instantiated if its trail end is_instantiated """
     Trail_End_Var = self.trail_end( )
-    return not isinstance(Trail_End_Var, Var) and Trail_End_Var.is_fully_instantiated()
+    return not isinstance(Trail_End_Var, Var) and Trail_End_Var.is_instantiated()
 
   def trail_end(self):
     """
@@ -283,7 +283,6 @@ def n_Vars(n: int) -> List[Var]:
   return [Var( ) for _ in range(n)]
 
 
-# noinspection PyProtectedMember
 @eot
 def unify(Left: Any, Right: Any):
   """
@@ -305,22 +304,12 @@ def unify(Left: Any, Right: Any):
   # If the trail_ends are equal, either because they have the same py_value (other than None) or
   # because they are the same (unbound) Var, do nothing. They are already unified.
   # yield to indicate unification success.
-  if Left == Right and not Left.get_py_value() is None:
+  if Left == Right and Left.is_instantiated():
     yield
 
   elif isinstance(Left, PyValue) and isinstance(Right, PyValue):
-    # Since they are not equal, if they are both instantiated PyValues, they can't be unified.
-    # Terminate without a yield to indicate unification failure.
-    if Left.is_fully_instantiated( ) and Right.is_fully_instantiated( ):
-      return False
-    # Now we know that they are both PyValues, and exactly one is uninstantiated. (If they
-    # were both uninstantiated, we would have Left == Right and not Left.get_py_value() is None.)
-    (assignedTo, assignedFrom) = (Left, Right) if Right.is_fully_instantiated( ) else (Right, Left)
-    assignedTo._set_py_value(assignedFrom.get_py_value())
-    yield
-    # See discussion below for why we do this.
-    assignedTo._set_py_value(None)
-
+    yield from unify_PyValues(Left, Right)
+    
   # If at least one is a Var. Make the other an extension of its trail.
   # (If both are Vars, it makes no functional difference which extends which.)
   elif isinstance(Left, Var) or isinstance(Right, Var):
@@ -342,6 +331,19 @@ def unify(Left: Any, Right: Any):
   # (b) their arguments can be unified.
   elif isinstance(Left, Structure) and isinstance(Right, Structure) and Left.functor == Right.functor:
     yield from unify_sequences(Left.args, Right.args)
+    
+    
+# noinspection PyProtectedMember
+def unify_PyValues(Left, Right):
+  if (not Left.is_instantiated() or not Right.is_instantiated()) and \
+     (Left.is_instantiated( ) or Right.is_instantiated( )):
+    # Now we know that they are both PyValues, and exactly one is uninstantiated. (If they
+    # were both uninstantiated, we would have Left == Right and Left.is_instantiated().)
+    (assignedTo, assignedFrom) = (Left, Right) if Right.is_instantiated( ) else (Right, Left)
+    assignedTo._set_py_value(assignedFrom.get_py_value())
+    yield
+    # See discussion above for why we do this.
+    assignedTo._set_py_value(None)
 
 
 def unify_pairs(tuples: List[Tuple[Any, Any]]):
@@ -378,17 +380,26 @@ def unify_sequences(seq_1: Sequence, seq_2: Sequence):
 
 if __name__ == '__main__':
 
-  # A = PyValue('abc')
   A = 'abc'
   B = Var( )
   C = Var( )
-  # D = PyValue('def')
   D = 'def'
   print(f'\nA: {A}; B: {B}; C: {C}; D: {D}')
   print(f'Attempting: unify_pairs([(A, B), (B, C), (C, D)]).  A, B, C, D will all be the same if it succeeds.')
   for _ in unify_pairs([(A, B), (B, C), (C, D)]):
     print(f'b. A: {A}; B: {B}; C: {C}; D: {D}')
   print('As expected, unify_pairs fails -- because A and D have distinct PyValue values.')
+
+  PV1 = PyValue()
+  PV2 = PyValue()
+  print(f'\nTrying unify({PV1}, {PV2}). Should fail.')
+  for _ in unify(PV1, PV2):
+    print("Shouldn't have succeeded.")
+  print("Failed, as expected, if nothing before this.")
+  print(f'Trying unify({PV1}, 1). Should succeed.')
+  for _ in unify(PV1, 1):
+    print(f"PV1.is_instantiated(): {PV1.is_instantiated()}: {PV1}")
+  print(f"PV1.is_instantiated(): {PV1.is_instantiated()}: {PV1}")
 
   A = Var( )
   # B, C, and D are the same as above.
