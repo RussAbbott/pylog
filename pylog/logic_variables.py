@@ -53,15 +53,15 @@ class Term:
                                |                       |                      |
                             PyValue                   Var                 Structure
                                |                                              |
-                   -----------------------                              SuperSequence
-                   |                     |                                    |
-               Container         (int, float, string}                   -------------------
-        (a quasi-logic-variable)                                        |                 |
-                                                                    LinkedList       PySequence
-                                                                                          |
-                                                                                     -------------
-                                                                                     |           |
-                                                                                  PyList      PyTuple
+                   --------------------------                            SuperSequence
+                               |                                              |
+                   (int, float, string, etc.}                         -------------------
+                  (any immutable Python value)                        |                 |
+                                                                  LinkedList       PySequence
+                                                                                        |
+                                                                                  -------------
+                                                                                  |           |
+                                                                                PyList      PyTuple
   """
 
   term_count = 0
@@ -98,7 +98,9 @@ class Term:
   def get_py_value(self) -> Any:
     return None
 
+  @eot
   def is_instantiated(self) -> bool:
+    """ Should never get here since no trail-end is a Term. """
     return False
 
   def trail_end(self) -> Term:
@@ -121,7 +123,10 @@ class PyValue(Term):
 
   def __eq__(self, other: Term) -> bool:
     other_eot = other.trail_end()
-    return isinstance(other_eot, PyValue) and self.get_py_value() == other_eot.get_py_value()
+    return (isinstance(other_eot, PyValue) and
+            self.get_py_value() == other_eot.get_py_value() and
+            # Don't need to test both.
+            self.is_instantiated() and other.is_instantiated)
 
   def __lt__(self, other: Term) -> bool:
     other_eot = other.trail_end()
@@ -178,8 +183,9 @@ class Structure(Term):
     return Structure( (self.functor, *py_value_args) )
 
   def is_instantiated(self) -> bool:
-    py_value_args = all(arg.is_instantiated() for arg in self.args)
-    return py_value_args
+    """ A Structure is instantiated if all its args are. """
+    args_are_instantiated = all(arg.is_instantiated() for arg in self.args)
+    return args_are_instantiated
 
   @staticmethod
   def values_string(values: Iterable):
@@ -249,7 +255,7 @@ class Var(Term):
 
   # Can't use @eot. Generates an infinite recursive loop.
   def is_instantiated(self) -> bool:
-    """ is_instantiated if its trail end is_instantiated """
+    """ A Var is_instantiated if its trail end is_instantiated """
     Trail_End_Var = self.trail_end( )
     return not isinstance(Trail_End_Var, Var) and Trail_End_Var.is_instantiated()
 
@@ -283,6 +289,7 @@ def n_Vars(n: int) -> List[Var]:
   return [Var( ) for _ in range(n)]
 
 
+# noinspection PyProtectedMember
 @eot
 def unify(Left: Any, Right: Any):
   """
@@ -294,23 +301,45 @@ def unify(Left: Any, Right: Any):
 
   The final element on the trail is either
   o a non-Var, in which case the value of all preceding variables is the value of that non-Var, or
-  o a Var (which is not linked to any further variable), in which case, all variables on the trail
-    are unified, but they do not (yet) have a value.
+  o a Var (which is not linked to any further element), in which case, all variables on the trail
+    are unified but do not (yet) have a value.
   """
 
-  # (Left, Right) = map(lambda v: v if isinstance(v, Term) else PyValue(v) , (Left, Right))
+  # Make sure both Left and Right are logic variables. This allows us to call, e.g, unify(X, 'abc').
+  # ensure_is_logic_variable will wrap 'abc' in a PyValue.
   (Left, Right) = map(ensure_is_logic_variable, (Left, Right))
 
-  # If the trail_ends are equal, either because they have the same py_value (other than None) or
+  # If the trail_ends are equal, either because they have the same py_value or Structure or
   # because they are the same (unbound) Var, do nothing. They are already unified.
-  # yield to indicate unification success.
-  if Left == Right and Left.is_instantiated():
+  # yield to indicate unification success. If Left and Right are both
+  # uninstantiated PyValues, Left != Right. (See PyValue.__eq__.)
+  if Left == Right:
     yield
 
-  elif isinstance(Left, PyValue) and isinstance(Right, PyValue):
-    # If they are both PyValues, treat specially.
-    yield from unify_PyValues(Left, Right)
+  # The rest consists of special cases: both PyValues, both Structures, at least one Var.
+
+  # If Left and Right are both PyValues and exactly one is instantiated,
+  # "assign" it's value to the other. This is similar to (but simpler than)
+  # how we handle two Var's. But instead of building a trail, we "assign"
+  # one value to the other.
+  elif isinstance(Left, PyValue) and isinstance(Right, PyValue) and \
+       (not Left.is_instantiated( ) or not Right.is_instantiated( )) and \
+       (Left.is_instantiated( ) or Right.is_instantiated( )):
+    (assignedTo, assignedFrom) = (Left, Right) if Right.is_instantiated( ) else (Right, Left)
+    assignedTo._set_py_value(assignedFrom.get_py_value( ))
+    yield
+    # See discussion in unify below for why we do this.
+    assignedTo._set_py_value(None)
+    # :
+    # # If they are both PyValues, treat specially.
+    # yield from unify_PyValues(Left, Right)
     
+  # If both Left and Right are Structures, they can be unified if
+  # (a) they have the same functor and
+  # (b) their arguments can be unified.
+  elif isinstance(Left, Structure) and isinstance(Right, Structure) and Left.functor == Right.functor:
+    yield from unify_sequences(Left.args, Right.args)
+
   # If at least one is a Var. Make the other an extension of its trail.
   # (If both are Vars, it makes no functional difference which extends which.)
   elif isinstance(Left, Var) or isinstance(Right, Var):
@@ -327,28 +356,23 @@ def unify(Left: Any, Right: Any):
     # of a list. The first successful unification must be undone before the second can occur.
     pointsFrom.trail_next = None
 
-  # If both Left and Right are Structures, they can be unified if
-  # (a) they have the same functor and
-  # (b) their arguments can be unified.
-  elif isinstance(Left, Structure) and isinstance(Right, Structure) and Left.functor == Right.functor:
-    yield from unify_sequences(Left.args, Right.args)
     
-    
-# noinspection PyProtectedMember
-def unify_PyValues(Left, Right):
-  # If exactly one is instantiated, assign it's value to the other.
-  if (not Left.is_instantiated() or not Right.is_instantiated()) and \
-     (Left.is_instantiated( ) or Right.is_instantiated( )):
-    (assignedTo, assignedFrom) = (Left, Right) if Right.is_instantiated( ) else (Right, Left)
-    assignedTo._set_py_value(assignedFrom.get_py_value())
-    yield
-    # See discussion in unify above for why we do this.
-    assignedTo._set_py_value(None)
+# # noinspection PyProtectedMember
+# def unify_PyValues(Left, Right):
+#   # If exactly one is instantiated, assign it's value to the other.
+#   if (not Left.is_instantiated() or not Right.is_instantiated()) and \
+#      (Left.is_instantiated( ) or Right.is_instantiated( )):
+#     (assignedTo, assignedFrom) = (Left, Right) if Right.is_instantiated( ) else (Right, Left)
+#     assignedTo._set_py_value(assignedFrom.get_py_value())
+#     yield
+#     # See discussion in unify above for why we do this.
+#     assignedTo._set_py_value(None)
 
 
 def unify_pairs(tuples: List[Tuple[Any, Any]]):
   """ Apply unify to pairs of terms. """
-  if not tuples:  # If no more tuples, we are done.
+  # If no more tuples, we are done.
+  if not tuples:
     yield
   else:
     # Get the first tuple from the tuples list.
