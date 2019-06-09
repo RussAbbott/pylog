@@ -13,7 +13,7 @@ def complete_column(carry_out: int, Carry_Out_Dig: PyValue,
   """
   # Is Sum_Dig uninstantiated? If so, instantiate it to sum_digit if possible.
   # Then instantiate Carry_Out_Dig, and return (yield) digits_in with sum_digit removed.
-  if not Sum_Dig.is_fully_instantiated():
+  if not Sum_Dig.is_instantiated():
     try:
       # digits_in.index(sum_dig) throws a ValueError if sum_dig is not in digits_in
       i = digits_in.index(sum_dig)
@@ -70,7 +70,7 @@ def solve(Carries: List[PyValue],
       # Get head and tail of PVs.
       [PV, *PVs] = PVs
       # If PV already has a value, nothing to do. Go on to the remaining PVs.
-      if PV.is_fully_instantiated( ):
+      if PV.is_instantiated( ):
         yield from fill_column(PVs, index, digits_in)
       else:
         # Give PV one of the available digits. Through "backup" all digits will be tried.
