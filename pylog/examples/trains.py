@@ -1,10 +1,8 @@
 from functools import reduce
-from typing import List, Tuple, Union
+from typing import Iterator, List, Tuple, Union
 
 from control_structures import forall
-from logic_variables import PyValue, n_Vars, Term, unify, unify_pairs, Var
-
-from sequence_options.sequences import PyTuple
+from logic_variables import PyValue, Term, unify, unify_pairs
 
 
 lines = {
@@ -14,7 +12,7 @@ lines = {
 }
 
 
-def best_route(Start: PyValue, Route: Var, End: PyValue):
+def best_route(Start: PyValue, End: PyValue):
   """
   A Route will be: [Station, (Line, Dist), Station, (Line, Dist), ..., Station].
   Ignoring Dist, this will be the sequence of stations and lines to take from Start to End.
@@ -25,89 +23,87 @@ def best_route(Start: PyValue, Route: Var, End: PyValue):
   # Look for routes that use the fewest lines.
   for i in range(len(lines)):
     # The middle sequence is the intermediate lines and stations.
-    legs = (Start, *n_Vars(2*i+1), End)
+    intermediate = (PyValue() for _ in range(2*i+1))
+    legs = [Start, *intermediate, End]
     # If route(*legs) succeeds, route will instantiate legs to
     #         [Station, (Line, int), Station, (Line, int), ... , Station]
     # Once legs is instantiated, must take the py_values so that the collection
     # of routes remains instantiated after the list comprehension terminates.
     route_options = [ [elt.get_py_value() for elt in legs] for _ in route(*legs) ]
-    # Once we find at least one route from Start to End, find the best of them and quit.
+    # Once we find an i so that there is at least one route from Start to End using i lines,
+    # find the best of them and quit--by using return at the bottom.
+    # No point in looking for routes that use more lines.
     if route_options:
-      routes_with_totals = map(sum_distances, route_options)
-      best_option = min(routes_with_totals, key=lambda routeDist: routeDist[1])
-      # best_option will be a simple list. Make it a PyValue object so that it can be unified with Route.
-      yield from unify(Route, PyValue(best_option))
-      # break or return prevents backtracking, i.e., looking for alternative (and possibly longer) routes.
-      # Has an effect similar to a cut (!) in Prolog.
-      break
-      # return
+      routes_with_totals: Iterator[Tuple[List[str], int]] = map(sum_distances, route_options)
+      best_option: Tuple[List[str], int] = min(routes_with_totals, key=lambda routeDist: routeDist[1])
+      yield best_option
+      # return prevents backtracking, i.e., looking for longer routes.
+      # Has an effect similar to a cut (!) at the end of a clause in Prolog.
+      # break would work as well since it jumps out of the for-loop and returns.
+      return
 
 
-def connected(S1: Union[PyValue, Var], Line_Dist: Union[Var, PyTuple], S2: Union[PyValue, Var]):
+def connected(S1: PyValue, Line_Dist: PyValue, S2: PyValue):
+  # S1: Union[PyValue, Var], Line_Dist: Var, S2: Union[PyValue, Var
   """
   Are stations S1 and S2 connected on the same train line?
   If so, which line is it, and how many stations are between them?
-  Line_Dist will be unified with (Line, count_of_stations)
+  Line_Dist will be unified with (line, count_of_stations)
   """
   # print(f'-> connected({S1}, {Line_Dist}, {S2})?')
-  if S1 != S2:
-    Line = Var()
-    for _ in forall([lambda: has_station(Line, S1),
-                     lambda: has_station(Line, S2)]):
-      # Test again since S1 or S2 may have started as Var's
-      if S1 != S2:
-        stations = lines[Line.get_py_value()]
-        pos1 = stations.index(S1.get_py_value())
-        pos2 = stations.index(S2.get_py_value())
-        yield from unify(Line_Dist, PyTuple( (Line, PyValue(abs(pos1 - pos2))) ) )
+  # if S1 != S2:
+  Line = PyValue()
+  for _ in forall([lambda: has_station(Line, S1),
+                   lambda: has_station(Line, S2)]):
+    # Ensure that S1 != S2
+    if S1 != S2:
+      line = Line.get_py_value()
+      stations = lines[line]
+      pos1 = stations.index(S1.get_py_value())
+      pos2 = stations.index(S2.get_py_value())
+      yield from unify(Line_Dist, (line, abs(pos1 - pos2)))
   # print(f'XX connected({S1}, {Line_Dist}, {S2})?')
 
 
-def has_station(L: Union[PyValue, Var], S: Union[PyValue, Var]):
+def has_station(L: PyValue, S: PyValue):
   # print(f'-> has_station({L}, {S})?')
   for line in lines:
     for station in lines[line]:
-      for _ in unify_pairs([(L, PyValue(line)),
-                            (S, PyValue(station))]):
+      for _ in unify_pairs([(L, line),
+                            (S, station)]):
         # print(f'<- has_station({L}, {S})')
         yield
   # print(f'XX has_station({L}, {S})')
 
 
-def route(*legs: Tuple[Term]):
+def route(*legs: List[Term]):
   """
   Can we get from the first station to the last? If so, which lines and
   which intermediate stations should we use?
   :param legs: a sequence of: station, line, station, line, ... station.
-         All but the first and last may be variables.
-  :return:
+         All but the first and last will be PyValues.
+  :return: Find a route and instantiate the intermediate PyValues.
   """
   # print(f'-> route({[str(leg) for leg in legs]})?')
-  if len(legs) == 0 or len(legs) == 2:
-    # fail
-    # print(f'XX route({[str(leg) for leg in legs]}?')
-    pass
-  elif len(legs) == 1:  # Have arrived at our destination
+  if len(legs) == 1:  # Have arrived at our destination
     # succeed
     # print(f'<- route({[str(leg) for leg in legs]}?')
     yield
-  else:  # len(legs) >= 3. Take the next leg.
+  elif len(legs) >= 3:
+    # Take the next leg.
     for _ in connected(*legs[:3]):
       # Drop the first two elements, i.e., [Station, Line], and recurse.
-      # for _ in route(*legs[2:]):
-        # print(f'<- route({[str(leg) for leg in legs]}?')
-        # yield
       yield from route(*legs[2:])
 
 
-def sum_distances(legs: [Union[str, Tuple[str, int]]]) -> ([str], int):
+def sum_distances(legs: List[Union[str, Tuple[str, int]]]) -> Tuple[List[str], int]:
   """
   For a given route of legs, sum the distances along each line.
   :param legs: Each leg is either a station or a (line, dist) tuple.
   :return: (legs, total_dist), where legs drops the internal distances along each line
   """
 
-  def split_elts(routeDist: Tuple[tuple, int], elt: Union[str, Tuple[str, int]]) -> Tuple[tuple, int]:
+  def split_elts(routeDist: Tuple[List[str], int], elt: Union[str, Tuple[str, int]]) -> Tuple[List[str], int]:
     """
     This is the reduce function.
 
@@ -116,12 +112,13 @@ def sum_distances(legs: [Union[str, Tuple[str, int]]]) -> ([str], int):
     add the dist to the existing dist.
     """
     (route, dist) = routeDist
-    new_route = route + ( (elt[0] if isinstance(elt, tuple) else elt), )
+    assert isinstance(route, List) and isinstance(dist, int)
+    new_route: List[str] = route + [elt[0] if isinstance(elt, tuple) else elt]
     new_dist = dist + elt[1] if isinstance(elt, tuple) else dist
     return (new_route, new_dist)
 
   # print(f'-> sum_distances({[str(leg) for leg in legs]})?')
-  (new_route, total_dist) = reduce( split_elts, legs, ((), 0) )
+  (new_route, total_dist) = reduce( split_elts, legs, ([], 0) )
   # print(f'<- sum_distances: {(new_route, total_dist)}')
 
   return (new_route, total_dist)
@@ -163,8 +160,8 @@ if __name__ == '__main__':
     (S1, S2) = (PyValue(s1), PyValue(s2))
     # Use Route in Prolog style to pass back the route.
     # In this case it's simply a basket in which the best route is conveyed.
-    Route = Var( )
-    for _ in best_route(S1, Route, S2):
+    # Route = Var( )
+    for Route in best_route(S1, S2):
       print(f'\nA route from {S1} to {S2} that uses fewest lines ', end='')
       print(f'and of those that passes fewest intermediate stations:')
-      print_route( *Route.trail_end().get_py_value() )
+      print_route( *Route )
