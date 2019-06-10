@@ -269,20 +269,23 @@ class Var(Term):
 
 # @staticmethod
 def ensure_is_logic_variable(x: Any) -> Term:
-  # PyValue anything that is not a Term.
+  """
+    Applied to each argument in a Structure.
+    Applies PyValue to those that are not already Terms.
+    If x is not a logic variable, i.e., an instance of Term, it must be a Python value.
+    Wrap it in PyValue. (It must be immutable.)
+  """
   return x if isinstance(x, Term) else PyValue(x)
 
 
 # @staticmethod
 def make_property(prop):
   """
-    Applied to each argument in a term.
-    Applies PyValue to those that are not already Terms.
+    Use in StructureItem -- for puzzles.
     If a property is None, create a Var for it.
+    Otherwise apply ensure_is_logic_variable.
   """
-  return Var( ) if prop is None else ensure_is_logic_variable(prop)  # \
-  # prop if isinstance(prop, Term) else \
-  # PyValue(prop)
+  return Var( ) if prop is None else ensure_is_logic_variable(prop)
 
 
 def n_Vars(n: int) -> List[Var]:
