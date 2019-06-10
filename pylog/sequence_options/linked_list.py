@@ -1,9 +1,9 @@
 from __future__ import annotations
 from typing import Any, List, Tuple, Union
 
-from control_structures import forall, forany
-from logic_variables import ensure_is_logic_variable, eot, PyValue, n_Vars, Term, unify, unify_pairs, Var
-from sequence_options.super_sequence import is_a_subsequence_of,  member, SuperSequence
+from ..control_structures import forall, forany
+from ..logic_variables import ensure_is_logic_variable, eot, PyValue, n_Vars, Term, unify, unify_pairs, Var
+from ..sequence_options.super_sequence import is_a_subsequence_of,  member, SuperSequence
 
 
 class LinkedList(SuperSequence):

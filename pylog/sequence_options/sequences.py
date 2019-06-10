@@ -1,8 +1,8 @@
 from __future__ import annotations
 from typing import List, Union
 
-from logic_variables import eot, PyValue, n_Vars, unify, unify_pairs, unify_sequences, Var
-from sequence_options.super_sequence import SuperSequence
+from ..logic_variables import eot, PyValue, n_Vars, unify, unify_pairs, unify_sequences, Var
+from ..sequence_options.super_sequence import SuperSequence
 
 
 class PySequence(SuperSequence):
