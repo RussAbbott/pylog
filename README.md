@@ -159,6 +159,8 @@ However, since Prolog uses identifiers that begin with an upper case letter for 
 
 * Frederiksen, Bruce Frederiksen (2011) [Pyke](http://pyke.sourceforge.net/)
 
+* Kopec, David (2019) [Constraint-Satisfaction Problems in Python](https://freecontent.manning.com/constraint-satisfaction-problems-in-python/) from _[Classic Computer Science Problems in Python](https://www.manning.com/books/classic-computer-science-problems-in-python)_, Manning ([GitHub code repository](https://github.com/davecom/ClassicComputerScienceProblemsInPython/tree/master/Chapter3))
+
 * Maxime, Istasse (2016) [Prology: Logic programming for Python3](https://github.com/mistasse/Prology)
 
 * Meyers, Chris (2015) [Prolog in Python](http://www.openbookproject.net/py4fun/countClick.php?dest=prolog/intro.html)
