@@ -54,14 +54,6 @@ class PySequence(SuperSequence):
         for _ in unify_sequences(As, self.args[i:i+len_As]):
           yield
 
-  # def has_member(self, E: Term):
-  #   """ Is E in A_List? """
-  #   # yield from self.member(E, self)
-  #   if len(self) > 0:
-  #     for _ in forany([lambda: unify(E, self.head( )),
-  #                      lambda: self.tail( ).has_member(E)]):
-  #       yield
-  #
   def head(self):
     return self[0]
 
