@@ -407,7 +407,8 @@ if __name__ == '__main__':
 
   PV1 = PyValue()
   PV2 = PyValue()
-  print(f'\nTrying unify({PV1}, {PV2}). Should fail.')
+  print(f'\nTrying unify({PV1}, {PV2}). '
+        f"Should fail because we explicitly don't allow two uninstantiated PV's to unify.")
   for _ in unify(PV1, PV2):
     print("Shouldn't have succeeded.")
   print("Failed, as expected, if nothing before this.")
@@ -418,20 +419,15 @@ if __name__ == '__main__':
 
   A = Var( )
   # B, C, and D are the same as above.
-  # B = Var( )
-  # C = Var( )
-  # D = PyValue('def')
 
-  print(f'\n1. A: {A}; B: {B}; C: {C}; D: {D}')  # With while: A: A; B: _12. With if: A: A; B: A.
+  print(f'\n1. A: {A}; B: {B}; C: {C}; D: {D}')
   for _ in unify(A, B):
-    print(f'2a. After unify(A, B).  A: {A}; B: {B}; C: {C}; D: {D}')  # With while: A: A; B: _12. With if: A: A; B: A.
+    print(f'2a. After unify(A, B).  A: {A}; B: {B}; C: {C}; D: {D}')
     for _ in unify(A, C):
-      print(f'2b. After unify(A, C). A: {A}; B: {B}; C: {C}; D: {D}')  # With while: A: A; B: _12. With if: A: A; B: A.
+      print(f'2b. After unify(A, C). A: {A}; B: {B}; C: {C}; D: {D}')
       for _ in unify(A, D):
-        print(f'2c. After unify(A, D). A: {A}; B: {B}; C: {C}; D: {D}')  # =>
-                                                                      # With while: A: A; B: _12. With if: A: A; B: A.
-  print(f'3. Outside the scope of all unifies. A: {A}; B: {B}; C: {C}; D: {D}')  # =>
-                                                                      # With while: A: A; B: _12. With if: A: A; B: A.
+        print(f'2c. After unify(A, D). A: {A}; B: {B}; C: {C}; D: {D}')
+  print(f'3. Outside the scope of all unifies. A: {A}; B: {B}; C: {C}; D: {D}')
 
   print('End first test\n')
 
@@ -451,7 +447,6 @@ if __name__ == '__main__':
   A = Var( )
   B = Var( )
   C = Var( )
-  # D = PyValue('xyz')
   D = 'xyz'
 
   print(f'1. A: {A}, B: {B}, C: {C}, D: {D}')
@@ -484,9 +479,7 @@ if __name__ == '__main__':
   Y = Var( )
   Z = Var( )
   print(f'X: {X}, Y: {Y}, Z: {Z}')
-  # for _ in unify(PyValue('abc'), X):
   for _ in unify('abc', X):
-    # print(f'After unify(PyValue("abc"), X): 1. X: {X}, Y: {Y}, Z: {Z}')  # => abc
     print(f'After unify("abc", X): X: {X}, Y: {Y}, Z: {Z}')  # => abc
     for _ in unify(X, Y):
       print(f'After unify(X, Y): X: {X}, Y: {Y}, Z: {Z}')  # => abc
