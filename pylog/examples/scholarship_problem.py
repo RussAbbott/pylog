@@ -1,7 +1,7 @@
-from control_structures import would_succeed, forall, forany, print_sf
+from control_structures import forall, print_sf
 from logic_variables import StructureItem, Var
 
-from sequence_options.super_sequence import is_contiguous_in, is_a_subsequence_of, member, members
+from sequence_options.super_sequence import is_contiguous_in, is_a_subsequence_of, member
 
 from examples.puzzles import all_distinct, run_puzzle, SimpleCounter
 
@@ -56,17 +56,11 @@ def scholarship_problem(Students):
   # Keeps count of the number of successful rule applications.
   rule_applications = SimpleCounter( )
 
-  attr_name_to_nbr = {'name': 0, 'major': 1}
+  # Map attribute name to tuple position in Student objects.
+  attr_dict = {'name': 0, 'major': 1}
 
-  # # A list of students with all the student names.
-  # Student_names = [Student(name='Amy'),  Student(name='Carrie'),
-  #                  Student(name='Erma'), Student(name='Tracy')]
-  #
-  # # A list of students with all the majors.
-  # Majors = [Student(major='Astronomy'), Student(major='Comp Sci'),
-  #           Student(major='English'),   Student(major='Philosophy')]
-
-  # All the clues must succeed.
+  Major = Var()
+  # All clues must succeed.
   for _ in forall([
     # print_sf allows us to trace the progress of the solution.
     # Since the print_sf statements are included in a forall list, they should all succeed, (the second argument).
@@ -76,28 +70,21 @@ def scholarship_problem(Students):
     # We are taking advantage of the fact that the Students list is ordered by scholarship amount.
     lambda: forall([
                     lambda: is_a_subsequence_of([Student(major='Astronomy'), Student(name='Amy')], Students),
-
-                    # Make sure that all students and majors can be included, i.e., no duplicate names or majors.
-                    # would_succeed(x) is equivalent to  not not x  in Prolog.
-                    # lambda: would_succeed(members)(Student_names, Students),
-                    # lambda: would_succeed(members)(Majors, Students)
-                    lambda: all_distinct(attr_name_to_nbr['name'], Students),
-                    lambda: all_distinct(attr_name_to_nbr['major'], Students)
+                    # Ensure that all students and majors are distinct.
+                    lambda: all_distinct(attr_dict, ['name', 'major'], Students),
                     ]),
     lambda: print_sf(f'{rule_applications.incr()}) After 1: {Students}', 'Succeed'),
 
     # 2. Amy studies either English or Philosophy.
     lambda: forall([
-                    lambda: forany([
-                                    lambda: member(Student(name='Amy', major='English'), Students),
-                                    lambda: member(Student(name='Amy', major='Philosophy'), Students),
-    ]),
-
-                    # Make sure that all students and majors can be included, i.e., no duplicate names or majors.
-                    # lambda: would_succeed(members)(Student_names, Students),
-                    # lambda: would_succeed(members)(Majors, Students)
-                    lambda: all_distinct(attr_name_to_nbr['name'], Students),
-                    lambda: all_distinct(attr_name_to_nbr['major'], Students)
+                    # Note the use of Major as a Var, which gets instantiated after it is positioned.
+                    lambda: member(Student(name='Amy', major=Major), Students),
+                    # Since Philsophy is the right answer, if English is first in the list, 
+                    # more rule applications are required: 36 vs. 33.
+                    # lambda: member(Major, PyList(['English', 'Philosophy'])),
+                    lambda: member(Major, PyList(['Philosophy', 'English'])),
+                    # Ensure that all students and majors are distinct.
+                    lambda: all_distinct(attr_dict, ['name', 'major'], Students),
                     ]),
     lambda: print_sf(f'{rule_applications.incr()}) After 2: {Students}', 'Succeed'),
 
@@ -105,37 +92,25 @@ def scholarship_problem(Students):
     # To avoid arithmetic, take advantage of the known structure of the Scholarships list.
     lambda: forall([
                     lambda: is_contiguous_in([Student(name='Carrie'), Student(major='Comp Sci')], Students),
-
-                    # Make sure that all students and majors can be included, i.e., no duplicate names or majors.
-                    # lambda: would_succeed(members)(Student_names, Students),
-                    # lambda: would_succeed(members)(Majors, Students)
-                    lambda: all_distinct(attr_name_to_nbr['name'], Students),
-                    lambda: all_distinct(attr_name_to_nbr['major'], Students)
+                    # Ensure that all students and majors are distinct.
+                    lambda: all_distinct(attr_dict, ['name', 'major'], Students),
                     ]),
     lambda: print_sf(f'{rule_applications.incr()}) After 3: {Students}', 'Succeed'),
 
     # 4. Erma has a $10,000 larger scholarship than Carrie.
-    # This means that Erma comes after Carrie and that there is one person between them.
+    # This means that Erma comes after the person who comes after Carrie.
     lambda: forall([
                     lambda: is_contiguous_in([Student(name='Carrie'), Var( ), Student(name='Erma')], Students),
-
-                    # Make sure that all students and majors can be included, i.e., no duplicate names or majors.
-                    # lambda: would_succeed(members)(Student_names, Students),
-                    # lambda: would_succeed(members)(Majors, Students)
-                    lambda: all_distinct(attr_name_to_nbr['name'], Students),
-                    lambda: all_distinct(attr_name_to_nbr['major'], Students)
+                    # Ensure that all students and majors are distinct.
+                    lambda: all_distinct(attr_dict, ['name', 'major'], Students),
                     ]),
     lambda: print_sf(f'{rule_applications.incr()}) After 4: {Students}', 'Succeed'),
 
     # 5. Tracy has a larger scholarship than the student who studies English.
     lambda: forall([
                     lambda: is_a_subsequence_of([Student(major='English'), Student(name='Tracy')], Students),
-
-                    # Make sure that all students and majors can be included, i.e., no duplicate names or majors.
-                    # lambda: would_succeed(members)(Student_names, Students),
-                    # lambda: would_succeed(members)(Majors, Students),
-                    lambda: all_distinct(attr_name_to_nbr['name'], Students),
-                    lambda: all_distinct(attr_name_to_nbr['major'], Students)
+                    # Ensure that all students and majors are distinct.
+                    lambda: all_distinct(attr_dict, ['name', 'major'], Students),
                     ]),
     lambda: print_sf(f'{rule_applications.incr()}) After 5: {Students}', 'Succeed'),
                    ]):

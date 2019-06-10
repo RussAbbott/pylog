@@ -3,10 +3,23 @@ from typing import Callable, Type
 from sequence_options.super_sequence import SuperSequence
 
 
-def all_distinct(arg_nbr, lst):
-  values = {str(x.args[arg_nbr]) if x.args[arg_nbr] is not None else '_' + str(x.id) for x in lst}
-  if len(values) == len(lst):
-    yield
+def all_distinct(attr_dict, attr_names, lst):
+  """
+  For each attr_name in attr_names, all elements of lst must be distinct.
+  attr_dict is a dictionary that maps attribute names to attribute numbers.
+  """
+
+  for attr_name in attr_names:
+    attr_nbr = attr_dict[attr_name]
+    # Each attribute value is stored as a PyValue.
+    attr_PyValues = [x.args[attr_nbr] for x in lst]
+    values = {attr_PyValue.get_py_value() if attr_PyValue.is_instantiated() else str(attr_PyValue)
+              for attr_PyValue in attr_PyValues}
+    if len(values) != len(lst):
+      # Failed; abort and return instead of yielding.
+      return
+  # Succeeded for all attr_names; yield
+  yield
 
 
 class SimpleCounter:
