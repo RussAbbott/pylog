@@ -177,10 +177,11 @@ However, since Prolog uses identifiers that begin with an upper case letter for 
 
 * Santini, Claudio (2018) [Pampy: The Pattern Matching for Python you always dreamed of](https://github.com/santinic/pampy)  
 
-* Thompson, Jeff (2017) [Yield Prolog](http://yieldprolog.sourceforge.net/)
-
-* A bunch of links in these Stack Overflow questions.
+* Stack Overflow questions.
   * [Implementing the Prolog Unification algorithm in Python? Backtracking](https://stackoverflow.com/questions/49101342/implementing-the-prolog-unification-algorithm-in-python-backtracking)
   * [Relational/Logic Programming in Python?](https://stackoverflow.com/questions/1917607/relational-logic-programming-in-python)
 
+* Thompson, Jeff (2017) [Yield Prolog](http://yieldprolog.sourceforge.net/)
+
+* Triska, Markus [CLP(FD): Constraint Logic Programming over Finite Domains](http://www.swi-prolog.org/man/clpfd.html) (also [CLP(FD): Constraint Logic Programming over Finite Domains](http://www.swi-prolog.org/pldoc/man?section=clpfd) (Repo of [examples](https://github.com/triska/clpz))
 
