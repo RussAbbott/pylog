@@ -1,9 +1,9 @@
 from control_structures import forall, print_sf
-from logic_variables import StructureItem, Var
+from logic_variables import PyValue, StructureItem, Var
 
 from sequence_options.super_sequence import is_contiguous_in, is_a_subsequence_of, member
 
-from examples.puzzles import all_distinct, run_puzzle, SimpleCounter
+from examples.puzzles import all_all_distinct, run_puzzle, SimpleCounter
 
 """
 A puzzle from GeekOverdose: https://geekoverdose.wordpress.com/2015/10/31/solving-logic-puzzles-in-prolog-puzzle-1-of-3/
@@ -59,7 +59,19 @@ def scholarship_problem(Students):
   # Map attribute name to tuple position in Student objects.
   attr_dict = {'name': 0, 'major': 1}
 
-  Major = Var()
+  name_PyValues = [student.args[attr_dict['name']] for student in Students]
+  major_PyValues = [student.args[attr_dict['major']] for student in Students]
+
+  # Try not requiring the names and/or majors not to be distinct.
+
+  # Requires many more rule applications to get an answer.
+  # name_PyValues = []
+
+  # Gets the right answer after the same number of rule applications. But gets the wrong answer on backtracking.
+  # major_PyValues = []
+
+  # Need a PyValue variable in Rule 2.
+  Major = PyValue()
   # All clues must succeed.
   for _ in forall([
     # print_sf allows us to trace the progress of the solution.
@@ -71,20 +83,19 @@ def scholarship_problem(Students):
     lambda: forall([
                     lambda: is_a_subsequence_of([Student(major='Astronomy'), Student(name='Amy')], Students),
                     # Ensure that all students and majors are distinct.
-                    lambda: all_distinct(attr_dict, ['name', 'major'], Students),
+                    lambda: all_all_distinct([name_PyValues, major_PyValues]),
                     ]),
     lambda: print_sf(f'{rule_applications.incr()}) After 1: {Students}', 'Succeed'),
 
     # 2. Amy studies either English or Philosophy.
     lambda: forall([
-                    # Note the use of Major as a Var, which gets instantiated after it is positioned.
+                    # Note the use of Major as a PyValue, which gets instantiated *after* it is positioned.
                     lambda: member(Student(name='Amy', major=Major), Students),
-                    # Since Philsophy is the right answer, if English is first in the list, 
-                    # more rule applications are required: 36 vs. 33.
-                    # lambda: member(Major, PyList(['English', 'Philosophy'])),
+                    # Since Philosophy is the right answer, more rule applications are required (36 vs. 33)
+                    # if English is first in the list.
                     lambda: member(Major, PyList(['Philosophy', 'English'])),
                     # Ensure that all students and majors are distinct.
-                    lambda: all_distinct(attr_dict, ['name', 'major'], Students),
+                    lambda: all_all_distinct([name_PyValues, major_PyValues]),
                     ]),
     lambda: print_sf(f'{rule_applications.incr()}) After 2: {Students}', 'Succeed'),
 
@@ -93,7 +104,7 @@ def scholarship_problem(Students):
     lambda: forall([
                     lambda: is_contiguous_in([Student(name='Carrie'), Student(major='Comp Sci')], Students),
                     # Ensure that all students and majors are distinct.
-                    lambda: all_distinct(attr_dict, ['name', 'major'], Students),
+                    lambda: all_all_distinct([name_PyValues, major_PyValues]),
                     ]),
     lambda: print_sf(f'{rule_applications.incr()}) After 3: {Students}', 'Succeed'),
 
@@ -102,7 +113,7 @@ def scholarship_problem(Students):
     lambda: forall([
                     lambda: is_contiguous_in([Student(name='Carrie'), Var( ), Student(name='Erma')], Students),
                     # Ensure that all students and majors are distinct.
-                    lambda: all_distinct(attr_dict, ['name', 'major'], Students),
+                    lambda: all_all_distinct([name_PyValues, major_PyValues]),
                     ]),
     lambda: print_sf(f'{rule_applications.incr()}) After 4: {Students}', 'Succeed'),
 
@@ -110,7 +121,7 @@ def scholarship_problem(Students):
     lambda: forall([
                     lambda: is_a_subsequence_of([Student(major='English'), Student(name='Tracy')], Students),
                     # Ensure that all students and majors are distinct.
-                    lambda: all_distinct(attr_dict, ['name', 'major'], Students),
+                    lambda: all_all_distinct([name_PyValues, major_PyValues]),
                     ]),
     lambda: print_sf(f'{rule_applications.incr()}) After 5: {Students}', 'Succeed'),
                    ]):

@@ -1,24 +1,24 @@
-from typing import Callable, Type
+from typing import Callable, List, Type
 
+from control_structures import fails
+from logic_variables import Term
 from sequence_options.super_sequence import SuperSequence
 
 
-def all_distinct(attr_dict, attr_names, lst):
-  """
-  For each attr_name in attr_names, all elements of lst must be distinct.
-  attr_dict is a dictionary that maps attribute names to attribute numbers.
-  """
+def all_distinct(lst: List[Term]):
+  # The following builds a set, not a list. So no duplicates.
+  values = { x.get_py_value() if x.is_instantiated() else str(x) for x in lst }
+  if len(values) == len(lst):
+    # Succeed if the number of distinct values is the same as the length of the list.
+    yield
 
-  for attr_name in attr_names:
-    attr_nbr = attr_dict[attr_name]
-    # Each attribute value is stored as a PyValue.
-    attr_PyValues = [x.args[attr_nbr] for x in lst]
-    values = {attr_PyValue.get_py_value() if attr_PyValue.is_instantiated() else str(attr_PyValue)
-              for attr_PyValue in attr_PyValues}
-    if len(values) != len(lst):
-      # Failed; abort and return instead of yielding.
+
+def all_all_distinct(lists: List[List[Term]]) -> bool:
+  for lst in lists:
+    for _ in fails(all_distinct)(lst):
+      # Fail if any of the lists fails all_distinct.
       return
-  # Succeeded for all attr_names; yield
+  # Succeed if they all succeed.
   yield
 
 
