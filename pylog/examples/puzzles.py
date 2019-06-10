@@ -3,6 +3,12 @@ from typing import Callable, Type
 from sequence_options.super_sequence import SuperSequence
 
 
+def all_distinct(arg_nbr, lst):
+  values = {str(x.args[arg_nbr]) if x.args[arg_nbr] is not None else '_' + str(x.id) for x in lst}
+  if len(values) == len(lst):
+    yield
+
+
 class SimpleCounter:
   def __init__(self, init_value=0):
     self._count = init_value
