@@ -12,7 +12,7 @@ See discussion on the GitHub page: https://github.com/RussAbbott/pylog
 """
 
 """
-The pylog core (this file) contains the logic variable and data structure classes and the unify function.
+The pylog core, this file contains the logic variable and data structure classes and the unify function.
 """
 
 
@@ -27,19 +27,20 @@ def eot(f):
     return args_trail_ends
 
   def dict_Vars_trail_ends(dic):
-    dic_trail_ends = dic if not isinstance(dic, dict) else {k: var_trail_end(v) for (k, v) in dic.items()}
+    dic_trail_ends = {k: var_trail_end(v) for (k, v) in dic.items()}
     return dic_trail_ends
 
   @wraps(f)
   def eot_wrapper_gen(*args, **kwargs):
     args_trail_ends = arg_Vars_trail_ends(args)
-    kwargs_trail_ends = dict_Vars_trail_ends((kwargs))
+    kwargs_trail_ends = dict_Vars_trail_ends(kwargs)
     yield from f(*args_trail_ends, **kwargs_trail_ends)
 
   @wraps(f)
   def eot_wrapper_non_gen(*args, **kwargs):
     args = arg_Vars_trail_ends(args)
-    return f(*args, **kwargs)
+    kwargs_trail_ends = dict_Vars_trail_ends(kwargs)
+    return f(*args, **kwargs_trail_ends)
 
   return eot_wrapper_gen if isgeneratorfunction(f) else eot_wrapper_non_gen
 
@@ -47,21 +48,21 @@ def eot(f):
 class Term:
   """
 
-                                                     Term  (An abstract logic variable class)
+                                                     Term  (An abstract logic variable superclass)
                                                        |
                                ------------------------------------------------
                                |                       |                      |
                             PyValue                   Var                 Structure
                                |                                              |
                    --------------------------                            SuperSequence
-                               |                                              |
-                   (int, float, string, etc.}                         -------------------
-                  (any immutable Python value)                        |                 |
-                                                                  LinkedList       PySequence
-                                                                                        |
-                                                                                  -------------
-                                                                                  |           |
-                                                                                PyList      PyTuple
+                    int, float, string, etc.                                  |
+                   Any immutable Python value                        -------------------
+                                                                     |                 |
+                                                                 LinkedList       PySequence
+                                                                                       |
+                                                                                 -------------
+                                                                                 |           |
+                                                                               PyList      PyTuple
   """
 
   term_count = 0
@@ -318,8 +319,8 @@ def unify(Left: Any, Right: Any):
 
   # The rest consists of special cases: both PyValues, both Structures, at least one Var.
 
-  # If Left and Right are both PyValues and exactly one is instantiated,
-  # "assign" it's value to the other. This is similar to (but simpler than)
+  # Case 1. Both PyValues and exactly one is instantiated.
+  # "Assign" it's value to the other. This is similar to (but simpler than)
   # how we handle two Var's. But instead of building a trail, we "assign"
   # one value to the other.
   elif isinstance(Left, PyValue) and isinstance(Right, PyValue) and \
@@ -334,13 +335,14 @@ def unify(Left: Any, Right: Any):
     # # If they are both PyValues, treat specially.
     # yield from unify_PyValues(Left, Right)
     
-  # If both Left and Right are Structures, they can be unified if
+  # Case 2. Both  Structures. They can be unified if
   # (a) they have the same functor and
   # (b) their arguments can be unified.
   elif isinstance(Left, Structure) and isinstance(Right, Structure) and Left.functor == Right.functor:
     yield from unify_sequences(Left.args, Right.args)
 
-  # If at least one is a Var. Make the other an extension of its trail.
+  # Case 3. At least one is a Var. Since we use @eot, it's the end of its trail.
+  # Make the other an extension of its trail.
   # (If both are Vars, it makes no functional difference which extends which.)
   elif isinstance(Left, Var) or isinstance(Right, Var):
     (pointsFrom, pointsTo) = (Left, Right) if isinstance(Left, Var) else (Right, Left)
@@ -357,18 +359,6 @@ def unify(Left: Any, Right: Any):
     pointsFrom.trail_next = None
 
     
-# # noinspection PyProtectedMember
-# def unify_PyValues(Left, Right):
-#   # If exactly one is instantiated, assign it's value to the other.
-#   if (not Left.is_instantiated() or not Right.is_instantiated()) and \
-#      (Left.is_instantiated( ) or Right.is_instantiated( )):
-#     (assignedTo, assignedFrom) = (Left, Right) if Right.is_instantiated( ) else (Right, Left)
-#     assignedTo._set_py_value(assignedFrom.get_py_value())
-#     yield
-#     # See discussion in unify above for why we do this.
-#     assignedTo._set_py_value(None)
-
-
 def unify_pairs(tuples: List[Tuple[Any, Any]]):
   """ Apply unify to pairs of terms. """
   # If no more tuples, we are done.
@@ -387,7 +377,7 @@ def unify_pairs(tuples: List[Tuple[Any, Any]]):
 
 
 def unify_sequences(seq_1: Sequence, seq_2: Sequence):
-  """ Unify simple sequences. e.g., lists or tuples, of Terms. """
+  """ Unify simple sequences, e.g., lists or tuples, of Terms. """
   # The two sequences must be the same length.
   if len(seq_1) != len(seq_2):
     return
@@ -397,7 +387,8 @@ def unify_sequences(seq_1: Sequence, seq_2: Sequence):
     yield
 
   else:
-    # Unify the first element of each sequence. If successful go on to the rest.
+    # Unify the two first elements. If successful go on to the rest.
+    # Note that slice notation is supported.
     for _ in unify(seq_1[0], seq_2[0]):
       yield from unify_sequences(seq_1[1:], seq_2[1:])
 

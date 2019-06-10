@@ -184,11 +184,13 @@ def would_succeed(f):
     succeeded = False
     for _ in f(*args, **kwargs):
       succeeded = True
+      # Do not yield in the context of f succeeding.
+      # So un-unify any unifications that occurred in f.
 
     if succeeded:
-      yield  # Succeed (once) if f succeeded.
-    else:
-      pass   # Fail if f failed
+      yield  # Succeed if f succeeded.
+    # else:
+    #   pass   # Fail if f failed
 
   return would_succeed_wrapper
 
