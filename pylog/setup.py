@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 def readme():
     with open('README.md') as f:
@@ -19,8 +19,11 @@ setup(name='pylog',
         'Topic :: Software Development :: Libraries :: Python Modules',
       ],
       keywords='prolog python logic programming',
-      packages=['pylog'],
+      packages=find_packages('src'),
+      package_dir={'': 'src'},
       include_package_data=True,
       zip_safe=False,
       install_requires=[],
-      python_requires='>=3.7')
+      python_requires='>=3.7',
+      setup_requires=["pytest-runner"],
+      tests_require=["pytest"])
