@@ -29,20 +29,29 @@ class SimpleCounter:
   def __str__(self):
     return str(self._count)
 
+  def count(self):
+    return self._count
+
   def incr(self, amount=1):
     self._count += amount
     return self
 
 
-def run_puzzle(problem: Callable, ListType: Type, Answer_List: SuperSequence, additional_answer: Callable = None):
+def run_puzzle(Problem: Callable, ListType: Type, Answer_List: SuperSequence, additional_answer: Callable = None):
   """ Runs the problem and displays the answer. Takes and displays timing information. """
 
   inp = None  # needed below at this block level
   from timeit import default_timer as timer
   (start1, end1, start2, end2) = (timer( ), None, None, None)
-  for _ in problem(Answer_List):
+
+  last_rule_count = 0
+  problem = Problem(Answer_List)
+
+  for _ in problem():
+    rule_applications_increment = problem.rule_applications.count() - last_rule_count
+    last_rule_count = problem.rule_applications.count()
     end1 = timer( )
-    print('\nSolution: ')
+    print(f'\nAfter {rule_applications_increment} rule applications,\nSolution: ')
     for (index, item) in enumerate(Answer_List):
       print(f'\t{index + 1}. {item}')
     if additional_answer:
@@ -52,6 +61,7 @@ def run_puzzle(problem: Callable, ListType: Type, Answer_List: SuperSequence, ad
     if inp != 'y':
       break
   end2 = timer( )
+  rule_applications_increment = problem.rule_applications.count( ) - last_rule_count
   if inp == 'y':
-    print('No more solutions.')
+    print(f'\nAfter {rule_applications_increment} final rule applications, no more solutions.')
   print(f'\nUsing {ListType.__name__}s, the total compute time was: {round(end1 + end2 - start1 - start2, 3)} sec')
