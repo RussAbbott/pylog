@@ -158,7 +158,7 @@ def forany(gens):
       yield
 
 
-def trace(x, succeed=True, write_out=True):
+def trace(x, succeed=True, show_trace=True):
   """
   Can be included in a list of generators (as in forall and forany) to see where we are.
   The second argument determines whether it succeeds or fails.
@@ -167,7 +167,7 @@ def trace(x, succeed=True, write_out=True):
   When included in a list of forany generators, succeed should be set to False so that forany
   will just go on the the next generator one and won't take this one as an extraneous successes.
   """
-  if write_out:
+  if show_trace:
     print(x)
   if succeed:
     yield
