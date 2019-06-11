@@ -1,9 +1,9 @@
-from pylog.control_structures import forall, trace
+from pylog.control_structures import forall
 from pylog.logic_variables import PyValue, StructureItem, Var
 
 from pylog.sequence_options.super_sequence import is_contiguous_in, is_a_subsequence_of, member
 
-from puzzles import all_all_distinct, run_puzzle, SimpleCounter
+from puzzles import Problem
 
 """
 A puzzle from GeekOverdose: https://geekoverdose.wordpress.com/2015/10/31/solving-logic-puzzles-in-prolog-puzzle-1-of-3/
@@ -51,81 +51,68 @@ class Student(StructureItem):
     super( ).__init__( (name, major, scholarship), first_arg_as_str_functor)
 
 
-class ScholarshipProblem():
+class ScholarshipProblem(Problem):
 
   def __init__(self, Students):
-    self.Items = Students
+
+    # Do this early so that super().Items will have a value.
+    super().__init__(Students)
 
     # Map attribute name to tuple position in Student objects.
-    self.attr_dict = {'name': 0, 'major': 1}
-    self.rule_applications = SimpleCounter( )
+    attr_dict = {'name': 0, 'major': 1}
+    # Get the Vars for the names and majors. (Used in all_distinct.)
+    name_Vars = [student.args[attr_dict['name']] for student in self.Items]
+    major_Vars = [student.args[attr_dict['major']] for student in self.Items]
+    # Try not requiring the names and/or majors to be distinct.
 
-    self.name_PyValues = [student.args[self.attr_dict['name']] for student in self.Items]
-    self.major_PyValues = [student.args[self.attr_dict['major']] for student in self.Items]
+    # Requires many more rule applications to get an answer.
+    # name_Vars = []
 
-    self.clues = {index+1: clue for (index, clue) in
-                  enumerate([self.clue_1, self.clue_2, self.clue_3, self.clue_4, self.clue_5])}
+    # Gets the right answer after the same number of rule applications. But gets the wrong answer on backtracking.
+    # major_Vars = []
 
-  # Try not requiring the names and/or majors to be distinct.
+    self.set_all_distinct_lists([name_Vars, major_Vars])
+    self.set_clues_list([self.clue_1, self.clue_2, self.clue_3, self.clue_4, self.clue_5])
+    # Show trace on all clues.
+    self.show_trace_list = list(range(len(self.clues)))
 
-  # Requires many more rule applications to get an answer.
-  # name_PyValues = []
-
-  # Gets the right answer after the same number of rule applications. But gets the wrong answer on backtracking.
-  # major_PyValues = []
-
-  def clue_1(self):
+  # If we make the clues static, it's difficult (and strange) to make a list of them.
+  # See: https://stackoverflow.com/questions/41921255/staticmethod-object-is-not-callable-switch-case.
+  # noinspection PyMethodMayBeStatic
+  def clue_1(self, Students):
     """ 1. The student who studies Astronomy gets a smaller scholarship than Amy. """
-    yield from is_a_subsequence_of([Student(major='Astronomy'), Student(name='Amy')], self.Items)
+    yield from is_a_subsequence_of([Student(major='Astronomy'), Student(name='Amy')], Students)
 
-  def clue_2(self):
+  # noinspection PyMethodMayBeStatic
+  def clue_2(self, Students):
     """ 2. Amy studies either English or Philosophy. """
     # Local variable
     Major = PyValue( )
     yield from forall([
       # Note the use of Major as a PyValue, which gets instantiated *after* it is positioned.
-      lambda: member(Student(name='Amy', major=Major), self.Items),
+      lambda: member(Student(name='Amy', major=Major), Students),
       # Since Philosophy is the right answer, more rule applications are required (36 vs. 33)
       # if English is first in the list.
       lambda: member(Major, PyList(['Philosophy', 'English'])),
     ])
 
-  def clue_3(self):
+  # noinspection PyMethodMayBeStatic
+  def clue_3(self, Students):
     """ 3. The student who studies Comp Sci has a $5,000 larger scholarship than Carrie. """
     # To avoid arithmetic, take advantage of the known structure of the Scholarships list.
-    yield from is_contiguous_in([Student(name='Carrie'), Student(major='Comp Sci')], self.Items)
+    yield from is_contiguous_in([Student(name='Carrie'), Student(major='Comp Sci')], Students)
 
-  def clue_4(self):
+  # noinspection PyMethodMayBeStatic
+  def clue_4(self, Students):
     """ 4. Erma has a $10,000 larger scholarship than Carrie.
         This means that Erma comes after the person who comes after Carrie.
     """
-    yield from is_contiguous_in([Student(name='Carrie'), Var( ), Student(name='Erma')], self.Items)
+    yield from is_contiguous_in([Student(name='Carrie'), Var( ), Student(name='Erma')], Students)
 
-  def clue_5(self):
+  # noinspection PyMethodMayBeStatic
+  def clue_5(self, Students):
     """ 5. Tracy has a larger scholarship than the student who studies English. """
-    yield from is_a_subsequence_of([Student(major='English'), Student(name='Tracy')], self.Items)
-
-  def run_clue(self, index):
-    """ Run clue_<index>, check the all_distinct constraints, and show progress. """
-    for _ in forall([
-      self.clues[index],
-      lambda: all_all_distinct([self.name_PyValues, self.major_PyValues]),
-      lambda: trace(f'{self.rule_applications.incr( )}) After clue {index}: {self.Items}'),
-                     ]):
-      yield
-
-  def __call__(self):
-    # All clues must succeed.
-    for _ in forall([
-                      lambda: trace(f'\n{self.rule_applications.incr( )}) At the start: {self.Items}'),
-
-                      lambda: self.run_clue(1),
-                      lambda: self.run_clue(2),
-                      lambda: self.run_clue(3),
-                      lambda: self.run_clue(4),
-                      lambda: self.run_clue(5),
-                     ]):
-      yield
+    yield from is_a_subsequence_of([Student(major='English'), Student(name='Tracy')], Students)
 
 
 if __name__ == '__main__':
@@ -150,4 +137,5 @@ if __name__ == '__main__':
   Students = ListType([Student(scholarship=(25 + i*5)) for i in range(4)])
 
   """ Run problem """
-  run_puzzle(ScholarshipProblem, ListType, Students)
+  # The class has a __call__ method. So instances can be called
+  ScholarshipProblem(Students)(ListType)

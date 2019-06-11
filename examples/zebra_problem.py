@@ -147,4 +147,4 @@ if __name__ == '__main__':
   Houses = ListType([House( ) for _ in range(5)])
 
   """ Run problem """
-  run_puzzle(zebra_problem, ListType, Houses, additional_answer)
+  run_puzzle(ZebraProblem(Houses), ListType, additional_answer)
