@@ -145,7 +145,7 @@ class PyValue(Term):
     return self._py_value
 
   @staticmethod
-  def get_py_values(Vars: List[Var]):
+  def get_py_values(Vars: List[Union[Var, PyValue]]):
     return [v.get_py_value( ) for v in Vars]
 
   def is_instantiated(self) -> bool:
