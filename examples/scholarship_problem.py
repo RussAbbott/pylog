@@ -1,9 +1,9 @@
-from pylog.control_structures import would_succeed, forall, forany, print_sf
-from pylog.logic_variables import StructureItem, Var
+from pylog.control_structures import forall, trace
+from pylog.logic_variables import PyValue, StructureItem, Var
 
-from pylog.sequence_options.super_sequence import is_contiguous_in, is_a_subsequence_of, member, members
+from pylog.sequence_options.super_sequence import is_contiguous_in, is_a_subsequence_of, member
 
-from examples.puzzles import run_puzzle, SimpleCounter
+from puzzles import all_all_distinct, run_puzzle, SimpleCounter
 
 """
 A puzzle from GeekOverdose: https://geekoverdose.wordpress.com/2015/10/31/solving-logic-puzzles-in-prolog-puzzle-1-of-3/
@@ -51,81 +51,81 @@ class Student(StructureItem):
     super( ).__init__( (name, major, scholarship), first_arg_as_str_functor)
 
 
-def scholarship_problem(Students):
+class ScholarshipProblem():
 
-  # Keeps count of the number of successful rule applications.
-  rule_applications = SimpleCounter( )
+  def __init__(self, Students):
+    self.Items = Students
 
-  # A list of students with all the student names.
-  Student_names = [Student(name='Amy'),  Student(name='Carrie'),
-                   Student(name='Erma'), Student(name='Tracy')]
+    # Map attribute name to tuple position in Student objects.
+    self.attr_dict = {'name': 0, 'major': 1}
+    self.rule_applications = SimpleCounter( )
 
-  # A list of students with all the majors.
-  Majors = [Student(major='Astronomy'), Student(major='Comp Sci'),
-            Student(major='English'),   Student(major='Philosophy')]
+    self.name_PyValues = [student.args[self.attr_dict['name']] for student in self.Items]
+    self.major_PyValues = [student.args[self.attr_dict['major']] for student in self.Items]
 
-  # All the clues must succeed.
-  for _ in forall([
-    # print_sf allows us to trace the progress of the solution.
-    # Since the print_sf statements are included in a forall list, they should all succeed, (the second argument).
-    lambda: print_sf(f'\n{rule_applications.incr( )}) At the start: {Students}', 'Succeed'),
+    self.clues = {index+1: clue for (index, clue) in
+                  enumerate([self.clue_1, self.clue_2, self.clue_3, self.clue_4, self.clue_5])}
 
-    # 1. The student who studies Astronomy gets a smaller scholarship than Amy.
-    # We are taking advantage of the fact that the Students list is ordered by scholarship amount.
-    lambda: forall([lambda: is_a_subsequence_of([Student(major='Astronomy'), Student(name='Amy')], Students),
+  # Try not requiring the names and/or majors to be distinct.
 
-                    # Make sure that all students and majors can be included, i.e., no duplicate names or majors.
-                    # would_succeed(x) is equivalent to  not not x  in Prolog.
-                    lambda: would_succeed(members)(Student_names, Students),
-                    lambda: would_succeed(members)(Majors, Students)
-                    ]),
-    lambda: print_sf(f'{rule_applications.incr()}) After 1: {Students}', 'Succeed'),
+  # Requires many more rule applications to get an answer.
+  # name_PyValues = []
 
-    # 2. Amy studies either English or Philosophy.
-    lambda: forall([lambda: forany([
-                                    lambda: member(Student(name='Amy', major='English'), Students),
-                                    lambda: member(Student(name='Amy', major='Philosophy'), Students),
-    ]),
+  # Gets the right answer after the same number of rule applications. But gets the wrong answer on backtracking.
+  # major_PyValues = []
 
-                    # Make sure that all students and majors can be included, i.e., no duplicate names or majors.
-                    lambda: would_succeed(members)(Student_names, Students),
-                    lambda: would_succeed(members)(Majors, Students)
-                    ]),
-    lambda: print_sf(f'{rule_applications.incr()}) After 2: {Students}', 'Succeed'),
+  def clue_1(self):
+    """ 1. The student who studies Astronomy gets a smaller scholarship than Amy. """
+    yield from is_a_subsequence_of([Student(major='Astronomy'), Student(name='Amy')], self.Items)
 
-    # 3. The student who studies Comp Sci has a $5,000 larger scholarship than Carrie.
+  def clue_2(self):
+    """ 2. Amy studies either English or Philosophy. """
+    # Local variable
+    Major = PyValue( )
+    yield from forall([
+      # Note the use of Major as a PyValue, which gets instantiated *after* it is positioned.
+      lambda: member(Student(name='Amy', major=Major), self.Items),
+      # Since Philosophy is the right answer, more rule applications are required (36 vs. 33)
+      # if English is first in the list.
+      lambda: member(Major, PyList(['Philosophy', 'English'])),
+    ])
+
+  def clue_3(self):
+    """ 3. The student who studies Comp Sci has a $5,000 larger scholarship than Carrie. """
     # To avoid arithmetic, take advantage of the known structure of the Scholarships list.
-    lambda: forall([
-                    lambda: is_contiguous_in([Student(name='Carrie'), Student(major='Comp Sci')], Students),
+    yield from is_contiguous_in([Student(name='Carrie'), Student(major='Comp Sci')], self.Items)
 
-                    # Make sure that all students and majors can be included, i.e., no duplicate names or majors.
-                    lambda: would_succeed(members)(Student_names, Students),
-                    lambda: would_succeed(members)(Majors, Students)
-                    ]),
-    lambda: print_sf(f'{rule_applications.incr()}) After 3: {Students}', 'Succeed'),
+  def clue_4(self):
+    """ 4. Erma has a $10,000 larger scholarship than Carrie.
+        This means that Erma comes after the person who comes after Carrie.
+    """
+    yield from is_contiguous_in([Student(name='Carrie'), Var( ), Student(name='Erma')], self.Items)
 
-    # 4. Erma has a $10,000 larger scholarship than Carrie.
-    # This means that Erma comes after Carrie and that there is one person between them.
-    lambda: forall([
-                    lambda: is_contiguous_in([Student(name='Carrie'), Var( ), Student(name='Erma')], Students),
+  def clue_5(self):
+    """ 5. Tracy has a larger scholarship than the student who studies English. """
+    yield from is_a_subsequence_of([Student(major='English'), Student(name='Tracy')], self.Items)
 
-                    # Make sure that all students and majors can be included, i.e., no duplicate names or majors.
-                    lambda: would_succeed(members)(Student_names, Students),
-                    lambda: would_succeed(members)(Majors, Students)
-                    ]),
-    lambda: print_sf(f'{rule_applications.incr()}) After 4: {Students}', 'Succeed'),
+  def run_clue(self, index):
+    """ Run clue_<index>, check the all_distinct constraints, and show progress. """
+    for _ in forall([
+      self.clues[index],
+      lambda: all_all_distinct([self.name_PyValues, self.major_PyValues]),
+      lambda: trace(f'{self.rule_applications.incr( )}) After clue {index}: {self.Items}'),
+                     ]):
+      yield
 
-    # 5. Tracy has a larger scholarship than the student who studies English.
-    lambda: forall([lambda: is_a_subsequence_of([Student(major='English'), Student(name='Tracy')], Students),
+  def __call__(self):
+    # All clues must succeed.
+    for _ in forall([
+                      lambda: trace(f'\n{self.rule_applications.incr( )}) At the start: {self.Items}'),
 
-                    # Make sure that all students and majors can be included, i.e., no duplicate names or majors.
-                    lambda: would_succeed(members)(Student_names, Students),
-                    lambda: would_succeed(members)(Majors, Students)
-                    ]),
-    lambda: print_sf(f'{rule_applications.incr()}) After 5: {Students}', 'Succeed'),
-
-  ]):
-    yield
+                      lambda: self.run_clue(1),
+                      lambda: self.run_clue(2),
+                      lambda: self.run_clue(3),
+                      lambda: self.run_clue(4),
+                      lambda: self.run_clue(5),
+                     ]):
+      yield
 
 
 if __name__ == '__main__':
@@ -140,7 +140,7 @@ if __name__ == '__main__':
 
   """ additional_answer function, if any """
 
-  # No additional answers.
+  # No additional_answer function.
 
   """ Set up the initial Answer list """
   # The answer list starts as an ordered list of Students with scholarship values.
@@ -150,4 +150,4 @@ if __name__ == '__main__':
   Students = ListType([Student(scholarship=(25 + i*5)) for i in range(4)])
 
   """ Run problem """
-  run_puzzle(scholarship_problem, ListType, Students)
+  run_puzzle(ScholarshipProblem, ListType, Students)

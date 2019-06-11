@@ -158,20 +158,19 @@ def forany(gens):
       yield
 
 
-def print_sf(x, succeed_or_fail):
+def trace(x, succeed=True, write_out=True):
   """
   Can be included in a list of generators (as in forall and forany) to see where we are.
   The second argument determines whether it succeeds or fails.
-  When included in a list of forall generators, it is set to Succeed so that
-  it doesn't stop forall from succeeding.
-  When included in a list of forany generators, it should be set to Fail so that forany
-  will just go on the the next one and won't produce extraneous successes.
+  When included in a list of forall generators, succeed should be set to True so that
+  it doesn't provent forall from succeeding.
+  When included in a list of forany generators, succeed should be set to False so that forany
+  will just go on the the next generator one and won't take this one as an extraneous successes.
   """
-  print(x)
-  if succeed_or_fail == 'Succeed':
+  if write_out:
+    print(x)
+  if succeed:
     yield
-  else:
-    pass
 
 
 def would_succeed(f):
@@ -184,11 +183,13 @@ def would_succeed(f):
     succeeded = False
     for _ in f(*args, **kwargs):
       succeeded = True
+      # Do not yield in the context of f succeeding.
+      # So un-unify any unifications that occurred in f.
 
     if succeeded:
-      yield  # Succeed (once) if f succeeded.
-    else:
-      pass   # Fail if f failed
+      yield  # Succeed if f succeeded.
+    # else:
+    #   pass   # Fail if f failed
 
   return would_succeed_wrapper
 

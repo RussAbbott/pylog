@@ -159,9 +159,13 @@ However, since Prolog uses identifiers that begin with an upper case letter for 
 
 * Frederiksen, Bruce Frederiksen (2011) [Pyke](http://pyke.sourceforge.net/)
 
+* Kopec, David (2019) [Constraint-Satisfaction Problems in Python](https://freecontent.manning.com/constraint-satisfaction-problems-in-python/) from _[Classic Computer Science Problems in Python](https://www.manning.com/books/classic-computer-science-problems-in-python)_, Manning ([GitHub code repository](https://github.com/davecom/ClassicComputerScienceProblemsInPython/tree/master/Chapter3))
+
 * Maxime, Istasse (2016) [Prology: Logic programming for Python3](https://github.com/mistasse/Prology)
 
 * Meyers, Chris (2015) [Prolog in Python](http://www.openbookproject.net/py4fun/countClick.php?dest=prolog/intro.html)
+
+* Niemeyer, Gustavo and Sébastien Celles (2019). [python-constraint](https://github.com/python-constraint/python-constraint). Pypi page: [python-constraint](https://pypi.org/project/python-constraint/) (Also discussed in Popović, Olivera (2019) [Constraint Programming with python-constraint](https://stackabuse.com/constraint-programming-with-python-constraint/#listofbuiltinconstraints))
 
 * Orsini, Francesc, Paolo Frasconi, Luc De Raedt (2017) [kProbLog: an algebraic Prolog for machine learning](https://link.springer.com/article/10.1007/s10994-017-5668-y) (This seems more like a theoretical discussion of kProbLog, which was implementated in Python, rather than an integraton of Python and Prolog. It's a worthwhile distinction to make. One can implement Prolog in any general purpose language. Pylog is notable because it integrates Python and Prolog.)
 
@@ -169,14 +173,15 @@ However, since Prolog uses identifiers that begin with an upper case letter for 
 
 * Rocklin, Matthew (2015) [Unification](https://github.com/mrocklin/unification)
 
-* Rocklin, Matthew (2019) [kanren: Logic Programming in Python](https://github.com/logpy/logpy/)
+* Rocklin, Matthew (2019) [kanren: Logic Programming in Python](https://github.com/logpy/logpy/) (The author of [toolz](https://toolz.readthedocs.io/en/latest/index.html))
 
 * Santini, Claudio (2018) [Pampy: The Pattern Matching for Python you always dreamed of](https://github.com/santinic/pampy)  
 
-* Thompson, Jeff (2017) [Yield Prolog](http://yieldprolog.sourceforge.net/)
-
-* A bunch of links in these Stack Overflow questions.
+* Stack Overflow questions.
   * [Implementing the Prolog Unification algorithm in Python? Backtracking](https://stackoverflow.com/questions/49101342/implementing-the-prolog-unification-algorithm-in-python-backtracking)
   * [Relational/Logic Programming in Python?](https://stackoverflow.com/questions/1917607/relational-logic-programming-in-python)
 
+* Thompson, Jeff (2017) [Yield Prolog](http://yieldprolog.sourceforge.net/)
+
+* Triska, Markus [CLP(FD): Constraint Logic Programming over Finite Domains](http://www.swi-prolog.org/man/clpfd.html) (also [CLP(FD): Constraint Logic Programming over Finite Domains](http://www.swi-prolog.org/pldoc/man?section=clpfd) (Repo of [examples](https://github.com/triska/clpz))
 
