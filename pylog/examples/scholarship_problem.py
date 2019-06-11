@@ -81,7 +81,7 @@ class ScholarshipProblem(Problem):
     # These lists will be checked for distinctness after each clue.
     self.all_distinct_lists = [name_Vars, major_Vars]
 
-    # self.clueses at the Problem level is [self.clue_0]. That ensures that this setup clue will run.
+    # self.clues at the Problem level is [self.clue_0]. That ensures that this setup clue will run.
     # We append the actual clues so that the clues will be in their correct list index positions,
     # i.e., clue_i at self.clues[i].
     self.clues += [self.clue_1, self.clue_2, self.clue_3, self.clue_4, self.clue_5]

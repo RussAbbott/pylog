@@ -77,18 +77,18 @@ class ZebraProblem(Problem):
     self.Items = Houses
 
     # Check all attributes for distinctness
-    nbr_attributes = len(House().args)
+    nbr_attributes = len(House( ).args)
     vars_lists = [[house.args[i] for house in self.Items] for i in range(nbr_attributes)]
     self.all_distinct_lists = vars_lists
 
-    # self.clueses at the Problem level is [self.clue_0]. That ensures that this setup clue will run.
+    # self.clues at the Problem level is [self.clue_0]. That ensures that this setup clue will run.
     # We append the actual clues so that the clues will be in their correct list index positions,
     # i.e., clue_i at self.clues[i].
     self.clues += [self.clue_1, self.clue_2, self.clue_3, self.clue_4, self.clue_5,
                    self.clue_6, self.clue_7, self.clue_8, self.clue_9, self.clue_10,
                    self.clue_11, self.clue_12, self.clue_13, self.clue_14, self.clue_15]
 
-    # Show trace on selected clues.
+    # Show trace only after all clues have succeeded -- and we just need to fill in empty spaces.
     self.show_trace_list = [14]
     yield
 
@@ -131,7 +131,8 @@ class ZebraProblem(Problem):
     yield from unify(House(nationality='Norwegians'), Houses.head())
 
   def clue_10(self, Houses):
-    """ 10. The Chesterfield smokers live next to the fox. """
+    """ 10. The Chesterfield smokers live next to the fox.
+        Saying 'next to' doesn't commit to the right or left. """
     yield from next_to_in(House(smoke='Chesterfield'), House(pet='fox'), Houses)
 
   def clue_11(self, Houses):

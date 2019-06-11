@@ -14,16 +14,17 @@ def complete_column(carry_out: int, Carry_Out_Dig: PyValue,
   # Is Sum_Dig uninstantiated? If so, instantiate it to sum_digit if possible.
   # Then instantiate Carry_Out_Dig, and return (yield) digits_in with sum_digit removed.
   if not Sum_Dig.is_instantiated():
-    try:
-      # digits_in.index(sum_dig) throws a ValueError if sum_dig is not in digits_in
-      i = digits_in.index(sum_dig)
-      # Ensure not to instantiate any of the Leading_Digits to 0.
-      if digits_in[i] != 0 or all(Sum_Dig is not LV for LV in Leading_Digits):
-        for _ in unify_pairs([(Carry_Out_Dig, carry_out), (Sum_Dig, sum_dig)]):
-          yield digits_in[:i] + digits_in[i + 1:]
-    # sum_dig is not available in digits_in. Fail, i.e., return instead of yield.
-    except ValueError:
+    if sum_dig not in digits_in:
+      # sum_dig is not available in digits_in. Fail, i.e., return instead of yield.
       return
+
+    # sum_dig is available in digits_in. Give it to Sum_Dig as long as this does not give
+    # 0 to one of the leading digits.
+    if sum_dig != 0 or all(Sum_Dig is not LD for LD in Leading_Digits):
+      for _ in unify_pairs([(Carry_Out_Dig, carry_out), (Sum_Dig, sum_dig)]):
+        # Remove sum_digit from digits_in
+        i = digits_in.index(sum_dig)
+        yield digits_in[:i] + digits_in[i + 1:]
 
   # If Sum_Dig is instantiated, is it equal to sum_digit?
   # If so, instantiate Carry_Out_Dig and return the current digits_in.
