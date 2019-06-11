@@ -1,7 +1,6 @@
-from control_structures import forall, trace
 from logic_variables import n_Vars, StructureItem, unify
 
-from examples.puzzles import run_puzzle
+from examples.puzzles import Problem
 from sequence_options.super_sequence import is_contiguous_in, member, members, next_to_in
 
 """
@@ -30,8 +29,7 @@ Each family has a pet, a favorite smoke, and a favorite drink.
 
 Who has a zebra and who drinks water?
 
-Solution:
-
+Houses:
   1. Norwegians(Kool, fox, water, yellow)
   2. Ukrainians(Chesterfield, horse, tea, blue)
   3. English(Old Gold, snails, milk, red)
@@ -40,12 +38,10 @@ Solution:
   
   The Japanese own a zebra, and the Norwegians drink water.
 
-"""
-
-""" 
+ 
     =================================================================================================================
       This and the scholarship problem are both written so that they can use either LinkedLists or one of the
-      PySequence options: PyList or PyTuple.
+      PySequence options: PyList or PyTuple. Make a choice at the bottom of the file.
     =================================================================================================================
 """
 
@@ -56,86 +52,10 @@ class House(StructureItem):
     super( ).__init__( (nationality, smoke, pet, drink, color), first_arg_as_str_functor)
 
 
-def zebra_problem(Houses):
+# noinspection PyMethodMayBeStatic
+class ZebraProblem(Problem):
 
-  for _ in forall([
-    # 1. The English live in the red house.
-    lambda: member(House(nationality='English', color='red'), Houses),
-    # lambda: trace(f'After 1: {Houses}'),
-    
-    # 2. The Spanish have a dog.
-    lambda: member(House(nationality='Spanish', pet='dog'), Houses),
-    # lambda: trace(f'After 2: {Houses}'),
-    
-    # 3. They drink coffee in the green house.
-    lambda: member(House(drink='coffee', color='green'), Houses),
-    # lambda: trace(f'After 3: {Houses}'),
-    
-    # 4. The Ukrainians drink tea.
-    lambda: member(House(nationality='Ukrainians', drink='tea'), Houses),
-    # lambda: trace(f'After 4: {Houses}'),
-    
-    # 5. The green house is immediately to the right of the white house.
-    lambda: is_contiguous_in([House(color='white'), House(color='green')], Houses),
-    # lambda: trace(f'After 5: {Houses}'),
-    
-    # 6. The Old Gold smokers have snails.
-    lambda: member(House(smoke='Old Gold', pet='snails'), Houses),
-    # lambda: trace(f'After 6: {Houses}'),
-    
-    # 7. They smoke Kool in the yellow house.
-    lambda: member(House(smoke='Kool', color='yellow'), Houses),
-    # lambda: trace(f'After 7: {Houses}'),
-    
-    # 8. They drink milk in the middle house.
-    # Note the use of a slice. Houses[2] picks the middle house.
-    lambda: unify(House(drink='milk'), Houses[2]),
-    # lambda: trace(f'After 8: {Houses}'),
-    
-    # 9. The Norwegians live in the first house on the left.
-    lambda: unify(House(nationality='Norwegians'), Houses.head()),
-    # lambda: trace(f'After 9: {Houses}'),
-    
-    # 10. The Chesterfield smokers live next to the fox.
-    lambda: next_to_in(House(smoke='Chesterfield'), House(pet='fox'), Houses),
-    # lambda: trace(f'After 10: {Houses}'),
-    
-    # 11. They smoke Kool in the house next to the horse.
-    lambda: next_to_in(House(smoke='Kool'), House(pet='horse'), Houses),
-    # lambda: trace(f'After 11: {Houses}'),
-    
-    # 12. The Lucky smokers drink juice.
-    lambda: member(House(drink='juice', smoke='Lucky'), Houses),
-    # lambda: trace(f'After 12: {Houses}'),
-    
-    # 13. The Japanese smoke Parliament.
-    lambda: member(House(nationality='Japanese', smoke='Parliament'), Houses),
-    # lambda: trace(f'After 13: {Houses}'),
-    
-    # 14. The Norwegians live next to the blue house.
-    lambda: next_to_in(House(nationality='Norwegians'), House(color='blue'), Houses),
-
-    lambda: trace(f'After 14: {Houses}'),
-
-    # Fill in unmentioned properties.
-    lambda: members([House(pet='zebra'), House(drink='water')], Houses),
-  ]):
-    yield
-
-
-if __name__ == '__main__':
-
-  """ Select either LinkedList or a PySequence (PyList or PyTuple) as the ListType. """
-
-  from sequence_options.linked_list import LinkedList
-  ListType = LinkedList
-
-  # from sequence_options.sequences import PyList  # or PyTuple
-  # ListType = PyList  # or PyTuple
-
-  """ additional_answer function, if any """
-
-  def additional_answer(Houses):
+  def additional_answer(self, Houses):
     (Nat1, Nat2) = n_Vars(2)
     for _ in members([House(nationality=Nat1, pet='zebra'),
                       House(nationality=Nat2, drink='water')], Houses):
@@ -143,8 +63,107 @@ if __name__ == '__main__':
             f'\n\tThe {Nat1} own a zebra, and the {Nat2} drink water.'
       print(ans)
 
-  """ Set up the Answer list """
-  Houses = ListType([House( ) for _ in range(5)])
+  def clue_0(self, _):
+    """
+    Problem setup.
+      There are 5 houses in a row, each with a unique color: blue, green, red, white, yellow.
+      Each house is occupied by a family of a unique nationality: English, Japanese, Norwegians, Spanish, Ukrainians.
+      Each family has:
+        a pet: dog, fox, horse, snails, zebra,
+        a favorite smoke: Chesterfield, Kool, Lucky, Old Gold, Parliament, and
+        a favorite drink: coffee, juice, milk, tea, water.
+    """
+    Houses = ListType([House( ) for _ in range(5)])
+    self.Items = Houses
+
+    # Check all attributes for distinctness
+    nbr_attributes = len(House().args)
+    vars_lists = [[house.args[i] for house in self.Items] for i in range(nbr_attributes)]
+    self.all_distinct_lists = vars_lists
+
+    # self.clueses at the Problem level is [self.clue_0]. That ensures that this setup clue will run.
+    # We append the actual clues so that the clues will be in their correct list index positions,
+    # i.e., clue_i at self.clues[i].
+    self.clues += [self.clue_1, self.clue_2, self.clue_3, self.clue_4, self.clue_5,
+                   self.clue_6, self.clue_7, self.clue_8, self.clue_9, self.clue_10,
+                   self.clue_11, self.clue_12, self.clue_13, self.clue_14, self.clue_15]
+
+    # Show trace on selected clues.
+    self.show_trace_list = [14]
+    yield
+
+  def clue_1(self, Houses):
+    """ 1. The English live in the red house.  """
+    yield from member(House(nationality='English', color='red'), Houses)
+
+  def clue_2(self, Houses):
+    """ 2. The Spanish have a dog. """
+    yield from member(House(nationality='Spanish', pet='dog'), Houses)
+
+  def clue_3(self, Houses):
+    """ 3. They drink coffee in the green house. """
+    yield from member(House(drink='coffee', color='green'), Houses)
+
+  def clue_4(self, Houses):
+    """ 4. The Ukrainians drink tea. """
+    yield from member(House(nationality='Ukrainians', drink='tea'), Houses)
+
+  def clue_5(self, Houses):
+    """ 5. The green house is immediately to the right of the white house. """
+    yield from is_contiguous_in([House(color='white'), House(color='green')], Houses)
+
+  def clue_6(self, Houses):
+    """ 6. The Old Gold smokers have snails. """
+    yield from member(House(smoke='Old Gold', pet='snails'), Houses)
+
+  def clue_7(self, Houses):
+    """ 7. They smoke Kool in the yellow house. """
+    yield from member(House(smoke='Kool', color='yellow'), Houses)
+
+  def clue_8(self, Houses):
+    """ 8. They drink milk in the middle house.
+        Note the use of a slice. Houses[2] picks the middle house. """
+    yield from unify(House(drink='milk'), Houses[2])
+
+  def clue_9(self, Houses):
+    """ 9. The Norwegians live in the first house on the left.
+        Instead of Houses.head(), could have written Houses[0]. """
+    yield from unify(House(nationality='Norwegians'), Houses.head())
+
+  def clue_10(self, Houses):
+    """ 10. The Chesterfield smokers live next to the fox. """
+    yield from next_to_in(House(smoke='Chesterfield'), House(pet='fox'), Houses)
+
+  def clue_11(self, Houses):
+    """ 11. They smoke Kool in the house next to the horse. """
+    yield from next_to_in(House(smoke='Kool'), House(pet='horse'), Houses)
+
+  def clue_12(self, Houses):
+    """ 12. The Lucky smokers drink juice. """
+    yield from member(House(drink='juice', smoke='Lucky'), Houses)
+
+  def clue_13(self, Houses):
+    """ 13. The Japanese smoke Parliament. """
+    yield from member(House(nationality='Japanese', smoke='Parliament'), Houses)
+
+  def clue_14(self, Houses):
+    """ 14. The Norwegians live next to the blue house. """
+    yield from next_to_in(House(nationality='Norwegians'), House(color='blue'), Houses)
+
+  def clue_15(self, Houses):
+    """ 15 (implicit) Fill in unmentioned properties. """
+    yield from members([House(pet='zebra'), House(drink='water')], Houses)
+
+
+if __name__ == '__main__':
+
+  """ Select either LinkedList or a PySequence (PyList or PyTuple) as the ListType. """
+
+  # from sequence_options.linked_list import LinkedList
+  # ListType = LinkedList
+  #
+  from sequence_options.sequences import PyList  # or PyTuple
+  ListType = PyList  # or PyTuple
 
   """ Run problem """
-  run_puzzle(ZebraProblem(Houses), ListType, additional_answer)
+  ZebraProblem()(ListType)
