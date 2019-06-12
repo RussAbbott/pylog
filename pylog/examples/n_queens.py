@@ -1,27 +1,31 @@
 from math import log10
 from typing import Generator, List
 
+from logic_variables import PyValue, unify
 
-def is_safe(placement: List[int], col: int) -> bool:
+
+# noinspection SpellCheckingInspection
+def is_safe(placement: List[PyValue]) -> bool:
   """ Given the Placement so far, is it safe to add a queen in the next row at the col position? """
 
-  row = len(placement)
-
-  # (row, col) is the proposed position of the new queen. 
+  placement_vector = [c.get_py_value() for c in placement if c.is_instantiated()]
+  row = len(placement_vector)-1
+  col = placement_vector[-1]
+  # (row, col) is the proposed position of the new queen.
   # Assuming that (rowp, colp) is the position of a previously set queen, (row, col) is a safe placement if:
   # (a) col has not been used previously, i.e., col != colp, and
   # (b) (row, col) is not on the same diagonal as any previous queen, i.e., abs(rowp - row) != abs(colp - col).
 
-  return all([col != colp and abs(rowp - row) != abs(colp - col) for (rowp, colp) in enumerate(placement)])
+  return all([col != colp and abs(rowp - row) != abs(colp - col) for (rowp, colp) in enumerate(placement_vector[:-1])])
 
 
-def layout(placement: [int], board_width: int) -> str:
+def layout(placement_vector: [int], board_width: int) -> str:
   """ Format the placement for display. """
   offset = ord('a')
   # Generate the column headers.
   col_hdrs = ' '*(4+int(log10(board_width))) + \
              '  '.join([f'{chr(n+offset)}' for n in range(board_width)]) + '  col#\n'
-  display = col_hdrs + '\n'.join([one_row(r, c, board_width) for (r, c) in enumerate(placement)])
+  display = col_hdrs + '\n'.join([one_row(r, c, board_width) for (r, c) in enumerate(placement_vector)])
   return display
 
 
@@ -36,53 +40,41 @@ def place_n_queens(board_width: int):
   """
   Generate and display all solutions to the n-queens problem.
 
-  A Placement is a list of n integers. The rth integer indicates where the queen is to be
+  A Placement is a list of n PyValue integers. The rth integer indicates where the queen is to be
   placed in the rth row. I.e., Placement[r] is the position of the queen in row r.
-  Initially, Placement is an empty list.
 
-  This implementation uses a Python list wrapped in a PyValue for Placement. That's so that we
-  can demonstrate how to return the solution through Solution rather than through the parameter
-  in the "for _ in place_remaining_queens" statement.
-  "for Solution in place_remaining_queens" would work as well as long as place_remaining_queens
-  yields the solution rather than unifying it with Solution.
   """
-  placement = []
+  # Create the entire list of PyValue variables.
+  placement = [PyValue() for _ in range(board_width)]
   solutionNbr = 0
-  for solution in place_remaining_queens(placement, board_width):
+  # place_remaining_queens will instantiate the PyValue variables one by one.
+  for _ in place_remaining_queens(placement):
     solutionNbr += 1
-    solution_display = layout(solution, board_width)
+    solution_display = layout([c.get_py_value() for c in placement], board_width)
     print(f'\n{solutionNbr}.\n{solution_display}')
 
 
-def place_remaining_queens(placement: List[int], board_width: int) -> Generator[List[int], None, None]:
+def place_remaining_queens(placement: List[PyValue]):
   """
-  Find a safe spot for a queen in the row after those in the current Placement and continue with the rest of the rows.
-
-  :param placement: A placement is a list of n integers. It indicates the rows, from 0 through len(Placement)-1,
-  that have non-conflicting queen column assignments. The rth integer, i.e., Placement[r], indicates the column in
-  which the queen is to be placed in the rth row.
-  :param board_width: the size of the board: board_width x board_width, generally 8.
+  Find a safe spot for the next queen and eithe quit if it's the last position or call this recursively.
   """
-  # The following will try all the columns as possible positions for the next queen.
-  # It's what makes Prolog look like it's backtracking.
-  for col in range(board_width):
-    # Note that there is no 'else' for the following if. Whether or not col is a safe position,
-    # we go on to the next value after processing col.
-    if is_safe(placement, col):
-      extended_placement = placement + [col]
+  # next_col is the next column to be instantiated
+  next_col = len([c for c in placement if c.is_instantiated()])
+  for d in range(len(placement)):
+    for _ in unify(placement[next_col], d):
+      # Note that there is no 'else' for if is_safe(placement). Whether or not d is a safe position,
+      # we go on to the next value after processing it.
+      if is_safe(placement):
+        # Have we filled the board? If so, next_col will be, e.g., 7, and len(placement) will be 8.
+        last_col = len(placement)-1
+        if next_col == last_col:
+          # Found a solution; yield.
+          yield
 
-      # Have we filled the board?
-      if len(extended_placement) == board_width:
-        # Found a solution; yield it.
-        yield extended_placement
-
-      # More queens to place.
-      else:
-        # Find columns for the remaining queens.
-        yield from place_remaining_queens(extended_placement, board_width)
-        # The preceding 'yield from' line is equivalent to the following.
-        # for _ in place_remaining_queens(Extended_Placement, board_width, Solution):
-        #   yield
+        # More queens to place.
+        else:
+          # Find columns for the remaining queens.
+          yield from place_remaining_queens(placement)
 
 
 def space_offset(n, board_width):
