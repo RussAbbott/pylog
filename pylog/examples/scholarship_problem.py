@@ -1,7 +1,6 @@
-from control_structures import forall
 from logic_variables import PyValue, StructureItem, Var
 
-from sequence_options.super_sequence import is_contiguous_in, is_a_subsequence_of, member
+from sequence_options.super_sequence import is_contiguous_in, is_a_subsequence_of, member, SuperSequence
 
 from examples.puzzles import Problem
 
@@ -52,7 +51,7 @@ class Student(StructureItem):
 # noinspection PyMethodMayBeStatic
 class ScholarshipProblem(Problem):
 
-  def clue_0(self, _):
+  def clue_0(self, _: SuperSequence):
     """
     Problem setup.
       There are 4 students: Amy, Carrie, Erma, and Tracy.
@@ -92,34 +91,29 @@ class ScholarshipProblem(Problem):
 
   # If we make the clues static, it's difficult (and strange) to make a list of them.
   # See: https://stackoverflow.com/questions/41921255/staticmethod-object-is-not-callable-switch-case.
-  def clue_1(self, Students):
+  def clue_1(self, Students: SuperSequence):
     """ 1. The student who studies Astronomy gets a smaller scholarship than Amy. """
     yield from is_a_subsequence_of([Student(major='Astronomy'), Student(name='Amy')], Students)
 
-  def clue_2(self, Students):
+  def clue_2(self, Students: SuperSequence):
     """ 2. Amy studies either Philosophy or English. """
-    # Create Major as a local logic variable, i.e., existentially quantified.
+    # Create Major as a local logic variable.
     Major = PyValue( )
-    yield from forall([
-      # Note the use of Major as a PyValue, which gets instantiated *after* it is positioned.
-      lambda: member(Student(name='Amy', major=Major), Students),
-      # Since Philosophy is the right answer, more rule applications are required (36 vs. 33)
-      # if English is first in the list.
-      lambda: member(Major, PyList(['Philosophy', 'English'])),
-    ])
+    for _ in member(Student(name='Amy', major=Major), Students):
+      yield from member(Major, PyList(['Philosophy', 'English']))
 
-  def clue_3(self, Students):
+  def clue_3(self, Students: SuperSequence):
     """ 3. The student who studies Comp Sci has a $5,000 larger scholarship than Carrie. """
     # To avoid arithmetic, take advantage of the known structure of the Scholarships list.
     yield from is_contiguous_in([Student(name='Carrie'), Student(major='Comp Sci')], Students)
 
-  def clue_4(self, Students):
+  def clue_4(self, Students: SuperSequence):
     """ 4. Erma has a $10,000 larger scholarship than Carrie.
         This means that Erma comes after the person who comes after Carrie.
     """
     yield from is_contiguous_in([Student(name='Carrie'), Var( ), Student(name='Erma')], Students)
 
-  def clue_5(self, Students):
+  def clue_5(self, Students: SuperSequence):
     """ 5. Tracy has a larger scholarship than the student who studies English. """
     yield from is_a_subsequence_of([Student(major='English'), Student(name='Tracy')], Students)
 

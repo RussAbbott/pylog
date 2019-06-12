@@ -33,10 +33,12 @@ class Problem:
     self.show_trace_list = None
     self.rule_applications = SimpleCounter( )
     self.printing_time = 0
+    self.ListType = None
 
   def __call__(self, ListType: Type):
     """ Run the problem and display the answer. Take and display timing information. """
 
+    self.ListType = ListType
     inp = None  # needed below at this block level
     start = timer( )
 
