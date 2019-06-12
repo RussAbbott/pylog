@@ -77,9 +77,7 @@ class ZebraProblem(Problem):
     self.Items = Houses
 
     # Check all attributes for distinctness
-    nbr_attributes = len(House( ).args)
-    vars_lists = [[house.args[i] for house in self.Items] for i in range(nbr_attributes)]
-    self.all_distinct_lists = vars_lists
+    self.check_all_for_distinctness(House)
 
     # self.clues at the Problem level is [self.clue_0]. That ensures that this setup clue will run.
     # We append the actual clues so that the clues will be in their correct list index positions,
