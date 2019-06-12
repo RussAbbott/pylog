@@ -154,8 +154,9 @@ def forany(gens):
     # Can probably not do the lambda trick here, but keeping it makes it
     # parallel to forall. Succeed if any of them succeed.
     # Try them all even if earlier ones succeed. 
-    for _ in gen( ):
-      yield
+    # for _ in gen( ):
+    #   yield
+    yield from gen( )
 
 
 def trace(x, succeed=True, show_trace=True):
