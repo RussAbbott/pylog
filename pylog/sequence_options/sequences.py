@@ -111,8 +111,9 @@ def append(Xs: Union[PySequence, Var], Ys: Union[PySequence, Var], Zs: Union[PyS
       # Xs, Ys, and Zs are all of fixed lengths in which len(Xs) + len(Ys) = len(Zs).
       # Concatenate Xs and Ys and then unify the concatenation with Zs.
       XYs = [*Xs.trail_end().args, *Ys.trail_end().args]
-      for _ in unify_sequences(XYs, Zs.args):
-        yield
+      yield from unify_sequences(XYs, Zs.args)
+      # for _ in unify_sequences(XYs, Zs.args):
+      #   yield
 
 
 if __name__ == '__main__':
