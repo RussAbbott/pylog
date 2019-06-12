@@ -1,5 +1,6 @@
 from math import log10
-from typing import Generator, List
+from timeit import default_timer as timer
+from typing import List
 
 from logic_variables import PyValue, unify
 
@@ -44,6 +45,7 @@ def place_n_queens(board_width: int):
   placed in the rth row. I.e., Placement[r] is the position of the queen in row r.
 
   """
+  start = timer()
   # Create the entire list of PyValue variables.
   placement = [PyValue() for _ in range(board_width)]
   solutionNbr = 0
@@ -52,6 +54,12 @@ def place_n_queens(board_width: int):
     solutionNbr += 1
     solution_display = layout([c.get_py_value() for c in placement], board_width)
     print(f'\n{solutionNbr}.\n{solution_display}')
+    end = timer()
+    print(f'time: {round(end-start, 3)}')
+    inp = input('\nMore? (y, or n)? > ').lower( )
+    if inp != 'y':
+      break
+    start = timer()
 
 
 def place_remaining_queens(placement: List[PyValue]):
@@ -83,4 +91,4 @@ def space_offset(n, board_width):
 
 if __name__ == "__main__":
   # The parameter to place_n_queens is the size of the board, typically 8x8.
-  place_n_queens(8)
+  place_n_queens(20)
