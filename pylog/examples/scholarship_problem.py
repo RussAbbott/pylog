@@ -100,7 +100,7 @@ class ScholarshipProblem(Problem):
     # Create Major as a local logic variable.
     Major = PyValue( )
     for _ in member(Student(name='Amy', major=Major), Students):
-      yield from member(Major, PyList(['Philosophy', 'English']))
+      yield from member(Major, self.ListType(['Philosophy', 'English']))
 
   def clue_3(self, Students: SuperSequence):
     """ 3. The student who studies Comp Sci has a $5,000 larger scholarship than Carrie. """
@@ -121,11 +121,11 @@ class ScholarshipProblem(Problem):
 if __name__ == '__main__':
 
   """ Select either LinkedList or a PySequence (PyList or PyTuple) as the ListType. """
-  # from sequence_options.linked_list import LinkedList
-  # ListType = LinkedList
-  #
-  from sequence_options.sequences import PyList  # or PyTuple
-  ListType = PyList  # or PyTuple
+  from sequence_options.linked_list import LinkedList
+  ListType = LinkedList
+
+  # from sequence_options.sequences import PyList  # or PyTuple
+  # ListType = PyList  # or PyTuple
 
   """ Run problem """
   # Create an instance of the ScholarshipProblem and run it.

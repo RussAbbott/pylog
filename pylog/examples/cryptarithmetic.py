@@ -116,7 +116,7 @@ def set_up_puzzle(t1: str, t2: str, sum: str, _Z: PyValue) -> \
   Sum = [_Z for _ in range((length - len(sum)))] + letters_to_vars(sum, Vars_Dict)
   # Leading_Digits are the variables that should not be assigned 0.
   Leading_Digits = letters_to_vars({t1[0], t2[0], sum[0]}, Vars_Dict)
-  Carries = [PyValue() for _ in range(length - 1)] + [PyValue(0)]
+  Carries = [PyValue( ) for _ in range(length - 1)] + [PyValue(0)]
   return (Carries, T1, T2, Sum, Leading_Digits)
 
 

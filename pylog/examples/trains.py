@@ -1,7 +1,7 @@
 from functools import reduce
 from typing import Iterator, List, Tuple, Union
 
-from control_structures import forall
+# from control_structures import forall
 from logic_variables import PyValue, Term, unify
 
 
@@ -57,15 +57,18 @@ def connected(S1: PyValue, Line_Dist: PyValue, S2: PyValue):
   """
   # print(f'-> connected({S1}, {Line_Dist}, {S2})?')
   Line = PyValue()
-  for _ in forall([lambda: has_station(Line, S1),
-                   lambda: has_station(Line, S2)]):
-    # Ensure that S1 != S2
-    if S1 != S2:
-      line = Line.get_py_value()
-      stations = lines[line]
-      pos1 = stations.index(S1.get_py_value())
-      pos2 = stations.index(S2.get_py_value())
-      yield from unify(Line_Dist, (line, abs(pos1 - pos2)))
+  # Can use either forall or nested for _ in has_station's
+  # for _ in forall([lambda: has_station(Line, S1),
+  #                  lambda: has_station(Line, S2)]):
+  for _ in has_station(Line, S1):
+    for _ in has_station(Line, S2):
+      # Ensure that S1 != S2
+      if S1 != S2:
+        line = Line.get_py_value()
+        stations = lines[line]
+        pos1 = stations.index(S1.get_py_value())
+        pos2 = stations.index(S2.get_py_value())
+        yield from unify(Line_Dist, (line, abs(pos1 - pos2)))
   # print(f'XX connected({S1}, {Line_Dist}, {S2})?')
 
 
