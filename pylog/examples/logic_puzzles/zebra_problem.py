@@ -1,6 +1,6 @@
 from logic_variables import n_Vars, StructureItem, unify
 
-from examples.puzzles import Problem
+from examples.logic_puzzles.puzzles import Problem
 from sequence_options.super_sequence import is_contiguous_in, member, members, next_to_in, SuperSequence
 
 """

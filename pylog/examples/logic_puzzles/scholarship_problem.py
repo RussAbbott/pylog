@@ -2,7 +2,7 @@ from logic_variables import PyValue, StructureItem, Var
 
 from sequence_options.super_sequence import is_contiguous_in, is_a_subsequence_of, member, SuperSequence
 
-from examples.puzzles import Problem
+from examples.logic_puzzles.puzzles import Problem
 
 """
 A puzzle from GeekOverdose: https://geekoverdose.wordpress.com/2015/10/31/solving-logic-puzzles-in-prolog-puzzle-1-of-3/
