@@ -71,7 +71,7 @@ def place_n_queens(board_size: int):
   i = 0
   while True:
     i += 1
-    limit = i/2
+    limit = i/4
     starts += 1
     start = timer()
     placement = Placement(board_size)
