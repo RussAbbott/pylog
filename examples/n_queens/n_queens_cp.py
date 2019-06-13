@@ -117,6 +117,7 @@ def place_remaining_queens(placement: Placement):
       pass
 
     # More queens to place.
+    # Another comment
     else:
       # Find columns for the remaining queens.
       yield from place_remaining_queens(next_placement)
