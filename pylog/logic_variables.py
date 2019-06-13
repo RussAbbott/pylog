@@ -18,7 +18,8 @@ The pylog core, this file contains the logic variable and data structure classes
 
 def eot(f):
   """
-  A decorator that takes trail_end() of all Var arguments
+  A decorator that takes trail_end() of all Var arguments.
+  comment
   """
 
   def var_trail_end(v):
