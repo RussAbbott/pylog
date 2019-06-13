@@ -68,15 +68,14 @@ def place_n_queens(board_size: int):
   global limit, start, total_time_start
   starts = 0
   total_time_start = timer( )
-  for i in range(1, 10000):
+  i = 0
+  while True:
+    i += 1
     limit = i/2
     starts += 1
     start = timer()
-    # Create the entire list of PyValue variables along with, for each, the possible
-    # values still available for it.
     placement = Placement(board_size)
     solutionNbr = 0
-    # place_remaining_queens will instantiate the PyValue variables one by one.
     for solution in place_remaining_queens(placement):
       solutionNbr += 1
       sol = sorted([(r, c) for (r, (c, _)) in solution.items()])
@@ -84,11 +83,14 @@ def place_n_queens(board_size: int):
       solution_display = layout(stripped_sol, board_size)
       print(f'\n{solutionNbr}.\n{solution_display}')
       end = timer()
-      print(f'After {starts} starts, time: {round(end-start, 3)}/{round(end-total_time_start, 3)}')
+      print(f'After {starts} start{"" if starts == 1 else "s"}, time: {round(end-start, 3)} sec '
+            f'on the final run out of {round(end-total_time_start, 3)} total seconds.')
       inp = input('\nMore? (y, or n)? > ').lower( )
       if inp != 'y':
-        break
-      start = timer()
+        return
+      starts = 1
+      total_time_start = start = timer()
+      i = 1
 
 
 def place_remaining_queens(placement: Placement):
