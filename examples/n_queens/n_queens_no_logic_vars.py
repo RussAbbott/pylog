@@ -1,4 +1,5 @@
 from math import log10
+from timeit import default_timer as timer
 from typing import Generator, List
 
 
@@ -46,12 +47,19 @@ def place_n_queens(board_width: int):
   "for Solution in place_remaining_queens" would work as well as long as place_remaining_queens
   yields the solution rather than unifying it with Solution.
   """
+  start = timer()
   placement = []
   solutionNbr = 0
   for solution in place_remaining_queens(placement, board_width):
     solutionNbr += 1
     solution_display = layout(solution, board_width)
     print(f'\n{solutionNbr}.\n{solution_display}')
+    end = timer()
+    print(f'time: {round(end-start, 3)}')
+    inp = input('\nMore? (y, or n)? > ').lower( )
+    if inp != 'y':
+      break
+    start = timer()
 
 
 def place_remaining_queens(placement: List[int], board_width: int) -> Generator[List[int], None, None]:
@@ -91,4 +99,4 @@ def space_offset(n, board_width):
 
 if __name__ == "__main__":
   # The parameter to place_n_queens is the size of the board, typically 8x8.
-  place_n_queens(8)
+  place_n_queens(20)

@@ -80,10 +80,12 @@ class LinkedList(SuperSequence):
     else:
       (Xs, Ys) = n_Vars(2)
       # Succeed if we can find a way to divide self into Xs and Ys so that As is an initial sublist of Ys.
-      for _ in forall([lambda: append(Xs, Ys, self),
-                       lambda: append(As, Var( ), Ys)
-                       ]):
-        yield
+      # for _ in forall([lambda: append(Xs, Ys, self),
+      #                  lambda: append(As, Var( ), Ys)
+      #                  ]):
+      #   yield
+      for _ in append(Xs, Ys, self):
+        yield from append(As, Var( ), Ys)
 
   def head(self) -> Term:
     return self.args[0]

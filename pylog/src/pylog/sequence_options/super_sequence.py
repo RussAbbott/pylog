@@ -50,15 +50,14 @@ def is_a_subsequence_of(As: List, Zs: SuperSequence):
 
   elif not Zs:
     # If no more Zs to match the remaining As, fail.
-    pass
+    return
 
   else:
     for _ in forany([
                      # Match As[0] and Zs[0]; go on to is_a_subsequence_of(As[1:], Zs[1:])
                      lambda: forall([lambda: unify(As[0], Zs[0]),
                                      lambda: is_a_subsequence_of(As[1:], Zs[1:])]),
-                     # Whether or not we matched As[0] and Zs[0] above,
-                     # try is_a_subsequence_of(As, Zs[1:]), either to match the rest of the As or as an alternative.
+                     # Whether or not we matched As[0] and Zs[0] above, try is_a_subsequence_of(As, Zs[1:])
                      lambda: is_a_subsequence_of(As, Zs[1:])
                      ]):
       yield
@@ -76,8 +75,9 @@ def member(E: Term, A_List: Union[SuperSequence, Var]):
   # The following is an implicit 'or'. Either unify E with A_List.head() or call member(E, A_List.tail()).
 
   # The first case is easy.
-  for _ in unify(E, A_List.head( )):
-    yield
+  # for _ in unify(E, A_List.head( )):
+  #   yield
+  yield from unify(E, A_List.head( ))
 
   # The second case--member(E, A_List.tail())--is trickier.
   # Since A_List may be an open-ended LinkedList, A_List.tail() may be a Var.
