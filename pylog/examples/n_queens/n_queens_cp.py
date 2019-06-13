@@ -1,8 +1,7 @@
 from math import log10
+from random import choice
 from timeit import default_timer as timer
 from typing import Dict
-
-# from logic_variables import PyValue, unify
 
 
 class Placement(Dict):
@@ -15,17 +14,17 @@ class Placement(Dict):
   def __len__(self):
     return self.board_size
 
-  def get_available(self, c):
+  def available_for(self, c):
     return self[c][1]
 
-  def get_value(self, c):
-    return self[c][0]
-
   def is_instantiated(self, c):
-    return self.get_value(c) is not None
+    return self.value_for(c) is not None
 
   def uninstantiated_rows(self):
-    return [c for c in self if self.get_value(c) is None]
+    return [c for c in self if self.value_for(c) is None]
+
+  def value_for(self, c):
+    return self[c][0]
 
 
 def layout(placement_vector: [int], board_size: int) -> str:
@@ -53,6 +52,11 @@ def one_row(row: int, col: int, board_size: int) -> str:
          f'{" . "*col} Q {" . "*(board_size-col-1)} {space_offset(col+1, board_size)}({col+1})'
 
 
+limit = 0
+start = 0
+total_time_start = 0
+
+
 def place_n_queens(board_size: int):
   """
   Generate and display all solutions to the n-queens problem.
@@ -61,24 +65,30 @@ def place_n_queens(board_size: int):
   placed in the rth row. I.e., Placement[r] is the position of the queen in row r.
 
   """
-  start = timer()
-  # Create the entire list of PyValue variables along with, for each, the possible
-  # values still available for it.
-  placement = Placement(board_size)
-  solutionNbr = 0
-  # place_remaining_queens will instantiate the PyValue variables one by one.
-  for solution in place_remaining_queens(placement):
-    solutionNbr += 1
-    sol = sorted([(r, c) for (r, (c, _)) in solution.items()])
-    stripped_sol = [c for (_, c) in sol]
-    solution_display = layout(stripped_sol, board_size)
-    print(f'\n{solutionNbr}.\n{solution_display}')
-    end = timer()
-    print(f'time: {round(end-start, 3)}')
-    inp = input('\nMore? (y, or n)? > ').lower( )
-    if inp != 'y':
-      break
+  global limit, start, total_time_start
+  starts = 0
+  total_time_start = timer( )
+  for i in range(1, 10000):
+    limit = i/2
+    starts += 1
     start = timer()
+    # Create the entire list of PyValue variables along with, for each, the possible
+    # values still available for it.
+    placement = Placement(board_size)
+    solutionNbr = 0
+    # place_remaining_queens will instantiate the PyValue variables one by one.
+    for solution in place_remaining_queens(placement):
+      solutionNbr += 1
+      sol = sorted([(r, c) for (r, (c, _)) in solution.items()])
+      stripped_sol = [c for (_, c) in sol]
+      solution_display = layout(stripped_sol, board_size)
+      print(f'\n{solutionNbr}.\n{solution_display}')
+      end = timer()
+      print(f'After {starts} starts, time: {round(end-start, 3)}/{round(end-total_time_start, 3)}')
+      inp = input('\nMore? (y, or n)? > ').lower( )
+      if inp != 'y':
+        break
+      start = timer()
 
 
 def place_remaining_queens(placement: Placement):
@@ -87,8 +97,13 @@ def place_remaining_queens(placement: Placement):
   """
   uninstantiated_rows = placement.uninstantiated_rows()
   # Select the col with the fewest available possibilities as the next_row to be instantiated.
-  next_row = min( uninstantiated_rows, key=lambda row: len(placement.get_available(row)) )
-  for col in placement.get_available(next_row):
+  smallest_row = min( uninstantiated_rows, key=lambda row: len(placement.available_for(row)) )
+  avail_size = len(placement.available_for(smallest_row))
+  small_keys = [k for k in uninstantiated_rows if len(placement.available_for(k)) == avail_size]
+  next_row = choice(small_keys)
+  for col in placement.available_for(next_row):
+    if timer( ) - start > limit:
+      return
     next_placement = Placement(placement.board_size)
     # The value for col is None, since it's uninstantiated.
     for (r, (c, avail)) in placement.items( ):
@@ -98,7 +113,7 @@ def place_remaining_queens(placement: Placement):
       yield next_placement
 
     # If some column has no options left, fail and try the next col, rathet than jumping out of the loop.
-    elif frozenset() in [next_placement.get_available(row) for row in next_placement.uninstantiated_rows()]:
+    elif frozenset() in [next_placement.available_for(row) for row in next_placement.uninstantiated_rows()]:
       # This must be pass rather than return. We want to continue on to the next col, not jump out of the loop.
       pass
 
@@ -114,4 +129,4 @@ def space_offset(n, board_size):
 
 if __name__ == "__main__":
   # The parameter to place_n_queens is the size of the board, typically 8x8.
-  place_n_queens(20)
+  place_n_queens(235)
