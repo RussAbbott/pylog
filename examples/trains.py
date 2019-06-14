@@ -1,7 +1,7 @@
 from functools import reduce
 from typing import Iterator, List, Tuple, Union
 
-#from pylog.control_structures import forall
+# from control_structures import forall
 from pylog.logic_variables import PyValue, Term, unify
 
 

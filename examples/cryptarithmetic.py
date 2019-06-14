@@ -1,7 +1,7 @@
 from typing import Iterable, List, Optional, Tuple
 
 from pylog.logic_variables import PyValue, unify, unify_pairs
-from pylog.sequence_options.linked_list import LinkedList
+
 
 def complete_column(carry_out: int, Carry_Out_Dig: PyValue,
                     sum_dig: int, Sum_Dig: PyValue,

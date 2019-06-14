@@ -16,3 +16,5 @@
 *.ini
 .DS_Store
 .yml
+
+.idea/
