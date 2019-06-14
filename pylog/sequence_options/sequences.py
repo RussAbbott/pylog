@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import List, Union
 
-from logic_variables import eot, PyValue, n_Vars, unify, unify_pairs, unify_sequences, Var
+from logic_variables import euc, PyValue, n_Vars, unify, unify_pairs, unify_sequences, Var
 from sequence_options.super_sequence import SuperSequence
 
 
@@ -15,12 +15,12 @@ class PySequence(SuperSequence):
     super().__init__( (pyType, *initialElements) )
 
   def __add__(self, Other: Union[PySequence, Var]) -> PySequence:
-    Other_EoT = Other.trail_end()
+    Other_EoT = Other.unification_chain_end()
     # If not, can't append.
     assert isinstance(Other_EoT, PySequence)
     Result = Var()
     for _ in append(self, Other_EoT, Result):
-      Result_EoT = Result.trail_end()
+      Result_EoT = Result.unification_chain_end()
       # To make the PyCharm type checker happy.
       assert isinstance(Result_EoT, PySequence)
       return Result_EoT
@@ -74,7 +74,7 @@ class PyTuple(PySequence):
     super( ).__init__( tuple, initialElements )
 
 
-@eot
+@euc
 def append(Xs: Union[PySequence, Var], Ys: Union[PySequence, Var], Zs: Union[PySequence, Var]):
   """
     append([], Ys, Zs).
@@ -110,7 +110,7 @@ def append(Xs: Union[PySequence, Var], Ys: Union[PySequence, Var], Zs: Union[PyS
       # Although the lengths of Xs and Ys vary with i,
       # Xs, Ys, and Zs are all of fixed lengths in which len(Xs) + len(Ys) = len(Zs).
       # Concatenate Xs and Ys and then unify the concatenation with Zs.
-      XYs = [*Xs.trail_end().args, *Ys.trail_end().args]
+      XYs = [*Xs.unification_chain_end().args, *Ys.unification_chain_end().args]
       yield from unify_sequences(XYs, Zs.args)
       # for _ in unify_sequences(XYs, Zs.args):
       #   yield

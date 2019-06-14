@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import Any, List, Tuple, Union
 
 from control_structures import forall, forany
-from logic_variables import ensure_is_logic_variable, eot, PyValue, n_Vars, Term, unify, unify_pairs, Var
+from logic_variables import ensure_is_logic_variable, euc, PyValue, n_Vars, Term, unify, unify_pairs, Var
 from sequence_options.super_sequence import is_a_subsequence_of,  member, SuperSequence
 
 
@@ -95,7 +95,7 @@ class LinkedList(SuperSequence):
     if self.is_empty():
       return ([], [])
     else:
-      Tail_EoT = self.tail().trail_end()
+      Tail_EoT = self.tail().unification_chain_end()
       if isinstance(Tail_EoT, LinkedList):
         (tail_prefix, Tail_Tail) = Tail_EoT.prefix_and_tail( )
         return ([self.head()] + tail_prefix, Tail_Tail)
@@ -113,7 +113,7 @@ class LinkedList(SuperSequence):
 emptyLinkedList = LinkedList([])
 
 
-@eot
+@euc
 def append(Xs: Union[LinkedList, Var], Ys: Union[LinkedList, Var], Zs: Union[LinkedList, Var]):
   """
     append([], Ys, Zs).
@@ -332,7 +332,7 @@ if __name__ == '__main__':
   for _ in unify(A, B):
     print(f'2. A: {A}, B: {B}')
 
-    B_Tail_TrailEnd = B_Tail.trail_end( )
+    B_Tail_TrailEnd = B_Tail.unification_chain_end( )
     C = LinkedList([0, *B_Tail_TrailEnd.get_py_value( )])
     print(f'3. C: {C}')
 
@@ -348,8 +348,8 @@ if __name__ == '__main__':
     E = Var( )
     print(f'5a. B: {B}, E: {E}')
     for _ in unify(E, B):
-      # Since E is a Var, must take its trail_end to get something that has a head and tail.
-      E_EoT = E.trail_end( )
+      # Since E is a Var, must take its unification_chain_end to get something that has a head and tail.
+      E_EoT = E.unification_chain_end( )
       assert isinstance(E_EoT, LinkedList)
       print(f'5b. unify(E, B) => E: {E}, E_EoT.head(): {E_EoT.head( )}, E_EoT.tail(): {E_EoT.tail( )}\n')
 

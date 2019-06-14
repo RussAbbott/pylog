@@ -16,36 +16,36 @@ The pylog core, this file contains the logic variable and data structure classes
 """
 
 
-def eot(f):
+def euc(f):
   """
-  A decorator that takes trail_end() of all Var arguments.
+  A decorator that takes unification_chain_end() of all Var arguments.
   comment...
   """
 
-  def var_trail_end(v):
-    return v.trail_end() if isinstance(v, Var) else v
+  def var_unification_chain_end(v):
+    return v.unification_chain_end() if isinstance(v, Var) else v
 
-  def arg_Vars_trail_ends(args):
-    args_trail_ends = (var_trail_end(arg) for arg in args)
-    return args_trail_ends
+  def arg_Vars_unification_chain_ends(args):
+    args_unification_chain_ends = (var_unification_chain_end(arg) for arg in args)
+    return args_unification_chain_ends
 
-  def dict_Vars_trail_ends(dic):
-    dic_trail_ends = {k: var_trail_end(v) for (k, v) in dic.items()}
-    return dic_trail_ends
-
-  @wraps(f)
-  def eot_wrapper_gen(*args, **kwargs):
-    args_trail_ends = arg_Vars_trail_ends(args)
-    kwargs_trail_ends = dict_Vars_trail_ends(kwargs)
-    yield from f(*args_trail_ends, **kwargs_trail_ends)
+  def dict_Vars_unification_chain_ends(dic):
+    dic_unification_chain_ends = {k: var_unification_chain_end(v) for (k, v) in dic.items()}
+    return dic_unification_chain_ends
 
   @wraps(f)
-  def eot_wrapper_non_gen(*args, **kwargs):
-    args = arg_Vars_trail_ends(args)
-    kwargs_trail_ends = dict_Vars_trail_ends(kwargs)
-    return f(*args, **kwargs_trail_ends)
+  def euc_wrapper_gen(*args, **kwargs):
+    args_unification_chain_ends = arg_Vars_unification_chain_ends(args)
+    kwargs_unification_chain_ends = dict_Vars_unification_chain_ends(kwargs)
+    yield from f(*args_unification_chain_ends, **kwargs_unification_chain_ends)
 
-  return eot_wrapper_gen if isgeneratorfunction(f) else eot_wrapper_non_gen
+  @wraps(f)
+  def euc_wrapper_non_gen(*args, **kwargs):
+    args = arg_Vars_unification_chain_ends(args)
+    kwargs_unification_chain_ends = dict_Vars_unification_chain_ends(kwargs)
+    return f(*args, **kwargs_unification_chain_ends)
+
+  return euc_wrapper_gen if isgeneratorfunction(f) else euc_wrapper_non_gen
 
 
 class Term:
@@ -74,16 +74,16 @@ class Term:
     Term.term_count += 1
     self.term_id = self.term_count
 
-  # @eot Can't use decorators on dunder methods without doing this:
+  # @euc Can't use decorators on dunder methods without doing this:
   # (https://stackoverflow.com/questions/55550300/python-how-to-decorate-a-special-dunder-method).
   # Not sure I understand it. Not sure it's worth the trouble.
   def __eq__(self, other: Term) -> bool:
     """
     self == other if either (a) they have the same py_value or (b) are the same variable.
     """
-    (self_eot, other_eot) = (self.trail_end(), other.trail_end())
-    return self_eot is other_eot or \
-           (self is not self_eot or other is not other_eot) and self_eot == other_eot
+    (self_euc, other_euc) = (self.unification_chain_end(), other.unification_chain_end())
+    return self_euc is other_euc or \
+           (self is not self_euc or other is not other_euc) and self_euc == other_euc
 
   def __lt__(self, other: Term) -> bool:
     return str(self) < str(other)
@@ -95,19 +95,19 @@ class Term:
     """
     The str( ) of a Var is (a) the str of its py_value if is_instantiated( ) or (b) its term_id otherwise.
     """
-    self_eot = self.trail_end( )
-    return f'{self_eot}' if self_eot.is_instantiated( ) or isinstance(self_eot, Structure) else \
-           f'_{self_eot.term_id}'
+    self_euc = self.unification_chain_end( )
+    return f'{self_euc}' if self_euc.is_instantiated( ) or isinstance(self_euc, Structure) else \
+           f'_{self_euc.term_id}'
 
   def get_py_value(self) -> Any:
     return None
 
-  @eot
+  @euc
   def is_instantiated(self) -> bool:
-    """ Should never get here since no trail-end is a Term. """
+    """ Should never get here since no unification_chain_end is a Term. """
     return False
 
-  def trail_end(self) -> Term:
+  def unification_chain_end(self) -> Term:
     return self
 
 
@@ -126,15 +126,15 @@ class PyValue(Term):
     super( ).__init__( )
 
   def __eq__(self, other: Term) -> bool:
-    other_eot = other.trail_end()
-    return (isinstance(other_eot, PyValue) and
-            self.get_py_value() == other_eot.get_py_value() and
+    other_euc = other.unification_chain_end()
+    return (isinstance(other_euc, PyValue) and
+            self.get_py_value() == other_euc.get_py_value() and
             # Don't need to test both.
             self.is_instantiated() and other.is_instantiated)
 
   def __lt__(self, other: Term) -> bool:
-    other_eot = other.trail_end()
-    return isinstance(other_eot, PyValue) and self.get_py_value() < other_eot.get_py_value()
+    other_euc = other.unification_chain_end()
+    return isinstance(other_euc, PyValue) and self.get_py_value() < other_euc.get_py_value()
 
   def __str__(self) -> str:
     return f'{self._py_value}'
@@ -166,12 +166,12 @@ class Structure(Term):
     super().__init__()
 
   def __eq__(self, other: Term) -> bool:
-    other_eot = other.trail_end()
-    return (other_eot is self or
-            isinstance(other_eot, Structure) and
-            self.functor == other_eot.functor and
-            len(self.args) == len(other_eot.args) and
-            all([selfArg == other_eotArg for (selfArg, other_eotArg) in zip(self.args, other_eot.args)]))
+    other_euc = other.unification_chain_end()
+    return (other_euc is self or
+            isinstance(other_euc, Structure) and
+            self.functor == other_euc.functor and
+            len(self.args) == len(other_euc.args) and
+            all([selfArg == other_eucArg for (selfArg, other_eucArg) in zip(self.args, other_euc.args)]))
 
   def __getitem__(self, key: Union[int, slice]):
     return self.args[key]
@@ -208,7 +208,7 @@ class StructureItem(Structure):
     super().__init__( (functor, *map(make_property, args)) )
 
   def __str__(self):
-    all_args_uninstantiated = all(isinstance(arg.trail_end(), Var) for arg in self.args)
+    all_args_uninstantiated = all(isinstance(arg.unification_chain_end(), Var) for arg in self.args)
     if all_args_uninstantiated:
       # If all the args are uninstantiated, print a simple underscore.
       return '_'
@@ -228,46 +228,46 @@ class Var(Term):
   """
 
   def __init__(self):
-    # self.trail_next points to the next element on the trail, if any.
-    self.trail_next = None
+    # self.unification_chain_next points to the next element on the unification_chain, if any.
+    self.unification_chain_next = None
     super().__init__()
 
   def __getattr__(self, item):
-    self_eot = self.trail_end()
-    if self is not self_eot:
-      return self_eot.__getattribute__(item)
+    self_euc = self.unification_chain_end()
+    if self is not self_euc:
+      return self_euc.__getattribute__(item)
 
   # Apparently __getattr__ is not called for calls to __getitem__ when __getitem__ is missing
   def __getitem__(self, key: Union[int, slice]):
-    self_eot = self.trail_end()
-    if self is not self_eot and hasattr(self_eot, '__getitem__'):
-      return self_eot.__getitem__(key)
+    self_euc = self.unification_chain_end()
+    if self is not self_euc and hasattr(self_euc, '__getitem__'):
+      return self_euc.__getitem__(key)
 
   def __len__(self):
-    self_eot = self.trail_end()
+    self_euc = self.unification_chain_end()
     # To make PyCharm's type checker happy.
-    assert isinstance(self_eot, Sized)
-    return None if not hasattr(self_eot, '__len__') or self == self_eot else len(self_eot)
+    assert isinstance(self_euc, Sized)
+    return None if not hasattr(self_euc, '__len__') or self == self_euc else len(self_euc)
 
-  def _has_trail_next(self) -> bool:
-    # Is this the end of the trail?
-    return self.trail_next is not None
+  def _has_unification_chain_next(self) -> bool:
+    # Is this the end of the unification_chain?
+    return self.unification_chain_next is not None
 
-  @eot
+  @euc
   def get_py_value(self) -> Optional[Any]:
     return self.get_py_value( ) if self.is_instantiated( ) else None
 
-  # Can't use @eot. Generates an infinite recursive loop.
+  # Can't use @euc. Generates an infinite recursive loop.
   def is_instantiated(self) -> bool:
-    """ A Var is_instantiated if its trail end is_instantiated """
-    Trail_End_Var = self.trail_end( )
+    """ A Var is_instantiated if its unification_chain end is_instantiated """
+    Trail_End_Var = self.unification_chain_end( )
     return not isinstance(Trail_End_Var, Var) and Trail_End_Var.is_instantiated()
 
-  def trail_end(self):
+  def unification_chain_end(self):
     """
-    return: the Term, whatever it is, at the end of this Var's unification trail.
+    return: the Term, whatever it is, at the end of this Var's unification unification_chain.
     """
-    return self.trail_next.trail_end( ) if self._has_trail_next( ) else self
+    return self.unification_chain_next.unification_chain_end( ) if self._has_unification_chain_next( ) else self
 
 
 # @staticmethod
@@ -297,18 +297,18 @@ def n_Vars(n: int) -> List[Var]:
 
 
 # noinspection PyProtectedMember
-@eot
+@euc
 def unify(Left: Any, Right: Any):
   """
   Unify two logic Terms.
 
-  The strategy is to keep track of the "unification trail" for all variables.
+  The strategy is to keep track of the "unification unification_chain" for all variables.
 
-  The unification trail is a linked list of logic variables, which are all unified.
+  The unification unification_chain is a linked list of logic variables, which are all unified.
 
-  The final element on the trail is either
+  The final element on the unification_chain is either
   o a non-Var, in which case the value of all preceding variables is the value of that non-Var, or
-  o a Var (which is not linked to any further element), in which case, all variables on the trail
+  o a Var (which is not linked to any further element), in which case, all variables on the unification_chain
     are unified but do not (yet) have a value.
   """
 
@@ -316,7 +316,7 @@ def unify(Left: Any, Right: Any):
   # ensure_is_logic_variable will wrap 'abc' in a PyValue.
   (Left, Right) = map(ensure_is_logic_variable, (Left, Right))
 
-  # If the trail_ends are equal, either because they have the same py_value or Structure or
+  # If the unification_chain_ends are equal, either because they have the same py_value or Structure or
   # because they are the same (unbound) Var, do nothing. They are already unified.
   # yield to indicate unification success. If Left and Right are both
   # uninstantiated PyValues, Left != Right. (See PyValue.__eq__.)
@@ -327,7 +327,7 @@ def unify(Left: Any, Right: Any):
 
   # Case 1. Both PyValues and exactly one is instantiated.
   # "Assign" it's value to the other. This is similar to (but simpler than)
-  # how we handle two Var's. But instead of building a trail, we "assign"
+  # how we handle two Var's. But instead of building a unification_chain, we "assign"
   # one value to the other.
   elif isinstance(Left, PyValue) and isinstance(Right, PyValue) and \
        (not Left.is_instantiated( ) or not Right.is_instantiated( )) and \
@@ -347,12 +347,12 @@ def unify(Left: Any, Right: Any):
   elif isinstance(Left, Structure) and isinstance(Right, Structure) and Left.functor == Right.functor:
     yield from unify_sequences(Left.args, Right.args)
 
-  # Case 3. At least one is a Var. Since we use @eot, it's the end of its trail.
-  # Make the other an extension of its trail.
+  # Case 3. At least one is a Var. Since we use @euc, it's the end of its unification_chain.
+  # Make the other an extension of its unification_chain.
   # (If both are Vars, it makes no functional difference which extends which.)
   elif isinstance(Left, Var) or isinstance(Right, Var):
     (pointsFrom, pointsTo) = (Left, Right) if isinstance(Left, Var) else (Right, Left)
-    pointsFrom.trail_next = pointsTo
+    pointsFrom.unification_chain_next = pointsTo
     yield
     # All yields create a context in which more of the program is executed--like
     # the body of a while-loop or a for-loop. A "next()" request asks for alternatives.
@@ -362,7 +362,7 @@ def unify(Left: Any, Right: Any):
     # This is fundamental! It's what makes it possible for a Var to become un-unified outside
     # the context in which it was unified, e.g., unifying a Var with (successive) members
     # of a list. The first successful unification must be undone before the second can occur.
-    pointsFrom.trail_next = None
+    pointsFrom.unification_chain_next = None
 
     
 def unify_pairs(tuples: List[Tuple[Any, Any]]):
@@ -460,7 +460,7 @@ if __name__ == '__main__':
     print(f'2. After unify_pairs([(A, B), (B, C)]):. A: {A}, B: {B}, C: {C}, D: {D}')
 
     for _ in unify(D, B):
-      print('3. After unify(D, B): A: {A}, B: {B}, C: {C}, D: {D}'  # => A.eot: xyz, B.eot: xyz, C.eot: xyz, D.eot: xyz
+      print('3. After unify(D, B): A: {A}, B: {B}, C: {C}, D: {D}'  # => A.euc: xyz, B.euc: xyz, C.euc: xyz, D.euc: xyz
             )
 
     print(f'\n4. No longer unified with D. A: {A}, B: {B}, C: {C}')  # => A: xyz, B: xyz, C: xyz, D: xyz
@@ -472,8 +472,8 @@ if __name__ == '__main__':
 
   1. A: _13, B: _14, C: _15
   2. A: _15, B: _15, C: _15
-  3. A.eot: _15, B.eot: _15, C.eot: _15
-  4. A.eot: xyz, B.eot: xyz, C.eot: xyz, D.eot: xyz
+  3. A.euc: _15, B.euc: _15, C.euc: _15
+  4. A.euc: xyz, B.euc: xyz, C.euc: xyz, D.euc: xyz
 
   5. A: _15, B: _15, C: _15
   6. A: _13, B: _14, C: _15
@@ -526,7 +526,8 @@ if __name__ == '__main__':
     print('After unify(T4, V4):')
     print(f'V4[0]: {V4[0]}')
     print(f'V4[1] is T4: {V4[1] is T4}')
-    print(f'V4[1] == T4: {V4[1] == T4}, because: V4[1].trail_end() is T4: {V4[1].trail_end() is T4}')
+    print(f'V4[1] == T4: {V4[1] == T4}, '
+          f'because: V4[1].unification_chain_end() is T4: {V4[1].unification_chain_end() is T4}')
     print('An attempt to print T4 or V4 will produce "RecursionError: maximum recursion depth exceeded"')
     print('\nEnd of fifth test.')
 
@@ -538,7 +539,7 @@ if __name__ == '__main__':
   After unify(T4, V4):
   V4[0]: 1
   V4[1] is T4: False
-  V4[1] == T4: True, because: V4[1].trail_end() is T4: True
+  V4[1] == T4: True, because: V4[1].unification_chain_end() is T4: True
   An attempt to print T4 or V4 will produce "RecursionError: maximum recursion depth exceeded"
   
   End of fifth test.

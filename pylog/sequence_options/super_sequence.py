@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import List, Union
 
 from control_structures import forany, forall
-from logic_variables import eot, Structure, unify, Term, Var
+from logic_variables import euc, Structure, unify, Term, Var
 
 
 class SuperSequence(Structure):
@@ -33,13 +33,13 @@ class SuperSequence(Structure):
     pass
 
 
-@eot
+@euc
 def is_contiguous_in(As: List, Zs: SuperSequence):
   """ Can As be unified with a segment of Zs? """
   yield from Zs.has_contiguous_sublist(As)
 
 
-@eot
+@euc
 def is_a_subsequence_of(As: List, Zs: SuperSequence):
   """
   As may be spread out in Zs but must be in the same order as in Zs.
@@ -63,7 +63,7 @@ def is_a_subsequence_of(As: List, Zs: SuperSequence):
       yield
 
 
-@eot
+@euc
 def member(E: Term, A_List: Union[SuperSequence, Var]):
   """
   Is E in A_List?
@@ -95,7 +95,7 @@ def member(E: Term, A_List: Union[SuperSequence, Var]):
     yield from member(E, A_List_New_Tail)
 
 
-@eot
+@euc
 def members(Es: List, A_List: SuperSequence):
   """ Do all elements of es appear in A_List (in any order). """
   # No more to look up. We're done.
