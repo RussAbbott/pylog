@@ -325,7 +325,7 @@ def unify(Left: Any, Right: Any):
 
   # The rest consists of special cases: both PyValues, both Structures, at least one Var.
 
-  # Case 1. Both PyValues and exactly one is instantiated.
+  # Case 1. Both are PyValues, and exactly one is instantiated.
   # "Assign" it's value to the other. This is similar to (but simpler than)
   # how we handle two Var's. But instead of building a unification_chain, we "assign"
   # one value to the other.

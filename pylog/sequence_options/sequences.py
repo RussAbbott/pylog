@@ -60,7 +60,7 @@ class PySequence(SuperSequence):
   def tail(self) -> PySequence:
     return self.__class__(self.args[1:])
 
-  def to_python_list(self):
+  def to_python_list(self) -> list:
     return [*self.args]
 
 

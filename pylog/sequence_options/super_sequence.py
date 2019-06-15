@@ -29,6 +29,9 @@ class SuperSequence(Structure):
     # There is no way to represent a LinkedList is nothing but a variable tail. It is just a simple Var.
     return not self.args
 
+  def to_python_list(self) -> list:
+    return []
+
   def tail(self) -> SuperSequence:
     pass
 
@@ -64,11 +67,14 @@ def is_a_subsequence_of(As: List, Zs: SuperSequence):
 
 
 @euc
-def member(E: Term, A_List: Union[SuperSequence, Var]):
+def member(E: Term, A_List: Union[List, SuperSequence, Var]):
   """
   Is E in A_List?
   """
-  # If A_List is empty, it can't have a member. So fail.
+  # if isinstance(A_List, list):
+  #   yield from member_python_list(E, A_List)
+  #
+  # # If A_List is empty, it can't have a member. So fail.
   if A_List.is_empty():
     return
 
@@ -113,3 +119,9 @@ def next_to_in(E1: Term, E2: Term, Es: SuperSequence):
                    lambda: is_contiguous_in([E2, E1], Es),
                    ]):
     yield
+
+
+def reversed(A_List: SuperSequence) -> SuperSequence:
+  A_List_to_python_list = A_List.to_python_list()
+  reversed_A_List = A_List_to_python_list[::-1]
+  return type(A_List)(reversed_A_List)
