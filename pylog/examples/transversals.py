@@ -1,9 +1,9 @@
 from typing import Generator, List, Optional
 
-from pylog.control_structures import fails
-from pylog.logic_variables import unify, Var
-from pylog.sequence_options.sequences import PyList
-from pylog.sequence_options.super_sequence import member, reversed
+from control_structures import fails
+from logic_variables import unify, Var
+from sequence_options.sequences import PyList
+from sequence_options.super_sequence import member, reversed
 
 """
 transversal definitions
@@ -197,6 +197,26 @@ sets/[]; so_far_reversed/[3, 4, 1]
 """
 
 """
+transversal_prolog(sets, so_far, _Answer) :-
+    reverse(so_far, so_far_reversed),
+    writeln('sets'/sets;'  so_far_reversed'/so_far_reversed), 
+    fail.
+
+transversal_prolog([], so_far, Answer) :-
+    reverse(so_far, Answer),
+    format('                                  '),
+    writeln('Answer '=Answer), nl.
+
+transversal_prolog([S|Ss], so_far, Answer) :-
+    member(X, S),
+    \+ member(X, so_far),
+    transversal_prolog(Ss, [X|so_far], Answer).
+    
+    
+    
+    
+    
+    
 transversal_prolog(Sets, So_Far, _Answer) :-
     reverse(So_Far, So_Far_Reversed),
     writeln('Sets'/Sets;'  So_Far_Reversed'/So_Far_Reversed), 
@@ -236,5 +256,6 @@ Sets/[]; So_Far_Reversed/[3, 2, 1]
 Sets/[[1]]; So_Far_Reversed/[3, 4]
 Sets/[]; So_Far_Reversed/[3, 4, 1]
                                   Answer = [3, 4, 1]
+
 
 """

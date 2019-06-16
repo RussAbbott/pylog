@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import List, Union
 
 from ..control_structures import forany, forall
-from ..logic_variables import eot, Structure, unify, Term, Var
+from ..logic_variables import euc, Structure, unify, Term, Var
 
 
 class SuperSequence(Structure):
@@ -29,17 +29,20 @@ class SuperSequence(Structure):
     # There is no way to represent a LinkedList is nothing but a variable tail. It is just a simple Var.
     return not self.args
 
+  def to_python_list(self) -> list:
+    return []
+
   def tail(self) -> SuperSequence:
     pass
 
 
-@eot
+@euc
 def is_contiguous_in(As: List, Zs: SuperSequence):
   """ Can As be unified with a segment of Zs? """
   yield from Zs.has_contiguous_sublist(As)
 
 
-@eot
+@euc
 def is_a_subsequence_of(As: List, Zs: SuperSequence):
   """
   As may be spread out in Zs but must be in the same order as in Zs.
@@ -63,12 +66,15 @@ def is_a_subsequence_of(As: List, Zs: SuperSequence):
       yield
 
 
-@eot
-def member(E: Term, A_List: Union[SuperSequence, Var]):
+@euc
+def member(E: Term, A_List: Union[List, SuperSequence, Var]):
   """
   Is E in A_List?
   """
-  # If A_List is empty, it can't have a member. So fail.
+  # if isinstance(A_List, list):
+  #   yield from member_python_list(E, A_List)
+  #
+  # # If A_List is empty, it can't have a member. So fail.
   if A_List.is_empty():
     return
 
@@ -95,7 +101,7 @@ def member(E: Term, A_List: Union[SuperSequence, Var]):
     yield from member(E, A_List_New_Tail)
 
 
-@eot
+@euc
 def members(Es: List, A_List: SuperSequence):
   """ Do all elements of es appear in A_List (in any order). """
   # No more to look up. We're done.
@@ -113,3 +119,9 @@ def next_to_in(E1: Term, E2: Term, Es: SuperSequence):
                    lambda: is_contiguous_in([E2, E1], Es),
                    ]):
     yield
+
+
+def reversed(A_List: SuperSequence) -> SuperSequence:
+  A_List_to_python_list = A_List.to_python_list()
+  reversed_A_List = A_List_to_python_list[::-1]
+  return type(A_List)(reversed_A_List)
