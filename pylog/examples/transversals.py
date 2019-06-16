@@ -3,23 +3,7 @@ from typing import Generator, List, Optional
 from control_structures import fails
 from logic_variables import unify, Var
 from sequence_options.sequences import PyList
-from sequence_options.super_sequence import member, reversed
-
-"""
-transversal definitions
-
-Kung, J. P., Rota, G. C., & Yan, C. H. (2009). Combinatorics: the Rota way. Cambridge University Press.
-
-Let Y = (SJiel be a family of subsets of a set E. A set K C E is a transversal of the family 9’ if there exists a 
-bijection p : K + I such that k E &h) for all k E K. Note that Y may contain the same set more than
-once; hence the notation “9 = (S&i’ rather than “9’ = {Si}iEI .” 
-
-Weinberger, D. B. (1974). Sufficient regularity conditions for common transversals. Journal of Combinatorial Theory, 
-Series A, 16(3), 380-390.
-https://www.sciencedirect.com/science/article/pii/0097316574900612/pdf?md5=2c5a36ee9f7460417ac00d6c8f1ebdbd&isDTMRedir=Y&pid=1-s2.0-0097316574900612-main.pdf&_valck=1
-"""
-
-
+from sequence_options.super_sequence import member
 
 
 
@@ -28,22 +12,19 @@ https://www.sciencedirect.com/science/article/pii/0097316574900612/pdf?md5=2c5a3
 
 """                  transversal_dfs_first                   """
 def transversal_dfs_first(sets: List[List[int]],
-                          so_far: List[int]) \
+                          partial_transversal: List[int]) \
                                   -> Optional[List[int]]:
   """ Looking for the first solution. """
-  print(f'sets/{sets}; so_far_reversed/{so_far[::-1]}')
+  print(f'sets/{sets}; partial_transversal/{partial_transversal}')
   if not sets:
-    # X[::-1] returns the reverse of X
-    return so_far[::-1]
+    return list(partial_transversal)
   else:
-    # Set s and ss to sets[0] and sets[1:] respectively.
-    [s, *ss] = sets
-    [x, *s_rest] = s
-    t_result = None if x in so_far else \
-               transversal_dfs_first(ss, [x] + so_far)
-    return t_result if t_result else \
-           None if not s_rest else \
-           transversal_dfs_first([s_rest] + ss, so_far)
+    (s, ss) = (sets[0], sets[1:])
+    for element in s:
+      if element not in partial_transversal:
+        complete_transversal = transversal_dfs_first(ss, partial_transversal + [element])
+        if complete_transversal is not None:
+          return complete_transversal
 
 
 if __name__ == '__main__':
@@ -59,75 +40,75 @@ if __name__ == '__main__':
 
 transversal_dfs_first([[1, 2, 3], [2, 4], [1]], [])
 
-sets/[[1, 2, 3], [2, 4], [1]]; so_far_reversed/[]
-sets/[[2, 4], [1]]; so_far_reversed/[1]
-sets/[[1]]; so_far_reversed/[1, 2]
-sets/[[4], [1]]; so_far_reversed/[1]
-sets/[[1]]; so_far_reversed/[1, 4]
-sets/[[2, 3], [2, 4], [1]]; so_far_reversed/[]
-sets/[[2, 4], [1]]; so_far_reversed/[2]
-sets/[[4], [1]]; so_far_reversed/[2]
-sets/[[1]]; so_far_reversed/[2, 4]
-sets/[]; so_far_reversed/[2, 4, 1]
+sets/[[1, 2, 3], [2, 4], [1]]; partial_transversal_reversed/[]
+sets/[[2, 4], [1]]; partial_transversal_reversed/[1]
+sets/[[1]]; partial_transversal_reversed/[1, 2]
+sets/[[4], [1]]; partial_transversal_reversed/[1]
+sets/[[1]]; partial_transversal_reversed/[1, 4]
+sets/[[2, 3], [2, 4], [1]]; partial_transversal_reversed/[]
+sets/[[2, 4], [1]]; partial_transversal_reversed/[2]
+sets/[[4], [1]]; partial_transversal_reversed/[2]
+sets/[[1]]; partial_transversal_reversed/[2, 4]
+sets/[]; partial_transversal_reversed/[2, 4, 1]
                                 =>  [1, 4, 2]
 """
 
 
 
-
-
 """                  transversal_dfs_all                   """
-def transversal_dfs_all(sets: List[List[int]], so_far: List[int]) -> List[List[int]]:
-  print(f'sets/{sets}; so_far_reversed/{so_far[::-1]}')
+def transversal_dfs_all(sets: List[List[int]], partial_transversal: List[int]) \
+                                                                     -> List[List[int]]:
+  print(f'sets/{sets}; partial_transversal/{list(partial_transversal)}')
   if not sets:
-    return [so_far[::-1]]
+    return [list(partial_transversal)]
   else:
-    [s, *ss] = sets
-    answers = []
-    for x in s:
-      if x not in so_far:
-        answers += transversal_dfs_all(ss, [x] + so_far)
-    return answers
+    (s, ss) = (sets[0], sets[1:])
+    all_transversals = []
+    for element in s:
+      if element not in partial_transversal:
+        all_transversals += transversal_dfs_all(ss, partial_transversal + [element])
+    return all_transversals
 
 
 if __name__ == '__main__':
   print(f'\n{"-"*75}\ntransversal_dfs_all([[1, 2, 3], [2, 4], [1]], [])\n')
-  print(f'{" "*30}  =>  {transversal_dfs_all([[1, 2, 3], [2, 4], [1]], [])[::-1]}')
+  print(f'{" "*30}  =>  {transversal_dfs_all([[1, 2, 3], [2, 4], [1]], [])}')
 
 """
 ---------------------------------------------------------------------------
 
 transversal_dfs_all([[1, 2, 3], [2, 4], [1]], [])
 
-sets/[[1, 2, 3], [2, 4], [1]]; so_far_reversed/[]
-sets/[[2, 4], [1]]; so_far_reversed/[1]
-sets/[[1]]; so_far_reversed/[1, 2]
-sets/[[1]]; so_far_reversed/[1, 4]
-sets/[[2, 4], [1]]; so_far_reversed/[2]
-sets/[[1]]; so_far_reversed/[2, 4]
-sets/[]; so_far_reversed/[2, 4, 1]
-sets/[[2, 4], [1]]; so_far_reversed/[3]
-sets/[[1]]; so_far_reversed/[3, 2]
-sets/[]; so_far_reversed/[3, 2, 1]
-sets/[[1]]; so_far_reversed/[3, 4]
-sets/[]; so_far_reversed/[3, 4, 1]
+sets/[[1, 2, 3], [2, 4], [1]]; partial_transversal_reversed/[]
+sets/[[2, 4], [1]]; partial_transversal_reversed/[1]
+sets/[[1]]; partial_transversal_reversed/[1, 2]
+sets/[[1]]; partial_transversal_reversed/[1, 4]
+sets/[[2, 4], [1]]; partial_transversal_reversed/[2]
+sets/[[1]]; partial_transversal_reversed/[2, 4]
+sets/[]; partial_transversal_reversed/[2, 4, 1]
+sets/[[2, 4], [1]]; partial_transversal_reversed/[3]
+sets/[[1]]; partial_transversal_reversed/[3, 2]
+sets/[]; partial_transversal_reversed/[3, 2, 1]
+sets/[[1]]; partial_transversal_reversed/[3, 4]
+sets/[]; partial_transversal_reversed/[3, 4, 1]
                                 =>  [[1, 4, 2], [1, 2, 3], [1, 4, 3]]
 """
 
 
 
 """                  transversal_yield                   """
-def transversal_yield(sets: List[List[int]], so_far: List[int]) -> Generator[List[int], None, None]:
-  print(f'sets/{sets}; so_far_reversed/{so_far[::-1]}')
+def transversal_yield(sets: List[List[int]], partial_transversal: List[int]) -> Generator[List[int], None, None]:
+  print(f'sets/{sets}; partial_transversal/{partial_transversal}')
   if not sets:
-    yield so_far[::-1]
+    yield list(partial_transversal)
   else:
-    [s, *ss] = sets
-    for x in s:
-      if x not in so_far:
-        for t_result in transversal_yield(ss, [x] + so_far):
-          if t_result:
-            yield t_result
+    (s, ss) = (sets[0], sets[1:])
+    for element in s:
+      if element not in partial_transversal:
+        for complete_transversal in \
+          transversal_yield(ss, partial_transversal + [element]):
+          if complete_transversal is not None:
+            yield list(complete_transversal)
 
 
 if __name__ == '__main__':
@@ -139,122 +120,103 @@ if __name__ == '__main__':
 ---------------------------------------------------------------------------
 transversal_yield([[1, 2, 3], [2, 4], [1]], [])
 
-sets/[[1, 2, 3], [2, 4], [1]]; so_far_reversed/[]
-sets/[[2, 4], [1]]; so_far_reversed/[1]
-sets/[[1]]; so_far_reversed/[1, 2]
-sets/[[1]]; so_far_reversed/[1, 4]
-sets/[[2, 4], [1]]; so_far_reversed/[2]
-sets/[[1]]; so_far_reversed/[2, 4]
-sets/[]; so_far_reversed/[2, 4, 1]
+sets/[[1, 2, 3], [2, 4], [1]]; partial_transversal_reversed/[]
+sets/[[2, 4], [1]]; partial_transversal_reversed/[1]
+sets/[[1]]; partial_transversal_reversed/[1, 2]
+sets/[[1]]; partial_transversal_reversed/[1, 4]
+sets/[[2, 4], [1]]; partial_transversal_reversed/[2]
+sets/[[1]]; partial_transversal_reversed/[2, 4]
+sets/[]; partial_transversal_reversed/[2, 4, 1]
                                 =>  [1, 4, 2]
-sets/[[2, 4], [1]]; so_far_reversed/[3]
-sets/[[1]]; so_far_reversed/[3, 2]
-sets/[]; so_far_reversed/[3, 2, 1]
+sets/[[2, 4], [1]]; partial_transversal_reversed/[3]
+sets/[[1]]; partial_transversal_reversed/[3, 2]
+sets/[]; partial_transversal_reversed/[3, 2, 1]
                                 =>  [1, 2, 3]
-sets/[[1]]; so_far_reversed/[3, 4]
-sets/[]; so_far_reversed/[3, 4, 1]
+sets/[[1]]; partial_transversal_reversed/[3, 4]
+sets/[]; partial_transversal_reversed/[3, 4, 1]
                                 =>  [1, 4, 3]
 
 """
 """                  transversal_yield_lv                   """
-def transversal_yield_lv(sets: List[PyList], so_far: PyList, Answer: Var):
-  print(f'sets/[{", ".join([str(S) for S in sets])}]; so_far_reversed/{reversed(so_far)}')
-  if not sets:
-    yield from unify(reversed(so_far), Answer)
+def transversal_yield_lv(Sets: List[PyList], Partial_Transversal: PyList, Complete_Transversal: Var):
+  print(f'Sets/[{", ".join([str(S) for S in Sets])}]; Partial_Transversal/{Partial_Transversal}')
+  if not Sets:
+    yield from unify(Partial_Transversal, Complete_Transversal)
   else:
-    [S, *Ss] = sets
+    (S, Ss) = (Sets[0], Sets[1:])
     X = Var( )
     for _ in member(X, S):
-      for _ in fails(member)(X, so_far):
-        yield from transversal_yield_lv(Ss, PyList([X]) + so_far, Answer)
+      for _ in fails(member)(X, Partial_Transversal):
+        yield from transversal_yield_lv(Ss, Partial_Transversal + PyList([X]), Complete_Transversal)
 
 
 if __name__ == '__main__':
   print(f'\n{"-"*75}\ntransversal_yield_lv([[1, 2, 3], [2, 4], [1]], [], Ans)\n')
-  Ans = Var( )
-  for _ in transversal_yield_lv([PyList([1, 2, 3]), PyList([2, 4]), PyList([1])], PyList([]), Ans):
-    print(f'{" "*30}  =>  {Ans}')
+  Complete_Transversal = Var( )
+  for _ in transversal_yield_lv([PyList([1, 2, 3]), PyList([2, 4]), PyList([1])], PyList([]), Complete_Transversal):
+    print(f'{" "*30}  =>  {Complete_Transversal}')
 
 """
 ---------------------------------------------------------------------------
 transversal_yield_lv([[1, 2, 3], [2, 4], [1]], [], Ans)
 
-sets/[[1, 2, 3], [2, 4], [1]]; so_far_reversed/[]
-sets/[[2, 4], [1]]; so_far_reversed/[1]
-sets/[[1]]; so_far_reversed/[1, 2]
-sets/[[1]]; so_far_reversed/[1, 4]
-sets/[[2, 4], [1]]; so_far_reversed/[2]
-sets/[[1]]; so_far_reversed/[2, 4]
-sets/[]; so_far_reversed/[2, 4, 1]
+Sets/[[1, 2, 3], [2, 4], [1]]; Partial_Transversal/[]
+Sets/[[2, 4], [1]]; Partial_Transversal/[1]
+Sets/[[1]]; Partial_Transversal/[1, 2]
+Sets/[[1]]; Partial_Transversal/[1, 4]
+Sets/[[2, 4], [1]]; Partial_Transversal/[2]
+Sets/[[1]]; Partial_Transversal/[2, 4]
+Sets/[]; Partial_Transversal/[2, 4, 1]
                                 =>  [1, 4, 2]
-sets/[[2, 4], [1]]; so_far_reversed/[3]
-sets/[[1]]; so_far_reversed/[3, 2]
-sets/[]; so_far_reversed/[3, 2, 1]
+Sets/[[2, 4], [1]]; Partial_Transversal/[3]
+Sets/[[1]]; Partial_Transversal/[3, 2]
+Sets/[]; Partial_Transversal/[3, 2, 1]
                                 =>  [1, 2, 3]
-sets/[[1]]; so_far_reversed/[3, 4]
-sets/[]; so_far_reversed/[3, 4, 1]
+Sets/[[1]]; Partial_Transversal/[3, 4]
+Sets/[]; Partial_Transversal/[3, 4, 1]
                                 =>  [1, 4, 3]
 """
 
 """
-transversal_prolog(sets, so_far, _Answer) :-
-    reverse(so_far, so_far_reversed),
-    writeln('sets'/sets;'  so_far_reversed'/so_far_reversed), 
+transversal_prolog(Sets, Partial_Transversal, _Complete_Transversal) :-
+    reverse(Partial_Transversal, Partial_Transversal),
+    writeln('Sets'/Sets;'  Partial_Transversal'/Partial_Transversal), 
     fail.
 
-transversal_prolog([], so_far, Answer) :-
-    reverse(so_far, Answer),
+
+The  :-
+    reverse(Partial_Transversal, Complete_Transversal),
     format('                                  '),
-    writeln('Answer '=Answer), nl.
+    writeln('Complete_Transversal '=Complete_Transversal), nl.
 
-transversal_prolog([S|Ss], so_far, Answer) :-
+transversal_prolog([S|Ss], Partial_Transversal, Complete_Transversal) :-
     member(X, S),
-    \+ member(X, so_far),
-    transversal_prolog(Ss, [X|so_far], Answer).
+    \+ member(X, Partial_Transversal),
+    transversal_prolog(Ss, [X|Partial_Transversal], Complete_Transversal).
     
     
     
     
     
     
-transversal_prolog(Sets, So_Far, _Answer) :-
-    reverse(So_Far, So_Far_Reversed),
-    writeln('Sets'/Sets;'  So_Far_Reversed'/So_Far_Reversed), 
-    fail.
+?- transversal_prolog([[1, 2, 3], [2], [1]], [], Complete_Transversal).
 
-transversal_prolog([], So_Far, Answer) :-
-    reverse(So_Far, Answer),
-    format('                                  '),
-    writeln('Answer '=Answer), nl.
+Sets/[[1, 2, 3], [2, 4], [1]]; Partial_Transversal/[]
+Sets/[[2, 4], [1]]; Partial_Transversal/[1]
+Sets/[[1]]; Partial_Transversal/[1, 2]
+Sets/[[1]]; Partial_Transversal/[1, 4]
+Sets/[[2, 4], [1]]; Partial_Transversal/[2]
+Sets/[[1]]; Partial_Transversal/[2, 4]
+Sets/[]; Partial_Transversal/[2, 4, 1]
+                                  Complete_Transversal = [2, 4, 1]
 
-transversal_prolog([S|Ss], So_Far, Answer) :-
-    member(X, S),
-    \+ member(X, So_Far),
-    transversal_prolog(Ss, [X|So_Far], Answer).
-    
-    
-    
-    
-    
-    
-?- transversal_prolog([[1, 2, 3], [2], [1]], [], Answer).
+Sets/[[2, 4], [1]]; Partial_Transversal/[3]
+Sets/[[1]]; Partial_Transversal/[3, 2]
+Sets/[]; Partial_Transversal/[3, 2, 1]
+                                  Complete_Transversal = [3, 2, 1]
 
-Sets/[[1, 2, 3], [2, 4], [1]]; So_Far_Reversed/[]
-Sets/[[2, 4], [1]]; So_Far_Reversed/[1]
-Sets/[[1]]; So_Far_Reversed/[1, 2]
-Sets/[[1]]; So_Far_Reversed/[1, 4]
-Sets/[[2, 4], [1]]; So_Far_Reversed/[2]
-Sets/[[1]]; So_Far_Reversed/[2, 4]
-Sets/[]; So_Far_Reversed/[2, 4, 1]
-                                  Answer = [2, 4, 1]
-
-Sets/[[2, 4], [1]]; So_Far_Reversed/[3]
-Sets/[[1]]; So_Far_Reversed/[3, 2]
-Sets/[]; So_Far_Reversed/[3, 2, 1]
-                                  Answer = [3, 2, 1]
-
-Sets/[[1]]; So_Far_Reversed/[3, 4]
-Sets/[]; So_Far_Reversed/[3, 4, 1]
+Sets/[[1]]; Partial_Transversal/[3, 4]
+Sets/[]; Partial_Transversal/[3, 4, 1]
                                   Answer = [3, 4, 1]
 
 
