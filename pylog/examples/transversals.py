@@ -186,7 +186,7 @@ transversal_prolog(Sets, Partial_Transversal, _Complete_Transversal) :-
 transversal_prolog([], Partial_Transversal, Complete_Transversal) :-
     reverse(Partial_Transversal, Answer),
     format('                                  '),
-    writeln('Answer '=Answer), nl.
+    writeln('Complete_Transversal '=Complete_Transversal), nl.
 
 transversal_prolog([S|Ss], Partial_Transversal, Complete_Transversal) :-
     member(X, S),
