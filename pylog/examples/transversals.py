@@ -144,10 +144,10 @@ def transversal_yield_lv(Sets: List[PyList], Partial_Transversal: PyList, Comple
     yield from unify(Partial_Transversal, Complete_Transversal)
   else:
     (S, Ss) = (Sets[0], Sets[1:])
-    X = Var( )
-    for _ in member(X, S):
-      for _ in fails(member)(X, Partial_Transversal):
-        yield from transversal_yield_lv(Ss, Partial_Transversal + PyList([X]), Complete_Transversal)
+    Element = Var( )
+    for _ in member(Element, S):
+      for _ in fails(member)(Element, Partial_Transversal):
+        yield from transversal_yield_lv(Ss, Partial_Transversal + PyList([Element]), Complete_Transversal)
 
 
 if __name__ == '__main__':
@@ -183,11 +183,10 @@ transversal_prolog(Sets, Partial_Transversal, _Complete_Transversal) :-
     writeln('Sets'/Sets;'  Partial_Transversal'/Partial_Transversal), 
     fail.
 
-
-The  :-
-    reverse(Partial_Transversal, Complete_Transversal),
+transversal_prolog([], Partial_Transversal, Complete_Transversal) :-
+    reverse(Partial_Transversal, Answer),
     format('                                  '),
-    writeln('Complete_Transversal '=Complete_Transversal), nl.
+    writeln('Answer '=Answer), nl.
 
 transversal_prolog([S|Ss], Partial_Transversal, Complete_Transversal) :-
     member(X, S),
