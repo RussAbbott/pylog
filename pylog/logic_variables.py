@@ -424,16 +424,19 @@ if __name__ == '__main__':
   print(f"PV1.is_instantiated(): {PV1.is_instantiated()}: {PV1}")
 
   A = Var( )
-  # B, C, and D are the same as above.
+  B = Var( )
+  C = Var( )
+  D = 'def'
 
   print(f'\n1. A: {A}; B: {B}; C: {C}; D: {D}')
   for _ in unify(A, B):
-    print(f'2a. After unify(A, B).  A: {A}; B: {B}; C: {C}; D: {D}')
+    print(f'After unify(A, B).  A: {A}; B: {B}; C: {C}; D: {D}')
     for _ in unify(A, C):
-      print(f'2b. After unify(A, C). A: {A}; B: {B}; C: {C}; D: {D}')
+      print(f'After unify(A, C). A: {A}; B: {B}; C: {C}; D: {D}')
       for _ in unify(A, D):
-        print(f'2c. After unify(A, D). A: {A}; B: {B}; C: {C}; D: {D}')
-  print(f'3. Outside the scope of all unifies. A: {A}; B: {B}; C: {C}; D: {D}')
+        print(f'After unify(A, D). A: {A}; B: {B}; C: {C}; D: {D}')
+  print(f'Outside the scope of all unifies: ')
+  print(f'            A: {A}; B: {B}; C: {C}; D: {D}')
 
   print('End first test\n')
 

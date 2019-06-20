@@ -1,7 +1,6 @@
 from __future__ import annotations
 from typing import Any, List, Tuple, Union
 
-from control_structures import forall, forany
 from logic_variables import ensure_is_logic_variable, euc, PyValue, n_Vars, Term, unify, unify_pairs, Var
 from sequence_options.super_sequence import is_a_subsequence_of,  member, SuperSequence
 
@@ -150,22 +149,33 @@ def append(Xs: Union[LinkedList, Var], Ys: Union[LinkedList, Var], Zs: Union[Lin
   """
 
   # Create the existential variables at the start.
-  (XZ_Head, Xs_Tail, Zs_Tail) = n_Vars(3)
+  # (XZ_Hd, Xs_Tl, Zs_Tl) = n_Vars(3)
 
-  for _ in forany([
-    # Clause 1.
-    lambda: unify_pairs([(Xs, emptyLinkedList),
-                         (Ys, Zs)]),
-    # Clause 2.
-    lambda: forall([lambda: unify_pairs([ (Xs, LinkedList( (XZ_Head, Xs_Tail) )),
-                                          (Zs, LinkedList( (XZ_Head, Zs_Tail) ))
-                                          ]),
-                    lambda: append(Xs_Tail, Ys, Zs_Tail)])
-                   ]):
+  # for _ in forany([
+  #   # Clause 1.
+  #   lambda: unify_pairs([(Xs, emptyLinkedList),
+  #                        (Ys, Zs)]),
+  #   # Clause 2.
+  #   lambda: forall([lambda: unify_pairs([ (Xs, LinkedList( (XZ_Head, Xs_Tail) )),
+  #                                         (Zs, LinkedList( (XZ_Head, Zs_Tail) ))
+  #                                         ]),
+  #                   lambda: append(Xs_Tail, Ys, Zs_Tail)])
+  #                  ]):
+  #   yield
+
+  for _ in unify_pairs([(Xs, emptyLinkedList),
+                        (Ys, Zs)]):
     yield
+
+  (XZ_Head, Xs_Tail, Zs_Tail) = n_Vars(3)
+  for _ in unify_pairs([(Xs, LinkedList((XZ_Head, Xs_Tail))),
+                        (Zs, LinkedList((XZ_Head, Zs_Tail)))]):
+    yield from append(Xs_Tail, Ys, Zs_Tail)
 
 
 if __name__ == '__main__':
+
+  print( LinkedList([]) == LinkedList(()))
 
   print(emptyLinkedList)
   E = PyValue(3)
@@ -278,16 +288,17 @@ if __name__ == '__main__':
 
   # Run "backward:" Zs --> Xs + Ys
   # Multiple ways to split up Zs between Xs and Ys
-  (Xs, Ys, Zs) = (Var(), Var(), LinkedList([0, 1, 2, 3, 4]))
-  print(f'\nGiven: Xs: {Xs}, Ys: {Ys}\n?-  append(Xs, Ys, {Zs});')
+  (Xs, Ys, Zs) = (Var(), Var(), LinkedList([1, 2, 3]))
+  print(f'\nGiven: Xs: {Xs}, Ys: {Ys}, Zs: {Zs}\n?-  append(Xs, Ys, {Zs};')
   for _ in append(Xs, Ys, Zs):
-    print(f'Xs = {Xs}\nYs = {Ys}\n')
+    print(f'Xs = {Xs}\nYs = {Ys}\nZs = {Zs}\n')
 
   (Xs, Ys, Zs) = (LinkedList([1, 2, 3]), Var(), Var())
-  print(f'\nGiven: Ys: {Ys}, Zs: {Zs}\n?- append({Xs}, Ys, Zs); ')
+  print(f'\nGiven: Xs: {Xs}, Ys: {Ys}, Zs: {Zs}')
+  print(f'?- append({Xs}, Ys, Zs); ')
   for _ in append(Xs, Ys, Zs):
+    print(f'nlXs = {Xs}')
     print(f'Ys = {Ys}')
-    print(f'Zs = {Zs}')
 
   """
   Expected output:
@@ -295,6 +306,15 @@ if __name__ == '__main__':
   > append([0, 1], [2, 3, 4], Zs); (Zs: _14)
   Zs = [0, 1, 2, 3, 4]
   Zs = _14
+  """
+
+  (Xs, Ys, Zs) = (Var(), Var(), LinkedList([1, 2, 3, 4]))
+  print(f'\nGiven: Ys: {Ys}, Zs: {Zs}\n?- append({Xs}, Ys, Zs); ')
+  for _ in append(Xs, Ys, Zs):
+    print(f'Ys = {Ys}')
+    print(f'Zs = {Zs}')
+
+  """
   
   > append(Xs, Ys, [0, 1, 2, 3, 4]); (Xs: _36, Ys: _37)
   Xs = []

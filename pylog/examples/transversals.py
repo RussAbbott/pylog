@@ -15,14 +15,18 @@ def transversal_dfs_first(sets: List[List[int]],
                           partial_transversal: List[int]) \
                                   -> Optional[List[int]]:
   """ Looking for the first solution. """
-  print(f'sets/{sets}; partial_transversal/{partial_transversal}')
+  print(f'sets/{sets}; '
+        f'partial_transversal/{partial_transversal}')
   if not sets:
-    return list(partial_transversal)
+    return partial_transversal
   else:
     (s, ss) = (sets[0], sets[1:])
     for element in s:
       if element not in partial_transversal:
-        complete_transversal = transversal_dfs_first(ss, partial_transversal + [element])
+        complete_transversal = \
+          transversal_dfs_first(ss,
+                                partial_transversal
+                                + [element])
         if complete_transversal is not None:
           return complete_transversal
 
@@ -60,13 +64,15 @@ def transversal_dfs_all(sets: List[List[int]], partial_transversal: List[int]) \
                                                                      -> List[List[int]]:
   print(f'sets/{sets}; partial_transversal/{list(partial_transversal)}')
   if not sets:
-    return [list(partial_transversal)]
+    return [partial_transversal]
   else:
     (s, ss) = (sets[0], sets[1:])
     all_transversals = []
     for element in s:
       if element not in partial_transversal:
-        all_transversals += transversal_dfs_all(ss, partial_transversal + [element])
+        all_transversals += \
+          transversal_dfs_all(ss,
+                              partial_transversal + [element])
     return all_transversals
 
 
@@ -98,17 +104,15 @@ sets/[]; partial_transversal_reversed/[3, 4, 1]
 
 """                  transversal_yield                   """
 def transversal_yield(sets: List[List[int]], partial_transversal: List[int]) -> Generator[List[int], None, None]:
-  print(f'sets/{sets}; partial_transversal/{partial_transversal}')
+  print(f'sets/{sets}; '
+        f'partial_transversal/{partial_transversal}')
   if not sets:
-    yield list(partial_transversal)
+    yield partial_transversal
   else:
     (s, ss) = (sets[0], sets[1:])
     for element in s:
       if element not in partial_transversal:
-        for complete_transversal in \
-          transversal_yield(ss, partial_transversal + [element]):
-          if complete_transversal is not None:
-            yield list(complete_transversal)
+        yield from transversal_yield(ss, partial_transversal + [element])
 
 
 if __name__ == '__main__':
@@ -179,20 +183,20 @@ Sets/[]; Partial_Transversal/[3, 4, 1]
 
 """
 transversal_prolog(Sets, Partial_Transversal, _Complete_Transversal) :-
-    reverse(Partial_Transversal, Partial_Transversal),
     writeln('Sets'/Sets;'  Partial_Transversal'/Partial_Transversal), 
     fail.
 
-transversal_prolog([], Partial_Transversal, Complete_Transversal) :-
-    reverse(Partial_Transversal, Answer),
+transversal_prolog([], Complete_Transversal, Complete_Transversal) :-
     format('                                  '),
-    writeln('Complete_Transversal '=Complete_Transversal), nl.
+    writeln('Partial_Transversal '=Complete_Transversal), nl.
 
-transversal_prolog([S|Ss], Partial_Transversal, Complete_Transversal) :-
+transversal_prolog([S|Ss], Partial_Transversal, Complete_Transversal_X) :-
     member(X, S),
     \+ member(X, Partial_Transversal),
-    transversal_prolog(Ss, [X|Partial_Transversal], Complete_Transversal).
-    
+    append(Partial_Transversal, [X], Partial_Transversal_X),
+    transversal_prolog(Ss, Partial_Transversal_X, Complete_Transversal_X).
+
+
     
     
     
