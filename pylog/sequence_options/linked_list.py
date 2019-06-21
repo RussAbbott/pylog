@@ -118,7 +118,7 @@ emptyLinkedList = LinkedList([])
 @euc
 def append(Xs: Union[LinkedList, Var], Ys: Union[LinkedList, Var], Zs: Union[LinkedList, Var]):
   """
-    append([], Ys, Zs).
+    append([], Ys, Ys).
     append([X|Xs], Ys, [X|Zs]) :- append(Xs, Ys, Zs).
 
   Note that this could just have well have been written:
@@ -148,28 +148,13 @@ def append(Xs: Union[LinkedList, Var], Ys: Union[LinkedList, Var], Zs: Union[Lin
   Since an empty list cannot unify with a LinkedList that has a head and a tail, if either
   Xs or Zs is empty, unify_pairs will fail.
 
-  The actual code is quite short. It's very similar to like the prolog code.
+  The actual code is quite short. It's very similar to the prolog code.
   """
 
-  # Create the existential variables at the start.
-  # (XZ_Hd, Xs_Tl, Zs_Tl) = n_Vars(3)
+  # Corresponds to append([], Ys, Ys).
+  yield from unify_pairs([(Xs, emptyLinkedList), (Ys, Zs)])
 
-  # for _ in forany([
-  #   # Clause 1.
-  #   lambda: unify_pairs([(Xs, emptyLinkedList),
-  #                        (Ys, Zs)]),
-  #   # Clause 2.
-  #   lambda: forall([lambda: unify_pairs([ (Xs, LinkedList( (XZ_Head, Xs_Tail) )),
-  #                                         (Zs, LinkedList( (XZ_Head, Zs_Tail) ))
-  #                                         ]),
-  #                   lambda: append(Xs_Tail, Ys, Zs_Tail)])
-  #                  ]):
-  #   yield
-
-  for _ in unify_pairs([(Xs, emptyLinkedList),
-                        (Ys, Zs)]):
-    yield
-
+  # Corresponds to append([X | Xs], Ys, [X | Zs]): - append(Xs, Ys, Zs).
   (XZ_Head, Xs_Tail, Zs_Tail) = n_Vars(3)
   for _ in unify_pairs([(Xs, LinkedList(XZ_Head, Xs_Tail)),
                         (Zs, LinkedList(XZ_Head, Zs_Tail))]):

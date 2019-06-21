@@ -76,78 +76,92 @@ class ZebraProblem(Problem):
     Houses = self.ListType([House( ) for _ in range(5)])
     self.Items = Houses
 
-    # Check all attributes for distinctness
+    # # Check all attributes for distinctness
     self.check_all_for_distinctness(House)
-
-    # self.clues at the Problem level is [self.clue_0]. That ensures that this setup clue will run.
-    # We append the actual clues so that the clues will be in their correct list index positions,
-    # i.e., clue_i at self.clues[i].
-    self.clues += [self.clue_1, self.clue_2, self.clue_3, self.clue_4, self.clue_5,
-                   self.clue_6, self.clue_7, self.clue_8, self.clue_9, self.clue_10,
-                   self.clue_11, self.clue_12, self.clue_13, self.clue_14, self.clue_15]
-
-    # Show trace only after all clues have succeeded -- and we just need to fill in empty spaces.
+    #
+    # # self.clues at the Problem level is [self.clue_0]. That ensures that this setup clue will run.
+    # # We append the actual clues so that the clues will be in their correct list index positions,
+    # # i.e., clue_i at self.clues[i].
+    # self.clues += [self.clue_1, self.clue_2, self.clue_3, self.clue_4, self.clue_5,
+    #                self.clue_6, self.clue_7, self.clue_8, self.clue_9, self.clue_10,
+    #                self.clue_11, self.clue_12, self.clue_13, self.clue_14, self.clue_15]
+    #
+    # # Show trace only after all clues have succeeded -- and we just need to fill in empty spaces.
     self.show_trace_list = [14]
-    yield
+    yield from self.clue_1(Houses)
 
   def clue_1(self, Houses: SuperSequence):
     """ 1. The English live in the red house.  """
-    yield from member(House(nationality='English', color='red'), Houses)
+    for _ in member(House(nationality='English', color='red'), Houses):
+      yield from self.clue_2(Houses)
 
   def clue_2(self, Houses: SuperSequence):
     """ 2. The Spanish have a dog. """
-    yield from member(House(nationality='Spanish', pet='dog'), Houses)
+    for _ in member(House(nationality='Spanish', pet='dog'), Houses):
+      yield from self.clue_3(Houses)
 
   def clue_3(self, Houses: SuperSequence):
     """ 3. They drink coffee in the green house. """
-    yield from member(House(drink='coffee', color='green'), Houses)
+    for _ in member(House(drink='coffee', color='green'), Houses):
+      yield from self.clue_4(Houses)
 
   def clue_4(self, Houses: SuperSequence):
     """ 4. The Ukrainians drink tea. """
-    yield from member(House(nationality='Ukrainians', drink='tea'), Houses)
+    for _ in member(House(nationality='Ukrainians', drink='tea'), Houses):
+      yield from self.clue_5(Houses)
 
   def clue_5(self, Houses: SuperSequence):
     """ 5. The green house is immediately to the right of the white house. """
-    yield from is_contiguous_in([House(color='white'), House(color='green')], Houses)
+    for _ in is_contiguous_in([House(color='white'), House(color='green')], Houses):
+      yield from self.clue_6(Houses)
 
   def clue_6(self, Houses: SuperSequence):
     """ 6. The Old Gold smokers have snails. """
-    yield from member(House(smoke='Old Gold', pet='snails'), Houses)
+    for _ in member(House(smoke='Old Gold', pet='snails'), Houses):
+      yield from self.clue_7(Houses)
 
   def clue_7(self, Houses: SuperSequence):
     """ 7. They smoke Kool in the yellow house. """
-    yield from member(House(smoke='Kool', color='yellow'), Houses)
+    for _ in member(House(smoke='Kool', color='yellow'), Houses):
+      yield from self.clue_8(Houses)
 
   def clue_8(self, Houses: SuperSequence):
     """ 8. They drink milk in the middle house.
         Note the use of a slice. Houses[2] picks the middle house. """
-    yield from unify(House(drink='milk'), Houses[2])
+    for _ in unify(House(drink='milk'), Houses[2]):
+      yield from self.clue_9(Houses)
 
   def clue_9(self, Houses: SuperSequence):
     """ 9. The Norwegians live in the first house on the left.
         Instead of Houses.head(), could have written Houses[0]. """
-    yield from unify(House(nationality='Norwegians'), Houses.head())
+    for _ in unify(House(nationality='Norwegians'), Houses.head()):
+      yield from self.clue_10(Houses)
 
   def clue_10(self, Houses: SuperSequence):
     """ 10. The Chesterfield smokers live next to the fox.
         Saying 'next to' doesn't commit to the right or left. """
-    yield from next_to(House(smoke='Chesterfield'), House(pet='fox'), Houses)
+    for _ in next_to(House(smoke='Chesterfield'), House(pet='fox'), Houses):
+      yield from self.clue_11(Houses)
 
   def clue_11(self, Houses: SuperSequence):
     """ 11. They smoke Kool in the house next to the horse. """
-    yield from next_to(House(smoke='Kool'), House(pet='horse'), Houses)
+    for _ in next_to(House(smoke='Kool'), House(pet='horse'), Houses):
+      yield from self.clue_12(Houses)
 
   def clue_12(self, Houses: SuperSequence):
     """ 12. The Lucky smokers drink juice. """
-    yield from member(House(drink='juice', smoke='Lucky'), Houses)
+    for _ in member(House(drink='juice', smoke='Lucky'), Houses):
+      yield from self.clue_13(Houses)
 
   def clue_13(self, Houses: SuperSequence):
     """ 13. The Japanese smoke Parliament. """
-    yield from member(House(nationality='Japanese', smoke='Parliament'), Houses)
+    for _ in member(House(nationality='Japanese', smoke='Parliament'), Houses):
+      yield from self.clue_14(Houses)
 
   def clue_14(self, Houses: SuperSequence):
     """ 14. The Norwegians live next to the blue house. """
-    yield from next_to(House(nationality='Norwegians'), House(color='blue'), Houses)
+    for _ in next_to(House(nationality='Norwegians'), House(color='blue'), Houses):
+      yield from self.clue_15(Houses)
 
   def clue_15(self, Houses: SuperSequence):
     """ 15 (implicit) Fill in unmentioned properties. """
