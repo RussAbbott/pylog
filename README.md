@@ -1,3 +1,17 @@
+## How to use repository
+* Install `pytest`: `pip install pytest` / `conda install pytest`
+* Install `pylog` package:
+  ```shell
+  cd pylog/
+  pip install -e .
+  ```
+* Run examples' tests:
+  ```shell
+  cd examples/
+  python -m pytest
+  ```
+
+
 ## Abstract (outline from [The Programming Journal](https://programming-journal.org/cfp/))
 
 <dl><dt>Context: What is the broad context of the work? What is the importance of the general research area?</dt>
