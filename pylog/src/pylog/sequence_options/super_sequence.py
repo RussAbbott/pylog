@@ -112,7 +112,7 @@ def members(Es: List, A_List: SuperSequence):
       yield from members(Es[1:], A_List)
 
 
-def next_to_in(E1: Term, E2: Term, Es: SuperSequence):
+def next_to(E1: Term, E2: Term, Es: SuperSequence):
   """ Are E1 and E2 are next to each other in Es. """
   for _ in forany([
                    lambda: is_contiguous_in([E1, E2], Es),

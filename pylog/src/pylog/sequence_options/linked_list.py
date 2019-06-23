@@ -1,7 +1,6 @@
 from __future__ import annotations
-from typing import Any, List, Tuple, Union
+from typing import Any, List, Optional, Tuple, Union
 
-from ..control_structures import forall, forany
 from ..logic_variables import ensure_is_logic_variable, euc, PyValue, n_Vars, Term, unify, unify_pairs, Var
 from ..sequence_options.super_sequence import is_a_subsequence_of,  member, SuperSequence
 
@@ -17,11 +16,14 @@ class LinkedList(SuperSequence):
   When used as a constructor, the argument must be either a Python list or a (Head, Tail) tuple.
   In the second case, Tail must be a LinkedList or a Var.
   """
-  def __init__(self, list_or_tuple: Union[list, str, tuple] ):
-    args = self.args_from_pyList(list_or_tuple) if isinstance(list_or_tuple, list) else \
-           list_or_tuple if isinstance(list_or_tuple, tuple) else \
-           self.args_from_pyList(list(list_or_tuple))  # Run list_or_tuple to get a list if it's a generator.
+  def __init__(self, list_or_tuple: Union[list, str, Term, tuple], tail: Optional[Term] = None ):
     # args will either have two elements or none -- if we are creating an empty list.
+    if tail is None:
+      args = self.args_from_pyList(list_or_tuple) if isinstance(list_or_tuple, list) else \
+             list_or_tuple if isinstance(list_or_tuple, tuple) else \
+             self.args_from_pyList(list(list_or_tuple))  # Run list_or_tuple to get a list if it's a generator.
+    else:
+      args = (list_or_tuple, tail)
     super().__init__( ('linkedList', *args) )
 
   def __getitem__(self, key: Union[int, slice]):
@@ -116,7 +118,7 @@ emptyLinkedList = LinkedList([])
 @euc
 def append(Xs: Union[LinkedList, Var], Ys: Union[LinkedList, Var], Zs: Union[LinkedList, Var]):
   """
-    append([], Ys, Zs).
+    append([], Ys, Ys).
     append([X|Xs], Ys, [X|Zs]) :- append(Xs, Ys, Zs).
 
   Note that this could just have well have been written:
@@ -146,33 +148,29 @@ def append(Xs: Union[LinkedList, Var], Ys: Union[LinkedList, Var], Zs: Union[Lin
   Since an empty list cannot unify with a LinkedList that has a head and a tail, if either
   Xs or Zs is empty, unify_pairs will fail.
 
-  The actual code is quite short. It's very similar to like the prolog code.
+  The actual code is quite short. It's very similar to the prolog code.
   """
 
-  # Create the existential variables at the start.
-  (XZ_Head, Xs_Tail, Zs_Tail) = n_Vars(3)
+  # Corresponds to append([], Ys, Ys).
+  yield from unify_pairs([(Xs, emptyLinkedList), (Ys, Zs)])
 
-  for _ in forany([
-    # Clause 1.
-    lambda: unify_pairs([(Xs, emptyLinkedList),
-                         (Ys, Zs)]),
-    # Clause 2.
-    lambda: forall([lambda: unify_pairs([ (Xs, LinkedList( (XZ_Head, Xs_Tail) )),
-                                          (Zs, LinkedList( (XZ_Head, Zs_Tail) ))
-                                          ]),
-                    lambda: append(Xs_Tail, Ys, Zs_Tail)])
-                   ]):
-    yield
+  # Corresponds to append([X | Xs], Ys, [X | Zs]): - append(Xs, Ys, Zs).
+  (XZ_Head, Xs_Tail, Zs_Tail) = n_Vars(3)
+  for _ in unify_pairs([(Xs, LinkedList(XZ_Head, Xs_Tail)),
+                        (Zs, LinkedList(XZ_Head, Zs_Tail))]):
+    yield from append(Xs_Tail, Ys, Zs_Tail)
 
 
 if __name__ == '__main__':
+
+  print( LinkedList([]) == LinkedList(()))
 
   print(emptyLinkedList)
   E = PyValue(3)
   for _ in member(E, emptyLinkedList):
     print(f'Error: should not get here.')
 
-  A = LinkedList((Var( ), Var( )))
+  A = LinkedList(Var( ), Var( ))
   A112 = A[4:11:2]
   A37 = A[3:7]
   print(f'\nA: {A}\nA[3:7]: {A37}\nA[4:11:2]: {A112}')
@@ -278,16 +276,17 @@ if __name__ == '__main__':
 
   # Run "backward:" Zs --> Xs + Ys
   # Multiple ways to split up Zs between Xs and Ys
-  (Xs, Ys, Zs) = (Var(), Var(), LinkedList([0, 1, 2, 3, 4]))
-  print(f'\nGiven: Xs: {Xs}, Ys: {Ys}\n?-  append(Xs, Ys, {Zs});')
+  (Xs, Ys, Zs) = (Var(), Var(), LinkedList([1, 2, 3]))
+  print(f'\nGiven: Xs: {Xs}, Ys: {Ys}, Zs: {Zs}\n?-  append(Xs, Ys, {Zs};')
   for _ in append(Xs, Ys, Zs):
-    print(f'Xs = {Xs}\nYs = {Ys}\n')
+    print(f'Xs = {Xs}\nYs = {Ys}\nZs = {Zs}\n')
 
   (Xs, Ys, Zs) = (LinkedList([1, 2, 3]), Var(), Var())
-  print(f'\nGiven: Ys: {Ys}, Zs: {Zs}\n?- append({Xs}, Ys, Zs); ')
+  print(f'\nGiven: Xs: {Xs}, Ys: {Ys}, Zs: {Zs}')
+  print(f'?- append({Xs}, Ys, Zs); ')
   for _ in append(Xs, Ys, Zs):
+    print(f'nlXs = {Xs}')
     print(f'Ys = {Ys}')
-    print(f'Zs = {Zs}')
 
   """
   Expected output:
@@ -295,6 +294,15 @@ if __name__ == '__main__':
   > append([0, 1], [2, 3, 4], Zs); (Zs: _14)
   Zs = [0, 1, 2, 3, 4]
   Zs = _14
+  """
+
+  (Xs, Ys, Zs) = (Var(), Var(), LinkedList([1, 2, 3, 4]))
+  print(f'\nGiven: Ys: {Ys}, Zs: {Zs}\n?- append({Xs}, Ys, Zs); ')
+  for _ in append(Xs, Ys, Zs):
+    print(f'Ys = {Ys}')
+    print(f'Zs = {Zs}')
+
+  """
   
   > append(Xs, Ys, [0, 1, 2, 3, 4]); (Xs: _36, Ys: _37)
   Xs = []
@@ -326,7 +334,7 @@ if __name__ == '__main__':
   A = LinkedList([1, 2, 3])
   B_Head = Var( )
   B_Tail = Var( )
-  B = LinkedList((B_Head, B_Tail))
+  B = LinkedList(B_Head, B_Tail)
 
   print(f'1. A: {A}, B: {B}')
   for _ in unify(A, B):
@@ -349,21 +357,21 @@ if __name__ == '__main__':
     print(f'5a. B: {B}, E: {E}')
     for _ in unify(E, B):
       # Since E is a Var, must take its unification_chain_end to get something that has a head and tail.
-      E_EoT = E.unification_chain_end( )
-      assert isinstance(E_EoT, LinkedList)
-      print(f'5b. unify(E, B) => E: {E}, E_EoT.head(): {E_EoT.head( )}, E_EoT.tail(): {E_EoT.tail( )}\n')
+      E_EoC = E.unification_chain_end( )
+      assert isinstance(E_EoC, LinkedList)
+      print(f'5b. unify(E, B) => E: {E}, E_EoT.head(): {E_EoC.head( )}, E_EoT.tail(): {E_EoC.tail( )}\n')
 
   # The empty LinkedList is a LinkedList ith no arguments.
   head = PyValue('head')
-  Unclosed_List1 = LinkedList((head, Var( )))
+  Unclosed_List1 = LinkedList(head, Var( ))
   print(f'6. Unclosed_List1: {Unclosed_List1}, len(Unclosed_List1): {len(Unclosed_List1)}')
-  Unclosed_List2 = LinkedList((Var( ), Var( )))
+  Unclosed_List2 = LinkedList(Var( ), Var( ))
   print(f'7. Unclosed_List2: {Unclosed_List2}, len(Unclosed_List2): {len(Unclosed_List2)}')
   for _ in unify(LinkedList([*range(5)]), Unclosed_List2):
     print(f'8. unify(LinkedList([*range(5)]), Unclosed_List2) => ' 
           f'Unclosed_List2: {Unclosed_List2}; len(Unclosed_List2): {len(Unclosed_List2)}')
 
-  Unclosed_List3 = LinkedList((Var( ), Var( )))
+  Unclosed_List3 = LinkedList(Var( ), Var( ))
   print('\nStarting to call member on an open-ended list.')
   limit1 = 4
   for _ in member(PyValue(5), Unclosed_List3):
