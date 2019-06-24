@@ -2,7 +2,10 @@ import pytest
 from pylog.logic_variables import PyValue
 
 class TestClass(object):
-
+    '''
+    Any method prefixed with "test" will be autodiscovered by pytest as a test case
+    '''
+    
     def test_cryptarithmetic(self):
         import cryptarithmetic
         t1, t2, s, _Z, Blank = 'SEND', 'MORE', 'MONEY', PyValue(0), PyValue(' ')
