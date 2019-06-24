@@ -1,14 +1,12 @@
 ## How to use repository
 * Install `pytest`: `pip install pytest` / `conda install pytest`
 * Install `pylog` package:
-  ```shell
-  cd pylog/
-  pip install -e .
+  ```sh
+  pip install -e pylog/.
   ```
 * Run examples' tests:
-  ```shell
-  cd examples/
-  python -m pytest
+  ```sh
+  pytest examples/
   ```
 
 
