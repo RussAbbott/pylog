@@ -5,12 +5,13 @@ def readme():
         return f.read()
 
 setup(name='pylog',
-      version='0.1',
+      version='1.0',
       description='Python implementation of Prolog features.',
       long_description=readme(),
+      long_description_content_type='text/markdown',
       url='https://github.com/RussAbbott/pylog',
-      author='Russ Abbott',
-      author_email='Russ.Abbott@gmail.com',
+      author='Russ Abbott, Jay Patel',
+      author_email='Russ.Abbott@gmail.com, imjaypatel12@gmail.com',
       license='MIT',
       classifiers=[
         'Development Status :: 3 - Alpha',
