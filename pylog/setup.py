@@ -5,7 +5,7 @@ def readme():
         return f.read()
 
 setup(name='pylog',
-      version='1.0',
+      version='1.1',
       description='Python implementation of Prolog features.',
       long_description=readme(),
       long_description_content_type='text/markdown',
