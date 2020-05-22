@@ -1,0 +1,88 @@
+% Copyright 2009--2017 by Olivier Verdier
+% License: see the file LICENSE.rst
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{pythonhl}[2017/02/09 python code highlighting; provided by Olivier Verdier <olivier.verdier@gmail.com>]
+
+
+\RequirePackage{listings}
+\RequirePackage{xcolor}
+
+\usepackage{multicol,multirow,listings,fontaxes}
+\usepackage{epsfig,times,graphics,amssymb,amsbsy,url,setspace,float,xcolor,tcolorbox,mdframed,listings,sectsty,hyphenat,enumitem,capt-of,amsmath,url, hyperref}
+\usepackage[all]{xy}
+
+\renewcommand*{\lstlistlistingname}{Listings}
+\renewcommand*{\lstlistingname}{Listing}
+
+\colorlet{keywordcolour}{black}
+\colorlet{stringcolour}{black}
+
+\def\inv{\vspace*{-6pt}}
+\def\sinv{\vspace*{-3pt}}
+\def\smallinv{\vspace*{-3pt}}
+\def\smallinh{\hspace*{-3pt}}
+\def\smallv{\vspace*{2pt}}
+\def\smallh{\hspace*{2pt}}
+
+\colorlet{commentcolour}{black}
+\colorlet{stringcolour}{black}
+\colorlet{keywordcolour}{black}
+
+%\newcommand{\textbftt}[1]{\textbf{\texttt{#1}}}
+%\newcommand{\textittt}[1]{\textit{\texttt{#1}}}
+
+\raggedbottom
+
+% correct bad hyphenation here
+%\hyphenation{}
+
+\newcommand*{\framemargin}{3ex}
+
+\lstdefinestyle{mypython}{
+language=python,
+numbers=left, 
+numberstyle=\scriptsize, 
+stepnumber=1, 
+numbersep=5pt, 
+showtabs=true,
+tab=,
+tabsize=2,
+basicstyle=\fontfamily{cmss}\scriptsize,
+stringstyle=\color{stringcolour}\textit,
+showstringspaces=false,
+alsoletter={1234567890},
+keywordstyle=\color{keywordcolour}\bfseries,
+emph={and,break,class,continue,def,yield,del,elif ,else,%
+except,exec,finally,for,from,global,if,import,in,%
+lambda,None,not,or,pass,raise,return,try,while,assert,with},
+emphstyle=\color{black}\bfseries,
+morecomment=[s]{"""}{"""},
+commentstyle=\color{commentcolour}\slshape,
+frame=trbl,
+rulecolor=\color{black},
+backgroundcolor=\color{white},
+breakindent=.5\textwidth,frame=single,breaklines=true%
+}
+
+\lstnewenvironment{python1}{\lstset{style=mypython}} {}
+
+
+\makeatletter
+\newif\ifATOfontsize
+\lst@Key{fontsize}{\scriptsize}{\def\ATOfontsize{#1}\global\ATOfontsizetrue}
+\makeatother
+
+\lstnewenvironment{python}[1][]
+{
+\global\ATOfontsizefalse
+\lstset{style=mypython,
+    numbers=none,
+    #1
+}
+\ifATOfontsize
+    \lstset{basicstyle=\fontfamily{cmss}\ATOfontsize\setstretch{1}}
+\fi
+} {}
+
+
+

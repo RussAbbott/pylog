@@ -1,0 +1,369 @@
+\section{From Python to Prolog and back}\label{sec:Pylog}
+This section offers a reasonably detailed overview of Pylog and how it relates to Prolog. Our strategy is to show how a standard Python program can be transformed, step-by-step, into a structurally similar Prolog program. Listings of these programs are gathered together in section \ref{sec:listings}.
+
+As an example problem, we use the computation of a transversal. Given a sequence of sets (in our case lists without repetition), a transversal is a non-repeating sequence of elements with the property that the \textit{n\textsuperscript{th}} element of the traversal belongs to the \textit{n\textsuperscript{th}} set in the sequence.\footnote{From here on, we refer informally to the lists in our example as \textit{sets}.}  For example, the collection of sets [[1, 2, 3], [2, 4], [1]] has three transversals: [2, 4, 1], [3, 2, 1], and [3, 4, 1]. We use the transversal problem because it lends itself to depth-first search, the default Prolog control structure.\footnote{We use traditional, i.e., naive, depth-first search. Most modern Prologs include a constraint processing package such as CLP(FD)\cite{Triska2016}, which makes search much more efficient.
+
+Instead of scanning the sets in the order given, one can select the next set to scanned based on how constrained the sets are. Given [[1, 2, 3], [2, 4], [1]], the third set would be scanned first, with 1 selected as its representative---thereby precluding the selection of 1 for the first set.
+
+Another efficiency measure involves propagating constraints. Suppose our example sets are scanned from left to right. If 1 is selected from the first set, that choice would be propagated forward, eliminating 1 from the final set. Since the final set would then have no choices left, one can conclude that selecting 1 from the first set does not lead to a solution. 
+
+Application of such constraint rules eliminate much of the backtracking inherent in naive depth-first search. Powerful as they are, we do not use such constraint techniques in this example.}
+
+We will discuss five functions for finding transversals---the first four in Python, the final one in standard Prolog. As we discuss these programs we will introduce various Pylog features. Here is a road-map for the programs to be discussed and the Pylog features they illustrate. (To simplify formatting, in naming the programs we use \textittt{tvsl} in place of \textittt{transversal})
+
+\begin{enumerate}
+\item \textittt{tvsl\_dfs\_first} is a standard Python program that performs a depth-first search. It returns the first transversal it finds. It contains no Pylog features, but it illustrates the overall structure the others follow. 
+\item \textittt{tvsl\_dfs\_all}. In contrast to \textittt{tvsl\_dfs\_first}, the program \textittt{tvsl\_dfs\_all} finds and returns \textit{all} transversals. A very common strategy, and the one \textittt{tvsl\_dfs\_all} uses, is to gather all transversals into a collection as they are found and return that collection at the end.
+
+\item \textittt{tvsl\_dfs\_yield} also finds and returns all transversals, but it returns them one at a time as requested, as in Prolog. \textittt{tvsl\_dfs\_all} does this through the use of the Python generator structure, i.e., the \textbftt{\textbf{yield}} statement. This moves us an important step toward a Prolog-like control structure.
+\smallv
+\item \textittt{tvsl\_dfs\_yield\_lv} introduces logic variables, one of the most important features of Prolog.  
+\item \textittt{tvsl\_prolog} is a straight Prolog program. It is operationally identical to \textittt{tvsl\_dfs\_yield\_lv}, but syntactically very different. 
+\end{enumerate}
+
+The first three Python programs have similar signatures. 
+
+\begin{python}
+def tvsl_python_1_2_3(sets: List[List[int]], 
+                      partial_transversal: List[int])
+                             -> <some return type>: 
+\end{python}
+(The return types differ from one program to an other.)
+
+Both the fourth Python program and the Prolog program have a third parameter. Their return type, if any, is not meaningful for our purposes. In these programs, transversals, when found, are returned through the third parameter---as one does in Prolog.
+
+\begin{python}
+def tvsl_python_4(sets: List[List[int]], 
+                  partial_transversal: List[int],
+                  Complete_Transversal: Var)
+\end{python}
+
+\begin{python}
+tvsl_prolog(+Sets, +Partial_Transversal, -Complete_Transversal)
+\end{python}
+
+The signatures have the following in common. 
+\begin{enumerate}
+\item The first argument lists the sets for which a transversal is desired. Initially this is the full list of sets. The programs recursively step through the list, selecting an element from each set. At each recursive call, the first argument lists the remaining sets. 
+
+\item The second argument is a partial transversal consisting of elements selected from sets that have already been scanned. Initially, this argument is the empty list.
+
+\item The third parameter and the returned transversal.
+    \begin{enumerate}
+    \item The first two programs have no third parameter. They return a single transversal, a set of transversals, or \textbftt{None} through the normal \textbftt{return} mechanism.
+    
+    \item The final Python function and the Prolog predicate both have a third parameter. Neither returns a value through a normal Python \textbftt{return} mechanism. In both, the third argument is initially an uninstantiated logic variable, which will be unified with a transversal that is being returned.
+    \end{enumerate}
+\end{enumerate}
+
+We now turn to the details of the programs. For each program, we first introduce the relevant Python/Pylog constructs and then discuss how they are used in the example program.
+
+\subsection{\textittt{tvsl\_dfs\_first}}
+
+% \begin{itemize}
+% \item \textittt{tvsl\_dfs\_first}. 
+
+\begin{minipage}{\linewidth} \largev   \hrulefill
+\begin{python}[numbers=left]
+def tvsl_dfs_first(sets: List[List[int]], partial_transversal: List[int]) -> Optional[List[int]]:
+  print(f'sets: {sets}; partial_transversal: {partial_transversal}')  
+  if not sets:
+    return partial_transversal
+  else:
+    for element in sets[0]:
+      if element not in partial_transversal:
+        complete_transversal = tvsl_dfs_first(sets[1:], partial_transversal + [element])
+        if complete_transversal is not None:
+          return complete_transversal 
+    return None
+\end{python}
+\begin{lstlisting} [caption={\textittt{tvsl\_dfs\_first}}, label={lis:dfsfirst}]
+\end{lstlisting}
+\end{minipage}
+
+\smallv
+
+\textittt{tvsl\_dfs\_first} uses standard depth-first recursive search to find a single transversal. As the listing above shows, when we reach the end of the list of sets, we are done. At that point we return  \textit{partial\_transversal}, which is then known to be a complete transversal, if there is one. 
+
+The return type is \textittt{Optional[List[int]]}, i.e., either a list of \textittt{int}s, or \textbftt{None} for the case in which no transversal is found. The latter situation occurs when, after considering all elements of the current set (\textittt{sets[0]}) (line 6), we have not found a complete transversal.  
+
+It may be instructive to look at the log (below) created by the print statement (line 2).\footnote{All the programs in this section produce a log. This is the only log included in this paper.} It shows the value of the parameters at the start of each execution of the function. When \textittt{sets} is the empty list (line 3), we have found a transversal. On the other hand, when the function reaches a dead-end, it "backtracks" to the next element in the current set and tries again. 
+\smallv
+\smallv
+\smallv
+
+\begin{minipage}{\linewidth}  \largev   \hrulefill
+\begin{python}[numbers=left]
+sets: [[1, 2, 3], [2, 4], [1]]; partial_transversal: []
+sets: [[2, 4], [1]]; partial_transversal: [1]
+sets: [[1]]; partial_transversal: [1, 2]
+sets: [[1]]; partial_transversal: [1, 4]
+sets: [[2, 4], [1]]; partial_transversal: [2]
+sets: [[1]]; partial_transversal: [2, 4]
+sets: []; partial_transversal: [2, 4, 1]
+                                =>  [2, 4, 1]
+\end{python}
+\begin{lstlisting} [caption={\textittt{transversal\_dfs\_first trace}},  label={lis:dfsfirsttrace}]
+\end{lstlisting}
+\end{minipage}
+
+The first three lines of the log show that we have selected \textittt{[1, 2]} as the \textittt{partial\_transversal} and must now select an element of \textittt{[1]}, the remaining set. Since \textittt{1} is already in the \textittt{partial\_transversal}, it can't be selected to represent the final set. So we (blindly, as is the case with naive depth-first search) backtrack to the selection from the second set. We had initially selected \textittt{2}. Line 4 shows that we have now selected \textittt{4}. Of course that doesn't help. Having exhausted all elements of the second set, we backtrack all the way to our selection from the first set. Line 5 of the log shows that we have now selected \textittt{2} from the first set and are about to make a selection from the second set. We cannot select \textittt{2} from the second set since it is already in the \textittt{partial\_transversal}. Instead, we select \textittt{4} from the second set. We are then able to select \textittt{1} from the final set to complete the transversal. 
+
+Even though this is a simple depth-first search, it incorporates (what appears to be) backtracking, one of the mainstays of Prolog. What implements the backtracking? In fact, there is no backtracking. The nested \textbftt{for} loops produce a backtracking effect. Although this program uses recursion to produce the nesting, recursion is not a requirement. 
+
+Prolog, uses the term \textit{choicepoint} for places in the program at which (a) multiple choices are possible and (b) one wants to try them all if necessary. Pylog implements choicepoints by means of such nested \textbf{for} loops and related mechanisms.
+
+\subsection{\textittt{tvsl\_dfs\_all}}
+
+% \item \textittt{tvsl\_dfs\_all}. 
+
+\begin{minipage}{\linewidth} \largev   \hrulefill
+\begin{python}[numbers=left]
+def tvsl_dfs_all(sets: List[List[int]], partial_transversal: List[int]) -> List[List[int]]:
+  print(f'sets: {sets}; partial_transversal: {list(partial_transversal)}')
+  if not sets:
+    return [partial_transversal]
+  else:
+    all_transversals = []
+    for element in sets[0]:
+      if element not in partial_transversal:
+        all_transversals += tvsl_dfs_all(sets[1:], partial_transversal + [element])
+    return all_transversals
+\end{python}
+\begin{lstlisting} [caption={transversal\_dfs\_all},  label={lis:dfsall}]
+\end{lstlisting}
+\end{minipage}
+
+\smallv
+
+\textittt{tvsl\_dfs\_all} finds and returns \textit{all} transversals. It has the same structure as \textittt{tvsl\_dfs\_first} except that instead of returning a single transversal, each transversal is added to \textittt{all\_transversals} (line 9), which is returned when the program terminates. 
+
+Note that \textittt{tvsl\_dfs\_first} returns \textbftt{None} if no transversal is found; \textittt{tvsl\_dfs\_all} returns an empty list. 
+
+
+\subsection{\textittt{tvsl\_yield}}
+
+\begin{minipage}{\linewidth} \largev   \hrulefill
+\begin{python}[numbers=left]
+def tvsl_yield(sets: List[List[int]], partial_transversal: List[int]) -> Generator[List[int], None, None]:
+  print(f'sets/{sets}; '
+        f'partial_transversal/{partial_transversal}')
+  if not sets:
+    yield partial_transversal
+  else:
+    for element in sets[0]:
+      if element not in partial_transversal:
+        yield from tvsl_yield(sets[1:], partial_transversal + [element])
+            
+\end{python}
+\begin{lstlisting} [caption={transversal\_dfs\_yield},  label={lis:dfsyield}]
+\end{lstlisting}
+\end{minipage}
+
+\smallv
+% \item  \textittt{tvsl\_yield}. 
+
+\textittt{tvsl\_yield}, although quite similar to \textittt{tvsl\_dfs\_first}, takes a significant step toward mimicking Prolog. Whereas \textittt{tvsl\_dfs\_first} \textbftt{return}s the first transversal it finds, \textittt{tvsl\_yield} \textbftt{yield}s \textit{all} the transversals it finds---but one at a time.  Instead of looking for a single transversal on lines 8 - 10 with:
+\begin{python}
+complete_transversal = tvsl_dfs_first(ss, partial_transversal + [element])
+\end{python}
+and then \textbftt{return}ing those that are not \textbftt{None}, \textittt{tvsl\_yield} uses \textbftt{yield from} (line 9) to search for and \textbftt{yield} \textit{all} transversals---but one at a time.
+
+\begin{python}
+yield from tvsl_yield(ss, partial_transversal + [element])
+\end{python}
+
+We discuss Python's \textbftt{yield} and \textbftt{yield from} in more detail below. The mechanism it provides allows us to mimic Prolog's choicepoints.
+
+\subsection{\textittt{tvsl\_yield\_lv}}
+
+\begin{minipage}{\linewidth} \largev   \hrulefill
+\begin{python}[numbers=left]
+def tvsl_yield_lv(Sets: List[PyList], 
+                  Partial_Transversal: PyList,
+                  Complete_Transversal: Var):
+  print(f'Sets/[{", ".join([str(S) for S in Sets])}]; '
+        f'Partial_Transversal/{Partial_Transversal}')
+  if not Sets:
+    yield from unify(Partial_Transversal,Complete_Transversal)
+  else:
+    Element = Var( )
+    for _ in member(Element, Sets[0]):
+      for _ in fails(member)(Element, Partial_Transversal):
+        yield from tvsl_yield_lv(Sets[1:], 
+                                 Partial_Transversal + PyList([Element]), 
+                                 Complete_Transversal)
+\end{python}
+\begin{lstlisting} [caption={transversal\_dfs\_yield\_lv},  label={lis:dfsyieldlv}]
+\end{lstlisting}
+\end{minipage}
+
+\smallv
+
+\textittt{tvsl\_yield\_lv} moves toward Prolog along a second dimension---the use of logic variables.
+% \smallv
+
+One of Prolog's defining features is its logic variables. A logic variable is similar to a variable in mathematics. It may or may not have a value, but once it gets a value, its value never changes---i.e., logic variables are immutable.
+
+The primary operation on logic variables is known as \textit{unification}. When a logic variable is \textit{unified} with what is known as a \textit{ground term}, e.g., a number, a string, etc., it acquires that term as its value. For example, if \textittt{X} is a logic variable,\footnote{A note about identifiers. The Python convention is to use only lower case letters in identifiers other than class names. The Prolog convention is that the first letter of an identifier determines whether it's a constant term or a variable: variables begin with upper case letters. 
+\smallv
+    
+In the first three programs we have used strictly lower case letters in identifiers. In \textittt{tvsl\_yield\_lv}, and of course in the Prolog program to follow, we use upper case letters to begin identifiers that refer to Prolog-like logic variables. Thus the \textittt{X} and  \textittt{Y} in this discussion begin with upper case letters. In \textittt{tvsl\_yield\_lv}, the identifiers \textittt{Partial\_Transversal} and \textittt{Complete\_Transversal} begin with upper case letters. Even though they are Python variables, they are used as Pylog logic variables.} then after \textittt{unify(3, X)},\footnote{or \textittt{unify(X, 3)}, the order of the arguments is not relevant} \textittt{X} has the value \textittt{3}. 
+
+Like mathematical variables, logic variables may be set equal to each other---even if neither has a value. So if \textittt{X} and \textittt{Y} are two logic variables, then after \textittt{unify(X, Y)} whatever value either eventually gets will be considered the value of the other. 
+
+Consider the following example.(The function \textittt{Var} returns a new logic variable.) \footnote{In this example, as in many Pylog programs, operations, such as \textittt{unify(X, Y)} are in the body of a \textbftt{for} loop. The \textbftt{for} loop defines the scope of the operation.  The \textbftt{for} loop (deliberately) lacks an index variable since it serves no purpose in this context.}
+
+\smallv
+
+\begin{minipage}{\linewidth} \largev   \hrulefill
+\begin{python}
+(A, B, C, D, E) = (Var(), Var(), Var(), Var(), 'abc')
+for _ in unify(A, B):
+  for _ in unify(D, C):
+    for _ in unify(A, C):
+      for _ in unify(E, D):
+\end{python}
+\begin{lstlisting} [caption={Unifying logic variables},  label={lis:unifylogicvars}]
+\end{lstlisting}
+\end{minipage}
+Within the body of the final loop, \textittt{A}, \textittt{B}, \textittt{C}, \textittt{D}, and \textittt{E} all have the value \textittt{'abc'}.
+\smallv
+
+The following convenience methods make it possible to write the preceding code more concisely.
+\begin{itemize}
+    \item \textittt{n\_Vars} takes an integer argument and generates that many \textittt{Var} objects.
+    \item \textittt{unify\_pairs} takes a list of pairs (as tuples) and unifies the elements of each pair.
+\end{itemize}
+
+\begin{minipage}{\linewidth} \largev   \hrulefill
+\begin{python}
+(A, B, C, D, E) = (*n_Vars(4), 'abc')
+for _ in unify_pairs([(A, B), (D, C), (A, C), (E, D)]):
+\end{python}
+\begin{lstlisting} [caption={Unifying logic variables shortened},  label={lis:unifylogicvarsshortened}]
+\end{lstlisting}
+\end{minipage}
+
+\smallv
+
+% Since the Python functions \textit{unify} and \textit{unify\_pairs} are both Python generators, they must be called from something like a \textbftt{for} loop as shown---rather than as  standard function calls.
+\smallv
+
+Here are a few additional considerations about  \textit{tvsl\_yield\_lv}.
+\begin{itemize}
+\item  \textit{tvsl\_yield\_lv} has a third parameter, \textit{Complete\_Transversal}, which is declared as a \textit{Var}, i.e., a logic variable. When \textit{tvsl\_yield\_lv} is called, \textit{Complete\_Transversal} is passed an uninstantiated \textittt{Var}. If \textit{Sets} is empty, we perform \textit{unify(Partial\_Transversal, Complete\_Transversal)} (line 7), which gives \textit{Complete\_Transversal} the same value as \textit{Partial\_Transversal}. This is typical of how Prolog programs return values: unify an argument with the value to be returned.
+\item The \textbftt{else} clause (line 8) defines \textit{Element} to be a \textit{Var}. The line 
+    \begin{python}
+        for _ in member(Element, S):
+    \end{python}
+    unifies \textit{Element} with a different member of \textit{S} on each iteration. 
+\item The syntax of the \textbftt{for} iterator/generator loop is worth a remark. The function \textit{member} is written to perform its own \textit{unify} operation and then to perform a \textit{yield}. This makes it suitable for use in a \textbf{for} iterator/generator loop as shown. 
+
+\item The \textbftt{for} loop itself does not produce a value in the normal way. (Note the underscore.) Instead, after \textit{member} unifies its first argument with an element of its second, it \texttt{\textbf{yield}}s to indicate that the unification is complete. For example, 
+%\begin{minipage}{\linewidth} \largev   \hrulefill
+\begin{python}
+Element = Var()
+for _ in member(Element, S):
+  print(Element)
+\end{python}
+%\begin{lstlisting} [caption={Unifying logic vars in for-loop},  label={lis:unifyinforloop}]
+%\end{lstlisting}
+%\end{minipage}
+prints the elements of \textit{S}.
+\smallv
+
+\item In earlier functions we had written 
+\begin{python}
+if element not in partial_transversal:
+\end{python}
+In \texttt{tvsl\_yield\_lv} we write (line 11)
+\begin{python}
+for _ in fails(member)(Element, Partial_Transversal):
+\end{python}
+The Pylog \textit{fails} function does the same job as \textit{\textbackslash+}, i.e., negation, in Prolog. \textit{fails} takes another function as an argument---much like a Python decorator---and returns a function that succeeds or fails when its argument function fails or succeeds. Thus, although it's not boolean,
+\begin{python}
+for _ in fails(member)(Element, Partial_Transversal):
+\end{python} 
+plays a similar role as
+\begin{python}
+if element not in partial_transversal:
+\end{python}
+\smallv
+
+Pylog offers \textit{would\_succeed} for double negation, Prolog's \texttt{\textbackslash+\textbackslash+}.
+\begin{python}
+for _ in would_succeed(member)(Element, S):
+\end{python} 
+succeeds if and only if
+\begin{python}
+for _ in member(Element, S):
+\end{python} 
+would succeed. The only (but very important) difference is that, as in  Prolog's double negation, \textit{would\_succeed} does not unify any variables.
+\smallv
+
+\item Consider lines 12-15 of the listing. They use Python's \textbftt{yield} \textbftt{from} construct.\footnote{Python's \textbftt{yield} \textbftt{from} has additional uses, which Pylog does not exploit.} \texttt{\textbftt{yield from} <something>} can be considered shorthand for
+\begin{python}
+for X in <something>:
+  yield X
+\end{python}
+
+As before, \textittt{X} may be an underscore, in which case nothing is \textbftt{yield}ed, and the \textbftt{yield} statement is simply \textbftt{yield} with no argument.
+
+\item Consider how \textbftt{yield from} is used in this program. It performs four functions.
+\begin{enumerate}
+    \item It calls the remaining program to be executed. In this case, it's a recursive call, but that need not be the case.
+    \item It passes values from previously executed code to the called function. 
+    \item It also passes on an uninstantiated variables---the third argument---which the remainder of the program will (presumably) instantiate.
+    \item Since it functions as a \textbftt{yield}, it returns what will be the newly instantiated argument back up the \textbftt{yield} chain.
+\end{enumerate}
+\smallv
+
+We can put this into a Prolog context. Consider a standard Prolog clause.
+
+\begin{minipage}{\linewidth} \largev \hrulefill
+\begin{python}[numbers=left]
+    head(<args>) :-
+        term_1(<args_1>),
+        term_2(<args_2>), 
+        ...
+        term_n(<args_n>).
+\end{python}
+\begin{lstlisting} [caption={A prolog clause}, label={lis:prolog_clause}]
+\end{lstlisting}
+\end{minipage}
+
+The relationship between a clause head and its body as well as that between each term and the rest of the body is exactly a \textbftt{yield from} relationship. 
+% \smallv
+
+This observation leads to our proposed Python template for Prolog, discussed at the end of section \ref{subsec:zebra}. 
+\end{itemize}
+
+\subsection{\textittt{tvsl\_prolog}}
+
+\begin{minipage}{\linewidth} \largev \hrulefill
+\begin{python}[numbers=left]
+tvsl_prolog(Sets, Partial_Transversal, _Complete_Transversal) :-
+    writeln('Sets'/Sets;'  Partial_Transversal'/Partial_Transversal), 
+    fail.
+
+tvsl_prolog([], Complete_Transversal, Complete_Transversal) :-
+    format('                                  '),
+    writeln('Complete_Transversal '=Complete_Transversal), nl.
+
+tvsl_prolog([S|Ss], Partial_Transversal, Complete_Transversal_X) :-
+    member(X, S),
+    \+ member(X, Partial_Transversal),
+    append(Partial_Transversal, [X], Partial_Transversal_X),
+    tvsl_prolog(Ss, Partial_Transversal_X, Complete_Transversal_X).
+
+\end{python}
+\begin{lstlisting} [caption={transversal\_prolog},  label={lis:transversalprolog}]
+\end{lstlisting}
+\end{minipage}
+
+\smallv
+% \item 
+\textittt{tvsl\_prolog}, the final program, is straight Prolog. \textit{tvsl\_prolog} and \textit{tvsl\_yield\_lv} are the same program expressed in different languages.
+
+% \end{itemize}

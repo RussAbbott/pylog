@@ -1,0 +1,205 @@
+\section{Unification and control}\label{subsec:unification}
+This section examines the Pylog implementation of unification along with a number of control functions.
+
+\subsection{\textittt{Unification}}
+As it turns out, unification is relatively straightforward. 
+
+The \textittt{unify} function is called, \textittt{unify(Left, Right)}, where \textittt{Left} and \textittt{Right} are the Pylog objects to be unified. (Argument order is immaterial.) 
+
+The first step (line 4) ensures that the arguments are Pylog objects. If either is an immutable Python element, such as a string or int, it is wrapped in a \textittt{PyValue}. This allows us to call, e.g, \textittt{unify(X, 'abc')}.
+   
+There are four \textittt{unify} cases.
+
+\begin{enumerate}
+    \item \textittt{Left} and \textittt{Right} are already the same. Since Pylog objects are immutable, neither can change, and there's nothing to do. Succeed quietly via \textbftt{yield}.
+
+    \item \textittt{Left} and \textittt{Right} are both \textittt{PyValue}s, and exactly one of them has a value. Assign the uninstantiated \textittt{PyValue} the value of the instantiated one.
+    \smallv \\
+    An important step is to set the assignment back to \textbftt{None} after the \textbftt{yield} statement. (line 18) This undoes the unification on backtracking.
+
+    \item \textittt{Left} and \textittt{Right} are both \textittt{Structure}s, and they have the same functor. Unification consists of unifying the respective arguments. 
+
+    \item Either \textittt{Left} or \textittt{Right} is a \textittt{Var}. Point the \textittt{Var} to the other element at the end of the \textittt{Var} element's unification chain. As line 1 shows \textittt{unify} has a decorator. \textittt{euc} ensures that if either argument is a \textittt{Var} it is replaced by the element at the end of its unification chain. ("euc" stands for "end of unification chain".) Again, the unification must be undone on backtracking. (line 30) 
+
+\end{enumerate} 
+
+\begin{minipage}{\linewidth}  \largev \hrulefill
+\begin{python}[numbers=left]
+@euc
+def unify(Left: Any, Right: Any):
+
+  (Left, Right) = map(ensure_is_logic_variable, (Left, Right))
+
+  # Case 1.
+  if Left == Right:
+    yield
+
+  # Case 2.
+  elif isinstance(Left, PyValue) and isinstance(Right, PyValue) and \
+       (not Left.is_instantiated( ) or not Right.is_instantiated( )) and \
+       (Left.is_instantiated( ) or Right.is_instantiated( )):
+    (assignedTo, assignedFrom) = (Left, Right) if Right.is_instantiated( ) else (Right, Left)
+    assignedTo._set_py_value(assignedFrom.get_py_value( ))
+    yield
+
+    assignedTo._set_py_value(None)
+
+  # Case 3.
+  elif isinstance(Left, Structure) and isinstance(Right, Structure) and Left.functor == Right.functor:
+    yield from unify_sequences(Left.args, Right.args)
+
+  # Case 4.
+  elif isinstance(Left, Var) or isinstance(Right, Var):
+    (pointsFrom, pointsTo) = (Left, Right) if isinstance(Left, Var) else (Right, Left)
+    pointsFrom.unification_chain_next = pointsTo
+    yield
+
+    pointsFrom.unification_chain_next = None
+
+\end{python}
+\begin{lstlisting} [caption={unify},  label={lis:unify}]
+\end{lstlisting}
+\end{minipage}
+
+\subsection{\textittt{Control functions}}
+The following control functions are defined. We leave it to the doc-strings to explain what they do. It's striking how straight-forward they are.
+
+\begin{minipage}{\linewidth}  \largev \hrulefill
+\begin{python}[numbers=left]
+def fails(f):
+  """
+  Applied to a function so that the resulting function succeeds iff the original fails.
+  Note that it is applied to the function itself, not to a function call.
+  Similar to a decorator but applied explicitly when used.
+  """
+  def fails_wrapper(*args, **kwargs):
+    for _ in f(*args, **kwargs):
+      # Fail, i.e., don't yield, if f succeeds
+      return  
+    # Succeed if f fails.
+    yield     
+
+  return fails_wrapper
+\end{python}
+\begin{lstlisting} [caption={Control functions},  label={lis:control}]
+\end{lstlisting}
+\end{minipage}
+
+\begin{minipage}{\linewidth}  \largev \hrulefill
+\begin{python}[numbers=left]
+def forall(gens):
+  """
+  Succeeds if all generators in the gens list succeed. The elements in the gens list
+  are embedded in lambda functions to avoid premature evaluation.
+  """
+  if not gens:
+    # They have all succeeded.
+    yield
+  else:
+    # Get gens[0] and evaluate the lambda expression to get a fresh iterator.
+    # If it succeeds, run the rest of the generators in the list.
+    for _ in gens[0]( ):
+      yield from forall(gens[1:])
+\end{python}
+\begin{lstlisting} [caption={Control functions},  label={lis:control}]
+\end{lstlisting}
+\end{minipage}
+
+\begin{minipage}{\linewidth}  \largev \hrulefill
+\begin{python}[numbers=left]
+def forany(gens):
+  """
+  Succeeds if any of the generators in the gens list succeed. On "back-up," tries them all. 
+  The gen elements must be embedded in lambda functions.
+  """
+  for gen in gens:
+    yield from gen( )
+
+\end{python}
+\begin{lstlisting} [caption={Control functions},  label={lis:control}]
+\end{lstlisting}
+\end{minipage}
+
+\begin{minipage}{\linewidth}  \largev \hrulefill
+\begin{python}[numbers=left]
+def trace(x, succeed=True, show_trace=True):
+  """
+  Can be included in a list of generators (as in forall and forany) to see where we are.
+  The second argument determines whether it succeeds or fails.
+  When included in a list of forall generators, succeed should be set to True so that
+  it doesn't prevent forall from succeeding.
+  When included in a list of forany generators, succeed should be set to False so that forany
+  will go on the the next generator and won't take this as an extraneous successes.
+  """
+  if show_trace:
+    print(x)
+  if succeed:
+    yield
+
+\end{python}
+\begin{lstlisting} [caption={Control functions},  label={lis:control}]
+\end{lstlisting}
+\end{minipage}
+
+\begin{minipage}{\linewidth}  \largev \hrulefill
+\begin{python}[numbers=left]
+def would_succeed(f):
+  """
+  Applied to a function so that the resulting function succeeds/fails if and only if 
+  the original function succeeds/fails.
+  If the original function succeeds, this also succeeds but without binding any variables.
+  Similar to a decorator but applied explicitly when used.
+  """
+  def would_succeed_wrapper(*args, **kwargs):
+    succeeded = False
+    for _ in f(*args, **kwargs):
+      succeeded = True
+      
+    # Do not yield in the context of f succeeding.
+    # Un-unify any unifications that occurred in f.
+    if succeeded:
+      # Succeed if f succeeded.
+      yield  
+    # else:
+    #   Fail if f failed.
+    #   pass   
+
+  return would_succeed_wrapper
+
+\end{python}
+\begin{lstlisting} [caption={Control functions},  label={lis:control}]
+\end{lstlisting}
+\end{minipage}
+
+
+Finally, there is a more complex control structure, which is defined as an instance of the \textittt{Bool\_Yield\_Wrapper} class. It effectively converts \textbftt{yield} to a boolean. \textittt{Bool\_Yield\_Wrapper} instances are created via a \textittt{bool\_yield\_wrapper} decorator function. The decorator returns a function that instantiates \textittt{Bool\_Yield\_Wrapper} with the decorted function.
+
+\begin{minipage}{\linewidth}  \largev \hrulefill
+\begin{python}[numbers=left]
+def bool_yield_wrapper(gen):
+  """
+  A decorator. Produces a function that generates a Bool_Yield_Wrapper object. 
+  """
+  def wrapped_func(*args, **kwargs):
+    return Bool_Yield_Wrapper(gen(*args, **kwargs))
+
+  return wrapped_func
+\end{python}
+\begin{lstlisting} [caption={Control functions},  label={lis:control}]
+\end{lstlisting}
+\end{minipage}
+
+Suppose the \textittt{append} function discussed earlier is decorated with \textittt{@bool\_yield\_wrapper}. The resulting function may be used as follows. (Note that line 1 is required to generate the \textittt{append}-based instance of \textittt{@bool\_yield\_wrapper}, which is then used in the \textbftt{while} loop.)
+
+\begin{minipage}{\linewidth}  \largev \hrulefill
+\begin{python}[numbers=left]
+with append(Xs, Ys, Zs) as gen:
+  while gen.has_more():
+    print(f'Xs = {Xs}\nYs = {Ys}\nZs = {Zs}\n')
+\end{python}
+\begin{lstlisting} [caption={Control functions},  label={lis:control}]
+\end{lstlisting}
+\end{minipage}
+The output will be all the solutions to the append operation, depending on the initial values and state of instantiation of \textittt{Xs}, \textittt{Ys}, and \textittt{Zs}.
+
+An advantage of this approach is that it avoids the \textbftt{for} loop. \textbftt{for} loops just don't feel like the right structure to use for Prolog backtracking. The disadvantage of this approach is its additional wordiness and increased indentation, i.e., two nested lines, \textbftt{with} and \textbftt{while}, instead of the simpler \textbftt{for} construct. In practice, we found ourselves using the \textbftt{for} construct most of the time.
