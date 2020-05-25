@@ -1,0 +1,141 @@
+\subsection{Listings}\label{sec:listings}
+
+\begin{center}
+
+\begin{minipage}{\linewidth}
+\begin{python}[numbers=left]
+def transversal_dfs_first(sets: List[List[int]],
+                          partial_transversal: List[int]) \
+                          -> Optional[List[int]]:
+  print(f'sets/{sets}; '
+        f'partial_transversal/{partial_transversal}')  
+  if not sets:
+    return partial_transversal
+  else:
+    for element in sets[0]:
+      if element not in partial_transversal:
+        complete_transversal = transversal_dfs_first(sets[1:],
+                                                     partial_transversal 
+                                                     + [element])
+        if complete_transversal is not None:
+          return complete_transversal    
+\end{python}
+\begin{lstlisting} [caption={transversal\_dfs\_first},  label={lis:dfsfirst}]
+\end{lstlisting}
+\end{minipage}
+
+
+\begin{minipage}{\linewidth}
+
+\begin{python}[numbers=left]
+sets/[[1, 2, 3], [2, 4], [1]]; partial_transversal/[]
+sets/[[2, 4], [1]]; partial_transversal/[1]
+sets/[[1]]; partial_transversal/[1, 2]
+sets/[[1]]; partial_transversal/[1, 4]
+sets/[[2, 4], [1]]; partial_transversal/[2]
+sets/[[1]]; partial_transversal/[2, 4]
+sets/[]; partial_transversal/[2, 4, 1]
+                                =>  [2, 4, 1]
+\end{python}
+\begin{lstlisting} [caption={transversal\_dfs\_first trace},  label={lis:dfsfirsttrace}]
+\end{lstlisting}
+\end{minipage}
+
+
+\begin{minipage}{\linewidth}
+\begin{python}[numbers=left]
+def transversal_dfs_all(sets: List[List[int]],
+                        partial_transversal: List[int]) \
+                        -> List[List[int]]:
+  print(f'sets/{sets}; partial_transversal/{list(partial_transversal)}')
+  if not sets:
+    return [partial_transversal]
+  else:
+    all_transversals = []
+    for element in sets[0]:
+      if element not in partial_transversal:
+        all_transversals += \
+          transversal_dfs_all(sets[1:], partial_transversal + [element])
+    return all_transversals
+\end{python}
+\begin{lstlisting} [caption={transversal\_dfs\_all},  label={lis:dfsall}]
+\end{lstlisting}
+\end{minipage}
+
+
+\begin{minipage}{\linewidth}
+\begin{python}[numbers=left]
+def transversal_yield(sets: List[List[int]], 
+                      partial_transversal: List[int]) \
+                      -> Generator[List[int], None, None]:
+  print(f'sets/{sets}; '
+        f'partial_transversal/{partial_transversal}')
+  if not sets:
+    yield partial_transversal
+  else:
+    for element in sets[0]:
+      if element not in partial_transversal:
+        yield from \ 
+          transversal_yield(sets[1:], partial_transversal + [element])
+            
+\end{python}
+\begin{lstlisting} [caption={transversal\_dfs\_yield},  label={lis:dfsyield}]
+\end{lstlisting}
+\end{minipage}
+
+
+\begin{minipage}{\linewidth}
+\begin{python}[numbers=left]
+def transversal_yield_lv(Sets: List[PyList], 
+                         Partial_Transversal: PyList,
+                         Complete_Transversal: Var):
+  print(f'Sets/[{", ".join([str(S) for S in Sets])}]; '
+        f'Partial_Transversal/{Partial_Transversal}')
+  if not Sets:
+    yield from unify(Partial_Transversal,Complete_Transversal)
+  else:
+    Element = Var( )
+    for _ in member(Element, Sets[0]):
+      for _ in fails(member)(Element, Partial_Transversal):
+        yield from \
+          transversal_yield_lv(Sets[1:], 
+                               Partial_Transversal + PyList([Element]), 
+                               Complete_Transversal)
+    \end{python}
+    \begin{lstlisting} [caption={transversal\_dfs\_yield\_lv},  label={lis:dfsyieldlv}]
+    \end{lstlisting}
+\end{minipage}
+
+
+\begin{minipage}{\linewidth}
+\begin{python}[numbers=left]
+transversal_prolog(Sets, Partial_Transversal, _Complete_Transversal) :-
+    writeln('Sets'/Sets;'  Partial_Transversal'/Partial_Transversal), 
+    fail.
+
+transversal_prolog([], Complete_Transversal, Complete_Transversal) :-
+    format('                                  '),
+    writeln('Complete_Transversal '=Complete_Transversal), nl.
+
+transversal_prolog([S|Ss], Partial_Transversal, Complete_Transversal_X) :-
+    member(X, S),
+    \+ member(X, Partial_Transversal),
+    append(Partial_Transversal, [X], Partial_Transversal_X),
+    transversal_prolog(Ss, Partial_Transversal_X, Complete_Transversal_X).
+
+\end{python}
+\begin{lstlisting} [caption={transversal\_prolog},  label={lis:transversalprolog}]
+\end{lstlisting}
+\end{minipage}
+
+\end{center}
+
+% \begin{minipage}{\linewidth}
+% \begin{python}
+%     <your code goes here>
+% \end{python}
+% \begin{lstlisting}[caption={caption_goes_here},  label={label_goes_here}]
+% \end{lstlisting}
+% \end{minipage}
+
+
