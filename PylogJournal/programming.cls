@@ -308,10 +308,10 @@
 \ifthenelse{\boolean{xetex}\OR\boolean{luatex}}%
   {\RequirePackage{fontspec}[2013/05/20]
     \ifthenelse{\boolean{xetex}}%
-      {\setmainfont[Numbers=OldStyle,SmallCapsFeatures={Letters=SmallCaps,LetterSpace=5}]{XCharter}\relax}%
-      {\setmainfont[Numbers=OldStyle]{XCharter}\relax}
+      {\setmainfont[SmallCapsFeatures={Letters=SmallCaps,LetterSpace=5}]{XCharter}\relax}%
+      {\setmainfont[]{XCharter}\relax}
     \def\P@fontscale{MatchLowercase}}%
-  {\RequirePackage[osfI,sups]{XCharter}
+  {\RequirePackage[sups]{XCharter}
     \def\P@fontscale{.92}}
 \RequirePackage[scaled=\P@fontscale,semibold]{FiraSans}
 \ifdefstring{\P@codefont}{sf}%
@@ -432,7 +432,7 @@
 
 \ifthenelse{\boolean{xetex}\or\boolean{luatex}}%
   {\newfontfamily\firaoldstylemono
-      [ Numbers = {Monospaced,OldStyle},
+      [ Numbers = {Monospaced},
         UprightFont    = *-Book ,
         ItalicFont     = *-BookItalic ,
         BoldFont    = *-Bold ,
@@ -930,6 +930,5 @@
 
 \tolerance=100
 \emergencystretch=2pt
-
 \endinput
 % EOF

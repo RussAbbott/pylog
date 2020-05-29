@@ -1,12 +1,12 @@
 % -*- coding: utf-8; -*-
 % vim: set fileencoding=utf-8 :
 \documentclass[english,submission]{programming}
-\usepackage{mdframed, framed}
-\usepackage[backend=biber]{biblatex}
+\usepackage{mdframed, framed, rotating}
+\usepackage[style=numeric,backend=biber,seconds=true]{biblatex}
 \addbibresource{example.bib}
 \addbibresource{pylog.bib}
 \usepackage{pythonhl}
-
+%\DeclareUnicodeCharacter{21B3}{\drarrow}
 
 \lstdefinelanguage[programming]{TeX}[AlLaTeX]{TeX}{%
   deletetexcs={title,author,bibliography},%
@@ -41,6 +41,14 @@
 \newcommand{\textbftt}[1]{\textbf{\texttt{#1}}}
 \newcommand{\textittt}[1]{\textit{\texttt{#1}}}
 
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=blue,
+}
+
 
 \begin{document}
 
@@ -58,7 +66,7 @@
 
 \author[b]{Jay Patel}
 \authorinfo{is a co-author of this paper. Contact him at \email{imjaypatel12@gmail.com}.}
-\affiliation[b]{Visa, San Francisco, USA}
+\affiliation[b]{Visa, Foster City, USA}
 
 \keywords{backtracking, logic programming, logic variables, programming paradigms, Prolog, Pylog, Python, unification} 
 % please provide 1--5 keywords
@@ -86,26 +94,40 @@
 %% From HERE
 \begin{CCSXML}
 <ccs2012>
-<concept>
-<concept_id>10011007.10010940</concept_id>
-<concept_desc>Software and its engineering~Software organization and properties</concept_desc>
-<concept_significance>500</concept_significance>
-</concept>
-</ccs2012>
+   <concept>
+       <concept_id>10011007.10011006.10011008.10011009.10011021</concept_id>
+       <concept_desc>Software and its engineering~Multiparadigm languages</concept_desc>
+       <concept_significance>500</concept_significance>
+    </concept>
+ </ccs2012>
 \end{CCSXML}
 
-\ccsdesc[500]{Software and its engineering~Software organization and properties}
+\ccsdesc[500]{Software and its engineering~Multiparadigm languages}
+
+% \begin{CCSXML}
+% <ccs2012>
+% <concept>
+% <concept_id>10011007.10010940</concept_id>
+% <concept_desc>Software and its engineering~Software organization and properties</concept_desc>
+% <concept_significance>500</concept_significance>
+% </concept>
+% </ccs2012>
+% \end{CCSXML}
+
+% \ccsdesc[500]{Software and its engineering~Software organization and properties}
 % To HERE
 %%%%%%%%%%%%%%%%%%%%%%%
+
 
 \maketitle
 \input{tex/abstract.tex}
 \input{tex/introduction.tex}
-\input{tex/body.tex}
-% \input{tex/listings.tex}
+\input{tex/transversals.tex}
+\input{tex/control_flow.tex}
 \input{tex/logic_variables.tex}
-\input{tex/unification.tex}
 \input{tex/zebra_problem.tex}
 \input{tex/conclusion.tex}
+\newpage
+\printbibliography 
 \end{document}
 
