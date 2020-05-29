@@ -34,6 +34,8 @@ class PySequence(SuperSequence):
   def __str__(self):
     (left, right) = {list: ('[', ']'), tuple: ('(', ')')}[self.functor]
     values_string = self.values_string(self.args)
+    if len(self.args) == 1 and self.functor == tuple:
+      values_string = values_string + ", "
     result = f'{left}{values_string}{right}'
     return result
 
