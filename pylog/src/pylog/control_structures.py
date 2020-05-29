@@ -1,7 +1,7 @@
 # from inspect import getmembers
 from typing import Generator
 
-from logic_variables import euc, PyValue, unify, unify_pairs, Var
+from .logic_variables import euc, PyValue, unify, unify_pairs, Var
 
 
 class Bool_Yield_Wrapper:

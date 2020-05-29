@@ -2,7 +2,7 @@ from functools import reduce
 from typing import Iterator, List, Tuple, Union
 
 # from control_structures import forall
-from logic_variables import PyValue, Term, unify
+from pylog.logic_variables import PyValue, Term, unify
 
 
 lines = {
