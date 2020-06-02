@@ -82,8 +82,8 @@
 
 \newbool{P@submission}
 \P@Key{phase}[final]{%
-  \ifstr{#1}{final}{\boolfalse{P@submission}}{}
-  \ifstr{#1}{submission}{\booltrue{P@submission}}{}
+  \Ifstr{#1}{final}{\boolfalse{P@submission}}{}
+  \Ifstr{#1}{submission}{\booltrue{P@submission}}{}
   \FamilyKeyStateProcessed}
 \P@StdOption{submission}{phase=submission}
 \P@StdOption{crc}{phase=final}
@@ -489,7 +489,7 @@
     url=true,%
     abbreviate=false,%
     maxnames=20,
-    urldate=iso8601}
+    urldate=iso}
   \PreventPackageFromLoading[\message{%
     ^^J^^JERROR: You tried to load  the cite package that is not compatible
     with biblatex.^^J^^J%

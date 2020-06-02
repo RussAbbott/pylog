@@ -1,87 +1,93 @@
-\section{The Zebra Puzzle}\label{sec:zebra}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{The Zebra Puzzle (Listings in Appendix \ref{appsec:zebra})}\label{sec:zebra}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 The Zebra Puzzle is a well known logic puzzle.
 
 \begin{quotation}
-There are five houses in a row. Each has a unique color and is occupied by a family of unique nationality. Each family has a unique favorite smoke, a unique pet, and a unique favorite drink. Fourteen clues (see below) provide additional constraints. \textit{Who has a zebra and who drinks water?}
+There are five houses in a row. Each has a unique color and is occupied by a family of unique nationality. Each family has a unique favorite smoke, a unique pet, and a unique favorite drink. Fourteen clues (Listing \ref{lis:zebra_prolog}) provide additional constraints. \textit{Who has a zebra and who drinks water?}
 \end{quotation}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{The clues and a Prolog solution}
+\subsection{The clues and a Prolog solution (Listings in Appendix \ref{appsubsec:clues})} \label{subsec:clues}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 One can easily write Prolog programs to solve this and similar puzzles.
 \begin{itemize}
-\item Represent a house as a Prolog \textittt{house} term with the parameters corresponding to the indicated properties:
+\item Represent a house as a Prolog \textit{house} term with the parameters corresponding to the indicated properties:
 \begin{python}
    house(<nationality>, <cigarette brand>, <pet>, <drink>, <house color>)
 \end{python}
-\item Let the world consist of a list of five such \textittt{house} terms, with all fields initially uninstantiated.
+\item Define the world as a list of five \textit{house} terms, with all fields initially uninstantiated.
 
-\item Write the clues as more-or-less direct translations of the English.
+\item Write the clues (Listing \ref{lis:zebra_prolog}) as more-or-less direct translations of the English.
 \end{itemize}
 
-\begin{minipage}{\linewidth}
-\begin{python}
-zebra_problem(Houses) :-
-    Houses = [house(_, _, _, _, _), house(_, _, _, _, _), house(_, _, _, _, _), 
-              house(_, _, _, _, _), house(_, _, _, _, _)], 
+% \begin{minipage}{\linewidth}
+% \begin{python}
+% zebra_problem(Houses) :-
+%     Houses = [house(_, _, _, _, _), house(_, _, _, _, _), house(_, _, _, _, _), 
+%               house(_, _, _, _, _), house(_, _, _, _, _)], 
 
-    % 1. The English live in the red house.
-    member(house(english, _, _, _, red), Houses), 
+%     % 1. The English live in the red house.
+%     member(house(english, _, _, _, red), Houses), 
 
-    % 2. The Spanish have a dog.
-    member(house(spanish, _, dog, _, _), Houses), 
+%     % 2. The Spanish have a dog.
+%     member(house(spanish, _, dog, _, _), Houses), 
 
-    % 3. They drink coffee in the green house.
-    member(house(_, _, _, coffee, green), Houses), 
+%     % 3. They drink coffee in the green house.
+%     member(house(_, _, _, coffee, green), Houses), 
 
-    % 4. The Ukrainians drink tea.
-    member(house(ukranians, _, _, tea, _), Houses), 
+%     % 4. The Ukrainians drink tea.
+%     member(house(ukranians, _, _, tea, _), Houses), 
 
-    % 5. The green house is immediately to the right of the white house.
-    nextto(house(_, _, _, _, white), house(_, _, _, _, green), Houses), 
+%     % 5. The green house is immediately to the right of the white house.
+%     nextto(house(_, _, _, _, white), house(_, _, _, _, green), Houses), 
 
-    % 6. The Old Gold smokers have snails.
-    member(house(_, old_gold, snails, _, _), Houses), 
+%     % 6. The Old Gold smokers have snails.
+%     member(house(_, old_gold, snails, _, _), Houses), 
 
-    % 7. They smoke Kool in the yellow house.
-    member(house(_, kool, _, _, yellow), Houses), 
+%     % 7. They smoke Kool in the yellow house.
+%     member(house(_, kool, _, _, yellow), Houses), 
 
-    % 8. They drink milk in the middle house.
-    Houses = [_, _, house(_, _, _, milk, _), _, _], 
+%     % 8. They drink milk in the middle house.
+%     Houses = [_, _, house(_, _, _, milk, _), _, _], 
 
-    % 9. The Norwegians live in the first house on the left.
-    Houses = [house(norwegians, _, _, _, _) | _], 
+%     % 9. The Norwegians live in the first house on the left.
+%     Houses = [house(norwegians, _, _, _, _) | _], 
 
-    % 10. The Chesterfield smokers live next to the fox.
-    next_to(house(_, chesterfield, _, _, _), house(_, _, fox, _, _), Houses), 
+%     % 10. The Chesterfield smokers live next to the fox.
+%     next_to(house(_, chesterfield, _, _, _), house(_, _, fox, _, _), Houses), 
 
-    % 11. They smoke Kool in the house next to the horse.
-    next_to(house(_, kool, _, _, _), house(_, _, horse, _, _), Houses), 
+%     % 11. They smoke Kool in the house next to the horse.
+%     next_to(house(_, kool, _, _, _), house(_, _, horse, _, _), Houses), 
 
-    % 12. The Lucky smokers drink juice.
-    member(house(_, lucky, _, juice, _), Houses), 
+%     % 12. The Lucky smokers drink juice.
+%     member(house(_, lucky, _, juice, _), Houses), 
 
-    % 13. The Japanese smoke Parliament.
-    member(house(japanese, parliament, _, _, _), Houses), 
+%     % 13. The Japanese smoke Parliament.
+%     member(house(japanese, parliament, _, _, _), Houses), 
 
-    % 14. The Norwegians live next to the blue house.
-    next_to(house(norwegians, _, _, _, _), house(_, _, _, _, blue), Houses), 
-\end{python}
-\end{minipage}
+%     % 14. The Norwegians live next to the blue house.
+%     next_to(house(norwegians, _, _, _, _), house(_, _, _, _, blue), Houses), 
+% \end{python}
+% \begin{lstlisting} [caption={Zebra puzzle in Prolog},  label={lis:zebra_prolog}]
+% \end{lstlisting}
+% \end{minipage}
 
-After some minor adjustments, we can run this program online using SWI-Prolog. 
+\largev
+After the following adjustments, we can run this program online using SWI-Prolog. 
 \begin{itemize}
-    \item SWI-Prolog includes \textittt{member} and \textittt{nextto} predicates. SWI-Prolog's \textittt{nextto} means in the order given, as in clue 5.
+    \item SWI-Prolog includes \textit{member} and \textit{nextto} predicates. SWI-Prolog's \textit{nextto} means in the order given, as in clue 5.
 
-    \item SWI-Prolog does not include a predicate for \textit{next to} in the sense of clues 10, 11, and 14 in which the order is unspecified. But it's easy enough to write our own, say, \textittt{next\_to}.
+    \item SWI-Prolog does not include a predicate for \textit{next to} in the sense of clues 10, 11, and 14 in which the order is unspecified. But we can write our own, say, \textit{next\_to}.
+    
 \begin{python}
 next_to(A, B, List) :- nextto(A, B, List).
 next_to(A, B, List) :- nextto(B, A, List).
 \end{python}
 
-    \item A final issue needs resolution. None of the clues mentions either a zebra or water. The following originally implicit information, here made explicit, solves that problem.
+    \item Since none of the clues mentions either a zebra or water, we add the following.
 
 \begin{minipage}{\linewidth}
 \begin{python}
@@ -94,132 +100,151 @@ next_to(A, B, List) :- nextto(B, A, List).
 
 \end{itemize}
 
-When this program is run, we get an almost instantaneous answer---shown here manually formatted.
-
-\begin{minipage}{\linewidth}
-\begin{python}
-?- zebra_problem(Houses).
-[    
-    house(norwegians, kool, fox, water, yellow), 
-    house(ukranians, chesterfield, horse, tea, blue), 
-    house(english, old_gold, snails, milk, red), 
-    house(spanish, lucky, dog, juice, white), 
-    house(japanese, parliament, zebra, coffee, green)     
-]
-\end{python}
-\end{minipage}
-\smallv
-
-We can conclude that 
+When this program is run, we get an almost instantaneous answer---shown manually formatted in Listing \ref{lis:zebra_solution}. We can conclude that 
 \begin{quote} 
 \begin{quote} 
 \textit{The Japanese have a zebra, and the Norwegians drink water}.
 \end{quote} 
 \end{quote} 
 
+% \begin{minipage}{\linewidth}
+% \begin{python}
+% ?- zebra_problem(Houses).
+% [    
+%     house(norwegians, kool, fox, water, yellow), 
+%     house(ukranians, chesterfield, horse, tea, blue), 
+%     house(english, old_gold, snails, milk, red), 
+%     house(spanish, lucky, dog, juice, white), 
+%     house(japanese, parliament, zebra, coffee, green)     
+% ]
+% \end{python}
+% \begin{lstlisting} [caption={Zebra puzzle in Prolog},  label={lis:zebra_solution}]
+% \end{lstlisting}
+% \end{minipage}
+
+\smallv
+
+% We can conclude that 
+% \begin{quote} 
+% \begin{quote} 
+% \textit{The Japanese have a zebra, and the Norwegians drink water}.
+% \end{quote} 
+% \end{quote} 
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{A Pylog solution}
+\subsection{A Pylog solution (Listings in Appendix \ref{appsubsec:pylog_solution})} \label{subsec:pylog_solution}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-To write and run the Zebra problem in Pylog we built a general framework, actually three frameworks. 
+To write and run the Zebra problem in Pylog we built the following framework.
 \begin{itemize}
-    \item \sloppy We created a \textittt{House} class as a subclass of \textittt{Structure}. Users may select a house property as a pseudo-functor for displaying houses. We selected \textittt{nationality}. (See solution list below.)
+    \item \sloppy We created a \textit{House} class as a subclass of \textit{Structure}. Users may select a house property as a pseudo-functor for displaying houses. We selected \textit{nationality}.
 
-    \item Each clue is expressed as a Pylog function. For example, 
+    \item Each clue is expressed as a Pylog function. (See Listing \ref{lis:clues_as_pylog_functions}.) 
 
-        \begin{python}
-          def clue_1(self, Houses: SuperSequence):
-            """ 1. The English live in the red house.  """
-            yield from member(House(nationality='English', color='red'), Houses)
+        % \begin{minipage}{\linewidth}
+        % \begin{python}
+        %   def clue_1(self, Houses: SuperSequence):
+        %     """ 1. The English live in the red house.  """
+        %     yield from member(House(nationality='English', color='red'), Houses)
 
-          ...
+        %   ...
   
-          def clue_8(self, Houses: SuperSequence):
-            """ 8. They drink milk in the middle house. """
-            yield from unify(House(drink='milk'), Houses[2])
+        %   def clue_8(self, Houses: SuperSequence):
+        %     """ 8. They drink milk in the middle house. """
+        %     yield from unify(House(drink='milk'), Houses[2])
 
-          ...
-\end{python}
+        %   ...
+        % \end{python}
+        % \begin{lstlisting} [caption={Clues as Pylog functions},  label={lis:clues_as_pylog_functions}]
+        % \end{lstlisting}
+        % \end{minipage}
 
-    \item The \textittt{Houses} list may be any form of \textittt{SuperSequence}.
+    \item The \textit{Houses} list may be any form of \textit{SuperSequence}.
     
     \item We added some simple constraint checking.
 \end{itemize}
-When run, the answer is the same as in the Prolog version. (The system counts clue evaluations.)
+When run, the answer is the same as in the Prolog version. (See listing \ref{lis:pylog_solution}.)
 
-\begin{minipage}{\linewidth}
-\begin{python}
-After 1392 rule applications, 
-	1. Norwegians(Kool, fox, water, yellow)
-	2. Ukrainians(Chesterfield, horse, tea, blue)
-	3. English(Old Gold, snails, milk, red)
-	4. Spanish(Lucky, dog, juice, white)
-	5. Japanese(Parliament, zebra, coffee, green)
-The Japanese own a zebra, and the Norwegians drink water.
-\end{python}
-\end{minipage}
-
-\smallv
-Let's compare the underlying Prolog and Pylog mechanisms for running these programs. 
-\smallv
-
-\textbf{Prolog}. It's trivial to write a Prolog interpreter in Prolog. The \textittt{solve} predicate (listing \ref{lis:prologInterpreter} \cite{Bartak1998}) is given a list with a single \textittt{goal}, which it is asked to satisfy. Each Prolog clause is available in the database as \textittt{clause(Head, Body)}, where  \textittt{Body} is a possibly empty list of terms.   
+% \begin{minipage}{\linewidth}
+% \begin{python}
+% After 1392 rule applications, 
+% 	1. Norwegians(Kool, fox, water, yellow)
+% 	2. Ukrainians(Chesterfield, horse, tea, blue)
+% 	3. English(Old Gold, snails, milk, red)
+% 	4. Spanish(Lucky, dog, juice, white)
+% 	5. Japanese(Parliament, zebra, coffee, green)
+% The Japanese own a zebra, and the Norwegians drink water.
+% \end{python}
+% \begin{lstlisting} [caption={Pylog solution},  label={lis:pylog_solution}]
+% \end{lstlisting}
+% \end{minipage}
 
 \smallv
-\textbf{Python}. We developed \textit{three} Pylog approaches to rule interpretation. 
+Let's compare the underlying Prolog and Pylog mechanisms. 
+\smallv
+
+\textbf{Prolog}. It's trivial to write a Prolog interpreter in Prolog. See Listing \ref{lis:prologInterpreter} \cite{Bartak1998}.
+
+\smallv
+\textbf{Pylog}. We developed \textit{three} Pylog approaches to rule interpretation. 
 \begin{enumerate}
 
-\item \textit{forall}. Use the \textit{forall} construct discussed in Section \ref{subsec:controlfunctions}, Listing \ref{lis:forall}. The Zebra problem is coded as follows.
+\item \textit{forall}. Use the \textit{forall} construct as in Listing \ref{lis:zebra_forall}.
 
-\begin{minipage}{\linewidth}
-\begin{python}
-def zebra_problem(Houses) :-
-    for _ in forall{[
-        # 1. The English live in the red house.
-        lambda: member(house(english, _, _, _, red), Houses), 
-        # 2. The Spanish have a dog.
-        lambda: member(house(spanish, _, dog, _, _), Houses), 
-        # ...
-        ]}
-\end{python}
-\end{minipage}
+% \begin{minipage}{\linewidth}
+% \begin{python}
+% def zebra_problem(Houses) :-
+%     for _ in forall{[
+%         # 1. The English live in the red house.
+%         lambda: member(house(english, _, _, _, red), Houses), 
+%         # 2. The Spanish have a dog.
+%         lambda: member(house(spanish, _, dog, _, _), Houses), 
+%         # ...
+%         ]}
+% \end{python}
+% \begin{lstlisting} [caption={Pylog solution},  label={lis:zebra_forall}]
+% \end{lstlisting}
+% \end{minipage}
 
-\textit{forall} succeeds if and only if all members of the list it is passed succeed. Each list element is protected within a \textbf{lambda} construct to prevent evaluation when the list is constructed.
-\smallv
+\textit{forall} succeeds if and only if all members of the list it is passed succeed. Each list element is protected within a \textbf{lambda} construct to prevent evaluation.
 
-\item \textittt{run\_all\_rules}. We developed a Python function that accepts a list, e.g., of houses, reflecting the state of the world, along with a list of functions. It succeeds if and only if the functions all succeed. Following is a somewhat simplified version.
+\item \textit{run\_all\_rules}. We developed a Python function that accepts a list, e.g., of houses, reflecting the state of the world, along with a list of functions. It succeeds if and only if the functions all succeed. Listing \ref{lis:zebra_ run_all_clues} is a somewhat simplified version.
 
-\begin{minipage}{\linewidth}
-\begin{python}
-def run_all_clues(World_List: List[Term], clues: List[Callable]):
-    if not clues:
-      # Ran all the clues. Succeed.
-      yield
-    else:
-      # Run the current clue and then the rest of the clues.
-      for _ in clues[0](World_List):
-        yield from run_all_clues(World_List, clues[1:])
-\end{python}
-\end{minipage}
+% \begin{minipage}{\linewidth}
+% \begin{python}
+% def run_all_clues(World_List: List[Term], clues: List[Callable]):
+%     if not clues:
+%       # Ran all the clues. Succeed.
+%       yield
+%     else:
+%       # Run the current clue and then the rest of the clues.
+%       for _ in clues[0](World_List):
+%         yield from run_all_clues(World_List, clues[1:])
+% \end{python}
+% \begin{lstlisting} [caption={Pylog solution},  label={lis:zebra_ run_all_clues}]
+% \end{lstlisting}
+% \end{minipage}
 
-\item \textittt{Embed rule chaining in the rules.} For example, 
+\item \textit{Embed rule chaining in the rules.} For example, see Listing \ref{lis:zebra_rule_chaining}.
 
-\begin{minipage}{\linewidth}
-\begin{python}
-  def clue_1(Houses: SuperSequence):
-    """ 1. The English live in the red house.  """
-    for _ in member(House(nationality='English', color='red'), Houses):
-      yield from clue_2(Houses)
+% \begin{minipage}{\linewidth}
+% \begin{python}
+%   def clue_1(Houses: SuperSequence):
+%     """ 1. The English live in the red house.  """
+%     for _ in member(House(nationality='English', color='red'), Houses):
+%       yield from clue_2(Houses)
 
-  def clue_2(Houses: SuperSequence):
-    """ 2. The Spanish have a dog. """
-    for _ in member(House(nationality='Spanish', pet='dog'), Houses):
-      yield from clue_3(Houses)
-  ...
-\end{python}
-\end{minipage}
+%   def clue_2(Houses: SuperSequence):
+%     """ 2. The Spanish have a dog. """
+%     for _ in member(House(nationality='Spanish', pet='dog'), Houses):
+%       yield from clue_3(Houses)
+%   ...
+% \end{python}
+% \begin{lstlisting} [caption={Pylog solution},  label={lis:zebra_rule_chaining}]
+% \end{lstlisting}
+% \end{minipage}
 
-In this organization, unification propagates forward and backward, and backtracking occurs naturally.
+% In this organization, unification propagates forward and backward, and backtracking occurs naturally.
 
 Call \textit{clue\_1} with a list of uninstantiated houses, and the problem runs itself.
 \end{enumerate}
