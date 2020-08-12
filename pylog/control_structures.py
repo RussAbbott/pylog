@@ -257,18 +257,41 @@ if __name__ == '__main__':
                                ]):
           yield
 
+
   evens_4 = []
   # Create the generator in a separate step.
   is_even_gen_4 = is_even_2_decorated(11, Result)
-  while is_even_gen_4.has_more( ):
+  while is_even_gen_4.has_more():
     evens_4.append(Result.get_py_value())
-  print(f'4. evens_4: {evens_4}')    # => 4. evens_4: [0, 2, 4, 6, 8, 10]
+  print(f'4. evens_4: {evens_4}')  # => 4. evens_4: [0, 2, 4, 6, 8, 10]
 
   evens_5 = []
   # Create the generator in a 'with' statement.
   with is_even_2_decorated(13, Result) as is_even_gen_5:
-    while is_even_gen_5.has_more( ):
+    while is_even_gen_5.has_more():
       evens_5.append(Result.get_py_value())
-  print(f'5. evens_5: {evens_5}')    # => 5. evens_5: [0, 2, 4, 6, 8, 10, 12]
+  print(f'5. evens_5: {evens_5}')  # => 5. evens_5: [0, 2, 4, 6, 8, 10, 12]
 
-  print('\nEnd of test')
+  @bool_yield_wrapper
+  def squares(n: int, X2: Var) -> Bool_Yield_Wrapper:
+    for i in range(n):
+      unify_gen = bool_yield_wrapper(unify)(X2, i**2)
+      while unify_gen.has_more():
+        yield
+
+  Square = Var()
+  squares_gen = squares(5, Square)
+  while squares_gen.has_more():
+    print(Square)
+  # evens_x = []
+  # # Create the generator on the fly.
+  # # Doesn't work because is_even_2_decorated(15, Result) is called on each iteration,
+  # # effectively starting from the beginning each time.
+  # is_even_x_gen = is_even_x(15, Result)
+  # i = 0
+  # while is_even_x_gen.has_more():
+  #   i += 1
+  #   evens_x.append(Result.get_py_value())
+  # print(f'x. evens_x: {evens_x}')    # => 6. evens_6: [0, 2, 4, 6, 8, 10, 12]
+
+# print('\nEnd of test')
