@@ -30,7 +30,17 @@ class Trace:
 
     @staticmethod
     def to_str(xs):
-        xs_string = f'[{", ".join(Trace.to_str(x) for x in xs)}]' if isinstance(xs, list) else str(xs)
+        if isinstance(xs, list) or isinstance(xs, tuple):
+            (left, right) = ('[', ']') if isinstance(xs, list) else ('(', ')')
+            xs_string = f'{left}{", ".join(Trace.to_str(x) for x in xs)}{right}'
+        else:
+            xs_string = str(xs)
+        return xs_string
+
+    @staticmethod
+    def to_str0(xs):
+        xs_string = f'[{", ".join(Trace.to_str(x) for x in xs)}]' if isinstance(xs, list) else \
+                    f'({", ".join(Trace.to_str(x) for x in xs)})' if isinstance(xs, tuple) else str(xs)
         return xs_string
 
     def trace_line(self, args):
@@ -42,9 +52,10 @@ class Trace:
         return prefix + params + termination
 
 
+unassigned = '_'
 def uninstantiated_indices(transversal):
     """ Must return the actual list because the result is used twice.  """
-    return [indx for indx in range(len(transversal)) if transversal[indx] is None]
+    return [indx for indx in range(len(transversal)) if transversal[indx] is unassigned]
 
 
 @Trace
@@ -78,9 +89,9 @@ if __name__ == '__main__':
     for smallest_first in [False, True]:
         for propagate in [False, True]:
             print(f'\n{"-" * 75}'
-                  f'\ntransversal_dfs_first({sets}, (None, None, None)) '
+                  f'\ntransversal_dfs_first({sets}, (unassigned, unassigned, unassigned) '
                   f'\npropagate: {propagate}; smallest_first: {smallest_first}\n')
-            transversal_dfs_first(sets, (None, None, None))
+            transversal_dfs_first(sets, (unassigned, unassigned, unassigned))
 
 """Output
 
@@ -128,9 +139,9 @@ if __name__ == '__main__':
     for smallest_first in [False, True]:
         for propagate in [False, True]:
             print(f'\n{"-" * 75}'
-                  f'\ntransversal_dfs_all({sets}, (None, None, None)) '
+                  f'\ntransversal_dfs_all({sets}, (unassigned, unassigned, unassigned)) '
                   f'\npropagate: {propagate}; smallest_first: {smallest_first}\n')
-            print(f'\nAll transversals: {transversal_dfs_all(sets, (None, None, None))}')
+            print(f'\nAll transversals: {transversal_dfs_all(sets, (unassigned, unassigned, unassigned))}')
 
 
 """
@@ -180,9 +191,9 @@ if __name__ == '__main__':
     for smallest_first in [False, True]:
         for propagate in [False, True]:
             print(f'\n{"-" * 75}'
-                  f'\ntransversal_yield({sets}, (None, None, None)) '
+                  f'\ntransversal_yield({sets}, (unassigned, unassigned, unassigned)) '
                   f'\npropagate: {propagate}; smallest_first: {smallest_first}\n')
-            for Transversal in transversal_yield(sets, (None, None, None)):
+            for Transversal in transversal_yield(sets, (unassigned, unassigned, unassigned)):
                 print(f'Transversal: {Transversal}\n')
 
 
@@ -221,8 +232,10 @@ Sets_lv_string = f'[{", ".join(str(s) for s in Sets_lv)}]'
 #   Complete_Transversal = Var()
 #   for _ in transversal_yield_lv_0(Sets_lv, PyTuple(()), Complete_Transversal):
 #     print(f'{" "*30}  =>  {Complete_Transversal}')
-#
-#
+
+
+# Becomes PyValue(None)
+unassigned_lv = None
 def uninstantiated_indices_lv(transversal):
     """ Must return the actual list because the result is used twice.  """
     return [indx for indx in range(len(transversal)) if not transversal[indx].is_instantiated()]
@@ -264,9 +277,9 @@ if __name__ == '__main__':
     for smallest_first in [False, True]:
         for propagate in [False, True]:
             print(f'\n{"-" * 75}'
-                  f'\ntransversal_yield_lv({Sets_lv_string}, (None, None, None), Ans)'
+                  f'\ntransversal_yield_lv({Sets_lv_string}, (unassigned_lv, unassigned_lv, unassigned_lv))'
                   f'\npropagate: {propagate}; smallest_first: {smallest_first}\n')
-            Complete_Transversal = PyTuple((None, None, None))
+            Complete_Transversal = PyTuple((unassigned_lv, unassigned_lv, unassigned_lv))
             for _ in transversal_yield_lv(Sets_lv, Complete_Transversal):
                 print(Complete_Transversal)
 
