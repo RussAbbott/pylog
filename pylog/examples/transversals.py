@@ -37,12 +37,6 @@ class Trace:
             xs_string = str(xs)
         return xs_string
 
-    @staticmethod
-    def to_str0(xs):
-        xs_string = f'[{", ".join(Trace.to_str(x) for x in xs)}]' if isinstance(xs, list) else \
-                    f'({", ".join(Trace.to_str(x) for x in xs)})' if isinstance(xs, tuple) else str(xs)
-        return xs_string
-
     def trace_line(self, args):
         prefix = "  " * self.depth
         params = ", ".join([f'{param_name}: {Trace.to_str(arg)}'
