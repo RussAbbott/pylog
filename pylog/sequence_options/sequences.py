@@ -11,7 +11,7 @@ class PySequence(SuperSequence):
   The self.args are the list/tuple elements. Their length is fixed. (This disallows
   appending elements to a list or extending a list.)
   """
-  def __init__(self, pyType, initialElements: Union[list, tuple]):
+  def __init__(self, pyType, initialElements: Union[list, set, tuple]):
     super().__init__( (pyType, *initialElements) )
 
   def __add__(self, Other: Union[PySequence, Var]) -> PySequence:
@@ -32,7 +32,7 @@ class PySequence(SuperSequence):
     return len(self.args)
 
   def __str__(self):
-    (left, right) = {list: ('[', ']'), tuple: ('(', ')')}[self.functor]
+    (left, right) = {list: ('[', ']'), set: ('{', '}'), tuple: ('(', ')')}[self.functor]
     values_string = self.values_string(self.args)
     if len(self.args) == 1 and self.functor == tuple:
       values_string = values_string + ", "
@@ -74,6 +74,18 @@ class PyList(PySequence):
 class PyTuple(PySequence):
   def __init__(self, initialElements: tuple):
     super( ).__init__( tuple, initialElements )
+
+
+class PySet(PySequence):
+  def __init__(self, initialElements: Union[list, set, tuple]):
+    """ Doesn't check to see whether initialElements is really a set. """
+    super( ).__init__( set, tuple(initialElements) )
+
+  def discard(self, Other: PyValue) -> PySet:
+    Other_EoT = Other.unification_chain_end()
+    new_args = [arg for arg in self.args if arg != Other_EoT]
+    new_set = PySet(new_args)
+    return new_set
 
 
 @euc
