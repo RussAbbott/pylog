@@ -30,7 +30,7 @@ class Trace:
 
     @staticmethod
     def to_str(xs):
-        if isinstance(xs, list) or isinstance(xs, tuple):
+        if type(xs) in [list, tuple]: 
             (left, right) = ('[', ']') if isinstance(xs, list) else ('(', ')')
             xs_string = f'{left}{", ".join(Trace.to_str(x) for x in xs)}{right}'
         else:
