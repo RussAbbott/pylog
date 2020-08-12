@@ -137,7 +137,7 @@ class PyValue(Term):
     return isinstance(other_euc, PyValue) and self.get_py_value() < other_euc.get_py_value()
 
   def __str__(self) -> str:
-    return f'{self._py_value}'
+    return '_' if self._py_value is None else f'{self._py_value}'
 
   # This instantiates a PyValue, which had been None. This is dangerous since it mutates this object.
   def _set_py_value(self, py_value):
@@ -194,6 +194,8 @@ class Structure(Term):
   @staticmethod
   def values_string(values: Iterable):
     result = ', '.join(map(str, values))
+    # if len(values) == 1 and isinstance(values, tuple):
+    #   result = result + ", "
     return result
 
 
