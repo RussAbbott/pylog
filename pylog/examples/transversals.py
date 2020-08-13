@@ -30,7 +30,7 @@ class Trace:
 
     @staticmethod
     def to_str(xs):
-        if type(xs) in [list, tuple]: 
+        if type(xs) in [list, tuple]:
             (left, right) = ('[', ']') if isinstance(xs, list) else ('(', ')')
             xs_string = f'{left}{", ".join(Trace.to_str(x) for x in xs)}{right}'
         else:
@@ -59,10 +59,12 @@ def transversal_dfs_first(sets: List[Set[int]], transversal) -> Optional[Tuple]:
     if not remaining_indices:
         return transversal
 
-    # noinspection PyUnboundLocalVariable
+    # If the empty set is associated with one of the remaining indices, fail.
+    # This can only happen if we are propagating and removing elements from sets.
     if propagate and set() in (sets[indx] for indx in remaining_indices):
         return None
 
+    # Go through the remaining indices either in numerical order or smallest remainging set first.
     next_index = min(remaining_indices,
                      key=lambda indx: indx if not smallest_first else len(sets[indx]))
     for element in sets[next_index]:
@@ -75,6 +77,7 @@ def transversal_dfs_first(sets: List[Set[int]], transversal) -> Optional[Tuple]:
 
 
 # Use this for all non-lv tests.
+# Is there a better example?
 sets = [{1, 2, 3}, {1, 2, 4}, {1}]
 
 if __name__ == '__main__':
@@ -84,22 +87,24 @@ if __name__ == '__main__':
         for propagate in [False, True]:
             print(f'\n{"-" * 75}'
                   f'\ntransversal_dfs_first({sets}, (unassigned, unassigned, unassigned) '
-                  f'\npropagate: {propagate}; smallest_first: {smallest_first}\n')
-            transversal_dfs_first(sets, (unassigned, unassigned, unassigned))
+                  f'\n  propagate: {propagate}; smallest_first: {smallest_first}\n')
+            print(f'\nFirst transversal: {transversal_dfs_first(sets, (unassigned, unassigned, unassigned))}')
 
 """Output
 
 ---------------------------------------------------------------------------
-transversal_dfs_first([[1, 2, 3], [2, 4], [1]], [])
+transversal_dfs_first([{1, 2, 3}, {1, 2, 4}, {1}], (unassigned, unassigned, unassigned) 
+propagate: False; smallest_first: False
 
-sets: [[1, 2, 3], [2, 4], [1]], transversal: []
-. sets: [[2, 4], [1]], transversal: [1]
-. . sets: [[1]], transversal: [1, 2]
-. . sets: [[1]], transversal: [1, 4]
-. sets: [[2, 4], [1]], transversal: [2]
-. . sets: [[1]], transversal: [2, 4]
-. . . sets: [], transversal: [2, 4, 1]
-. . . => [2, 4, 1]
+sets: [{1, 2, 3}, {1, 2, 4}, {1}], transversal: (_, _, _)
+  sets: [{1, 2, 3}, {1, 2, 4}, {1}], transversal: (1, _, _)
+    sets: [{1, 2, 3}, {1, 2, 4}, {1}], transversal: (1, 2, _)
+    sets: [{1, 2, 3}, {1, 2, 4}, {1}], transversal: (1, 4, _)
+  sets: [{1, 2, 3}, {1, 2, 4}, {1}], transversal: (2, _, _)
+    sets: [{1, 2, 3}, {1, 2, 4}, {1}], transversal: (2, 1, _)
+    sets: [{1, 2, 3}, {1, 2, 4}, {1}], transversal: (2, 4, _)
+      sets: [{1, 2, 3}, {1, 2, 4}, {1}], transversal: (2, 4, 1)
+(2, 4, 1)
 
 """
 
@@ -115,7 +120,6 @@ def transversal_dfs_all(sets: List[Set[int]], transversal) -> List[Tuple]:
 
     all_transversals = []
 
-    # noinspection PyUnboundLocalVariable
     if propagate and set() in (sets[indx] for indx in remaining_indices):
         return []
 
@@ -134,29 +138,31 @@ if __name__ == '__main__':
         for propagate in [False, True]:
             print(f'\n{"-" * 75}'
                   f'\ntransversal_dfs_all({sets}, (unassigned, unassigned, unassigned)) '
-                  f'\npropagate: {propagate}; smallest_first: {smallest_first}\n')
+                  f'\n  propagate: {propagate}; smallest_first: {smallest_first}\n')
             print(f'\nAll transversals: {transversal_dfs_all(sets, (unassigned, unassigned, unassigned))}')
 
 
 """
 ---------------------------------------------------------------------------
-transversal_dfs_all([[1, 2, 3], [2, 4], [1]], [])
+transversal_dfs_all([{1, 2, 3}, {1, 2, 4}, {1}], (unassigned, unassigned, unassigned)) 
+propagate: False; smallest_first: False
 
-sets: [[1, 2, 3], [2, 4], [1]], transversal: []
-. sets: [[2, 4], [1]], transversal: [1]
-. . sets: [[1]], transversal: [1, 2]
-. . sets: [[1]], transversal: [1, 4]
-. sets: [[2, 4], [1]], transversal: [2]
-. . sets: [[1]], transversal: [2, 4]
-. . . sets: [], transversal: [2, 4, 1]
-. . . => [2, 4, 1]
-. sets: [[2, 4], [1]], transversal: [3]
-. . sets: [[1]], transversal: [3, 2]
-. . . sets: [], transversal: [3, 2, 1]
-. . . => [3, 2, 1]
-. . sets: [[1]], transversal: [3, 4]
-. . . sets: [], transversal: [3, 4, 1]
-. . . => [3, 4, 1]
+sets: [{1, 2, 3}, {1, 2, 4}, {1}], transversal: (_, _, _)
+  sets: [{1, 2, 3}, {1, 2, 4}, {1}], transversal: (1, _, _)
+    sets: [{1, 2, 3}, {1, 2, 4}, {1}], transversal: (1, 2, _)
+    sets: [{1, 2, 3}, {1, 2, 4}, {1}], transversal: (1, 4, _)
+  sets: [{1, 2, 3}, {1, 2, 4}, {1}], transversal: (2, _, _)
+    sets: [{1, 2, 3}, {1, 2, 4}, {1}], transversal: (2, 1, _)
+    sets: [{1, 2, 3}, {1, 2, 4}, {1}], transversal: (2, 4, _)
+      sets: [{1, 2, 3}, {1, 2, 4}, {1}], transversal: (2, 4, 1)
+  sets: [{1, 2, 3}, {1, 2, 4}, {1}], transversal: (3, _, _)
+    sets: [{1, 2, 3}, {1, 2, 4}, {1}], transversal: (3, 1, _)
+    sets: [{1, 2, 3}, {1, 2, 4}, {1}], transversal: (3, 2, _)
+      sets: [{1, 2, 3}, {1, 2, 4}, {1}], transversal: (3, 2, 1)
+    sets: [{1, 2, 3}, {1, 2, 4}, {1}], transversal: (3, 4, _)
+      sets: [{1, 2, 3}, {1, 2, 4}, {1}], transversal: (3, 4, 1)
+
+All transversals: [(2, 4, 1), (3, 2, 1), (3, 4, 1)]
 """
 
 """                  transversal_yield                   """
@@ -168,7 +174,7 @@ def transversal_yield(sets: List[Set[int]], transversal: Tuple = ()) -> Generato
     if not remaining_indices:
         yield transversal
     else:
-        # noinspection PyUnboundLocalVariable
+
         if propagate and set() in (sets[indx] for indx in remaining_indices):
             return None
 
@@ -186,9 +192,9 @@ if __name__ == '__main__':
         for propagate in [False, True]:
             print(f'\n{"-" * 75}'
                   f'\ntransversal_yield({sets}, (unassigned, unassigned, unassigned)) '
-                  f'\npropagate: {propagate}; smallest_first: {smallest_first}\n')
+                  f'\n  propagate: {propagate}; smallest_first: {smallest_first}\n')
             for Transversal in transversal_yield(sets, (unassigned, unassigned, unassigned)):
-                print(f'Transversal: {Transversal}\n')
+                print(f'Yielded transversal: {Transversal}\n')
 
 
 """
@@ -202,88 +208,79 @@ transversal_yield([[1, 2, 3], [2, 4], [1]], [])
 """
 """                  transversal_yield_lv                   """
 
-Sets_lv = [PySet({1, 2, 3}), PySet({1, 2, 4}), PySet({1})]
-Sets_lv_string = f'[{", ".join(str(s) for s in Sets_lv)}]'
+sets_lv = [PySet({1, 2, 3}), PySet({1, 2, 4}), PySet({1})]
+sets_lv_string = f'[{", ".join(str(s) for s in sets_lv)}]'
 
-
-# This is the original transversal_yield_lv
-# @Trace
-# def transversal_yield_lv_0(Sets: List[PySet], Transversal: PyTuple, Complete_Transversal: Var):
-#   if not Sets:
-#     yield from unify(Transversal, Complete_Transversal)
-#   else:
-#     (S, Ss) = (Sets[0], Sets[1:])
-#     if S.is_empty():
-#       return None
-#     Element = Var()
-#     for _ in member(Element, S):
-#       for _ in fails(member)(Element, Transversal):
-#         yield from transversal_yield_lv_0(Ss, Transversal + PyTuple((Element, )), Complete_Transversal)
-#
-#
-# if __name__ == '__main__':
-#   print(f'\n{"-"*75}\ntransversal_yield_lv_0({Sets_lv_string}, ()), Ans)\n')
-#   Complete_Transversal = Var()
-#   for _ in transversal_yield_lv_0(Sets_lv, PyTuple(()), Complete_Transversal):
-#     print(f'{" "*30}  =>  {Complete_Transversal}')
-
-
-# Becomes PyValue(None)
-unassigned_lv = None
 def uninstantiated_indices_lv(transversal):
     """ Must return the actual list because the result is used twice.  """
     return [indx for indx in range(len(transversal)) if not transversal[indx].is_instantiated()]
 
 
 @Trace
-def transversal_yield_lv(Sets: List[PySet], Transversal: PyTuple):
+def transversal_yield_lv(sets: List[PySet], transversal: Tuple[PyValue]):
     """
-    Transversal is a tuple of length len(Sets).
+    transversal is a tuple of length len(sets).
     Initially it consists of uninstaniated PyValues.
     When all the PyValues are instantiated, it is yielded as the answer.
     """
-    remaining_indices = uninstantiated_indices_lv(Transversal)
+    remaining_indices = uninstantiated_indices_lv(transversal)
     if not remaining_indices:
-        yield Transversal
+        yield transversal
     else:
         if propagate:
             # If we are propagating, we will have removed used values from all the sets.
             # If any of those sets are now empty but are associated with
-            # an uninstantiated position in Transversal, fail;
-            empty_sets = [Sets[indx].is_empty() for indx in remaining_indices]
+            # an uninstantiated position in transversal, fail;
+            empty_sets = [sets[indx].is_empty() for indx in remaining_indices]
             if any(empty_sets):
                 return None
 
         next_index = min(remaining_indices,
                          key=lambda indx: indx if not smallest_first else len(sets[indx]))
         # T_next is the PyValue to be instantiated this time around.
-        T_next = Transversal[next_index]
-        # Keep PyCharm happy
-        assert isinstance(T_next, PyValue)
-        used_values = PyList([Transversal[i] for i in range(len(Transversal)) if i not in remaining_indices])
-        for _ in member(T_next, Sets[next_index]):
+        T_next = transversal[next_index]
+        used_values = PyList([transversal[i] for i in range(len(transversal)) if i not in remaining_indices])
+        for _ in member(T_next, sets[next_index]):
             for _ in fails(member)(T_next, used_values):
-                New_sets = Sets if not propagate else [set.discard(T_next) for set in Sets]
-                yield from transversal_yield_lv(New_sets, Transversal)
+                new_sets = sets if not propagate else [set.discard(T_next) for set in sets]
+                yield from transversal_yield_lv(new_sets, transversal)
 
 
 if __name__ == '__main__':
     for smallest_first in [False, True]:
         for propagate in [False, True]:
             print(f'\n{"-" * 75}'
-                  f'\ntransversal_yield_lv({Sets_lv_string}, (unassigned_lv, unassigned_lv, unassigned_lv))'
-                  f'\npropagate: {propagate}; smallest_first: {smallest_first}\n')
-            Complete_Transversal = PyTuple((unassigned_lv, unassigned_lv, unassigned_lv))
-            for _ in transversal_yield_lv(Sets_lv, Complete_Transversal):
-                print(Complete_Transversal)
+                  f'\ntransversal_yield_lv({sets_lv_string}, (PyValue(None), PyValue(None), PyValue(None)))'
+                  f'\n  propagate: {propagate}; smallest_first: {smallest_first}\n')
+            transversal = (PyValue(None), PyValue(None), PyValue(None))
+            for _ in transversal_yield_lv(sets_lv, transversal):
+                print(f'Yielded logic-variable traversal: {Trace.to_str(transversal)}\n')
 
 """
 ---------------------------------------------------------------------------
-transversal_yield_lv([[1, 2, 3], [2, 4], [1]], [], Ans)
+transversal_yield_lv([{1, 2, 3}, {1, 2, 4}, {1}], (PyValue(None), PyValue(None), PyValue(None)))
+  propagate: False; smallest_first: False
 
-[2, 4, 1]
-[3, 2, 1]
-[3, 4, 1]
+sets: [{1, 2, 3}, {1, 2, 4}, {1}], transversal: (_, _, _)
+  sets: [{1, 2, 3}, {1, 2, 4}, {1}], transversal: (1, _, _)
+    sets: [{1, 2, 3}, {1, 2, 4}, {1}], transversal: (1, 2, _)
+    sets: [{1, 2, 3}, {1, 2, 4}, {1}], transversal: (1, 4, _)
+  sets: [{1, 2, 3}, {1, 2, 4}, {1}], transversal: (2, _, _)
+    sets: [{1, 2, 3}, {1, 2, 4}, {1}], transversal: (2, 1, _)
+    sets: [{1, 2, 3}, {1, 2, 4}, {1}], transversal: (2, 4, _)
+      sets: [{1, 2, 3}, {1, 2, 4}, {1}], transversal: (2, 4, 1)
+Yielded logic-variable traversal: (2, 4, 1)
+
+  sets: [{1, 2, 3}, {1, 2, 4}, {1}], transversal: (3, _, _)
+    sets: [{1, 2, 3}, {1, 2, 4}, {1}], transversal: (3, 1, _)
+    sets: [{1, 2, 3}, {1, 2, 4}, {1}], transversal: (3, 2, _)
+      sets: [{1, 2, 3}, {1, 2, 4}, {1}], transversal: (3, 2, 1)
+Yielded logic-variable traversal: (3, 2, 1)
+
+    sets: [{1, 2, 3}, {1, 2, 4}, {1}], transversal: (3, 4, _)
+      sets: [{1, 2, 3}, {1, 2, 4}, {1}], transversal: (3, 4, 1)
+Yielded logic-variable traversal: (3, 4, 1)
+
 
 """
 
