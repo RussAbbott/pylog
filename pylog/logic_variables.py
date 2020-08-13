@@ -569,3 +569,22 @@ if __name__ == '__main__':
   
   End of sixth test.
   """
+
+def print_ABCDE(A, B, C, D, E):
+    print(f'A: {A}, B: {B}, C: {C}, D: {D}, E: {E}')
+
+
+(A, B, C, D, E) = (Var(), Var(), Var(), Var(), 'abc')
+print_ABCDE(A, B, C, D, E)
+for _ in unify(A, B):
+  print_ABCDE(A, B, C, D, E)
+  for _ in unify(D, C):
+    print_ABCDE(A, B, C, D, E)
+    for _ in unify(A, C):
+      print_ABCDE(A, B, C, D, E)
+      for _ in unify(E, D):
+        print_ABCDE(A, B, C, D, E)
+      print_ABCDE(A, B, C, D, E)
+    print_ABCDE(A, B, C, D, E)
+  print_ABCDE(A, B, C, D, E)
+print_ABCDE(A, B, C, D, E)
