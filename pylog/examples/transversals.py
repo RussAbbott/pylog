@@ -7,6 +7,8 @@ from sequence_options.sequences import PyList, PySet, PyTuple
 from sequence_options.super_sequence import member
 
 
+trace = True
+
 class Trace:
 
     def __init__(self, f):
@@ -15,7 +17,8 @@ class Trace:
         self.depth = 0
 
     def __call__(self, *args):
-        print(self.trace_line(args))
+        if trace:
+            print(self.trace_line(args))
         self.depth += 1
         if isgeneratorfunction(self.f):
             return self.yield_from(*args)
@@ -329,22 +332,19 @@ Sets:[]; Partial_Transversal:[3, 4, 1]
 
 """
 
+def find_transversal_with_sum_n(sets: List[Set[int]], n: int):
+    global trace
+    trace = False
+    transversal = (PyValue(None), PyValue(None), PyValue(None))
+    for _ in transversal_yield_lv(sets, transversal):
+        transversal_values = [t.get_py_value() for t in transversal]
+        t_sum = sum(transversal_values)
+        if n != t_sum:
+            print(f'sum{transversal_values} != {n}')
+        else:
+            print(f'sum{transversal_values} == {n}')
+            break
 
-# def print_ABCDE(A, B, C, D, E):
-#     print(f'A: {A}, B: {B}, C: {C}, D: {D}, E: {E}')
-#
-#
-# (A, B, C, D, E) = (Var(), Var(), Var(), Var(), 'abc')
-# print_ABCDE(A, B, C, D, E)
-# for _ in unify(A, B):
-#   print_ABCDE(A, B, C, D, E)
-#   for _ in unify(D, C):
-#     print_ABCDE(A, B, C, D, E)
-#     for _ in unify(A, C):
-#       print_ABCDE(A, B, C, D, E)
-#       for _ in unify(E, D):
-#         print_ABCDE(A, B, C, D, E)
-#       print_ABCDE(A, B, C, D, E)
-#     print_ABCDE(A, B, C, D, E)
-#   print_ABCDE(A, B, C, D, E)
-# print_ABCDE(A, B, C, D, E)
+
+if __name__ == '__main__':
+    find_transversal_with_sum_n(sets_lv, 6)
