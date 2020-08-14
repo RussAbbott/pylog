@@ -125,6 +125,9 @@ class PyValue(Term):
     self._py_value = py_value
     super( ).__init__( )
 
+  def __add__(self, other):
+    return PyValue(self.get_py_value() + other.get_py_value())
+
   def __eq__(self, other: Term) -> bool:
     other_euc = other.unification_chain_end()
     return (isinstance(other_euc, PyValue) and
@@ -570,21 +573,21 @@ if __name__ == '__main__':
   End of sixth test.
   """
 
-def print_ABCDE(A, B, C, D, E):
-    print(f'A: {A}, B: {B}, C: {C}, D: {D}, E: {E}')
+  def print_ABCDE(A, B, C, D, E):
+      print(f'A: {A}, B: {B}, C: {C}, D: {D}, E: {E}')
 
 
-(A, B, C, D, E) = (Var(), Var(), Var(), Var(), 'abc')
-print_ABCDE(A, B, C, D, E)
-for _ in unify(A, B):
+  (A, B, C, D, E) = (Var(), Var(), Var(), Var(), 'abc')
   print_ABCDE(A, B, C, D, E)
-  for _ in unify(D, C):
+  for _ in unify(A, B):
     print_ABCDE(A, B, C, D, E)
-    for _ in unify(A, C):
+    for _ in unify(D, C):
       print_ABCDE(A, B, C, D, E)
-      for _ in unify(E, D):
+      for _ in unify(A, C):
+        print_ABCDE(A, B, C, D, E)
+        for _ in unify(E, D):
+          print_ABCDE(A, B, C, D, E)
         print_ABCDE(A, B, C, D, E)
       print_ABCDE(A, B, C, D, E)
     print_ABCDE(A, B, C, D, E)
   print_ABCDE(A, B, C, D, E)
-print_ABCDE(A, B, C, D, E)
