@@ -341,11 +341,16 @@ def find_transversal_with_sum_n(sets: List[Set[int]], n: int):
             return (A.get_py_value(), B.get_py_value(), C.get_py_value())
         else:
             print(f'{A} + {B} + {C} != {n}')
+    print(f'No more transversals')
+    # This is the default even without the following statement
+    return None
 
 
 if __name__ == '__main__':
-    n = 8
     print(f'{"=" * 15}')
-    (a, b, c) = find_transversal_with_sum_n(sets_lv, n)
-    print(f'{a} + {b} + {c} == {n}')
+    n = 9
+    ans = find_transversal_with_sum_n(sets_lv, n)
+    if ans is not None:
+        (a, b, c) = ans
+        print(f'{a} + {b} + {c} == {n}')
     print(f'{"=" * 15}')
