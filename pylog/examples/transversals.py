@@ -335,16 +335,17 @@ Sets:[]; Partial_Transversal:[3, 4, 1]
 def find_transversal_with_sum_n(sets: List[Set[int]], n: int):
     global trace
     trace = False
-    transversal = (PyValue(None), PyValue(None), PyValue(None))
-    for _ in transversal_yield_lv(sets, transversal):
-        transversal_values = [t.get_py_value() for t in transversal]
-        t_sum = sum(transversal_values)
-        if n != t_sum:
-            print(f'sum{transversal_values} != {n}')
+    (A, B, C) = (PyValue(), PyValue(), PyValue())
+    for _ in transversal_yield_lv(sets, (A, B, C)):
+        if A + B + C == PyValue(n):
+            return (A.get_py_value(), B.get_py_value(), C.get_py_value())
         else:
-            print(f'sum{transversal_values} == {n}')
-            break
+            print(f'{A} + {B} + {C} != {n}')
 
 
 if __name__ == '__main__':
-    find_transversal_with_sum_n(sets_lv, 6)
+    n = 8
+    print(f'{"=" * 15}')
+    (a, b, c) = find_transversal_with_sum_n(sets_lv, n)
+    print(f'{a} + {b} + {c} == {n}')
+    print(f'{"=" * 15}')
