@@ -56,6 +56,33 @@ def uninstantiated_indices(transversal):
 
 
 @Trace
+def tnvsl_dfs(sets, tnvsl):
+  remaining_indices = \
+    [indx for indx in range(len(tnvsl))
+          if tnvsl[indx] == '_']
+  if not remaining_indices: return tnvsl
+
+  nxt_indx = remaining_indices[0]
+  for elmt in sets[nxt_indx]:
+    if elmt not in tnvsl:
+      new_tnvsl = tnvsl[:nxt_indx] \
+                  + (elmt, ) \
+                  + tnvsl[nxt_indx+1:]
+      full_tnvsl = tnvsl_dfs(sets, new_tnvsl)
+      if full_tnvsl is not None: return full_tnvsl
+
+
+# Use this for all non-lv tests.
+# Is there a better example?
+sets = [{1, 2, 3}, {1, 2, 4}, {1}]
+
+if __name__ == '__main__':
+
+    print(f'\n{"-" * 75}'
+          f'\ntnvsl_dfs_first({sets}, (_, _, _))\n')
+    print(f"\nFirst transversal: {tnvsl_dfs(sets, ('_', '_', '_'))}")
+
+@Trace
 def transversal_dfs_first(sets: List[Set[int]], transversal) -> Optional[Tuple]:
     """ Looking for the first solution. """
     remaining_indices = uninstantiated_indices(transversal)
@@ -81,7 +108,6 @@ def transversal_dfs_first(sets: List[Set[int]], transversal) -> Optional[Tuple]:
 
 # Use this for all non-lv tests.
 # Is there a better example?
-sets = [{1, 2, 3}, {1, 2, 4}, {1}]
 
 if __name__ == '__main__':
 
