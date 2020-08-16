@@ -117,7 +117,6 @@ def is_immutable(x):
 
 
 class PyValue(Term):
-
   """ A wrapper class for integers, strings, and other immutable Python value. """
 
   def __init__(self, py_value: Optional[str, Number] = None ):
@@ -237,6 +236,9 @@ class Var(Term):
     self.unification_chain_next = None
     super().__init__()
 
+  def __add__(self, other):
+    return PyValue(self.get_py_value() + other.get_py_value())
+
   def __getattr__(self, item):
     self_euc = self.unification_chain_end()
     if self is not self_euc:
@@ -286,7 +288,6 @@ def ensure_is_logic_variable(x: Any) -> Term:
   return x if isinstance(x, Term) else PyValue(x)
 
 
-# @staticmethod
 def make_property(prop):
   """
     Use in StructureItem -- for puzzles.
@@ -342,7 +343,7 @@ def unify(Left: Any, Right: Any):
     yield
     # See discussion in unify below for why we do this.
     assignedTo._set_py_value(None)
-    # :
+    #
     # # If they are both PyValues, treat specially.
     # yield from unify_PyValues(Left, Right)
     
@@ -406,188 +407,214 @@ def unify_sequences(seq_1: Sequence, seq_2: Sequence):
 
 if __name__ == '__main__':
 
-  A = 'abc'
-  B = Var( )
-  C = Var( )
-  D = 'def'
-  print(f'\nA: {A}; B: {B}; C: {C}; D: {D}')
-  print(f'Attempting: unify_pairs([(A, B), (B, C), (C, D)]).  A, B, C, D will all be the same if it succeeds.')
-  for _ in unify_pairs([(A, B), (B, C), (C, D)]):
-    print(f'b. A: {A}; B: {B}; C: {C}; D: {D}')
-  print('As expected, unify_pairs fails -- because A and D have distinct PyValue values.')
+  # A = 'abc'
+  # B = Var( )
+  # C = Var( )
+  # D = 'def'
+  # print(f'\nA: {A}; B: {B}; C: {C}; D: {D}')
+  # print(f'Attempting: unify_pairs([(A, B), (B, C), (C, D)]).  A, B, C, D will all be the same if it succeeds.')
+  # for _ in unify_pairs([(A, B), (B, C), (C, D)]):
+  #   print(f'b. A: {A}; B: {B}; C: {C}; D: {D}')
+  # print('As expected, unify_pairs fails -- because A and D have distinct PyValues.')
+  #
+  # PV1 = PyValue()
+  # PV2 = PyValue()
+  # print(f'\nTrying unify({PV1}, {PV2}). '
+  #       f"Should fail because we explicitly don't allow two uninstantiated PV's to unify.")
+  # for _ in unify(PV1, PV2):
+  #   print("Shouldn't have succeeded.")
+  # print("Failed, as expected, if nothing before this.")
+  # print(f'Trying unify({PV1}, 1). Should succeed.')
+  # for _ in unify(PV1, 1):
+  #   print(f"PV1.is_instantiated(): {PV1.is_instantiated()}: {PV1}")
+  # print(f"PV1.is_instantiated(): {PV1.is_instantiated()}: {PV1}")
+  #
+  # A = Var( )
+  # B = Var( )
+  # C = Var( )
+  # D = 'def'
+  #
+  # print(f'\n1. A: {A}; B: {B}; C: {C}; D: {D}')
+  # for _ in unify(A, B):
+  #   print(f'After unify(A, B).  A: {A}; B: {B}; C: {C}; D: {D}')
+  #   for _ in unify(A, C):
+  #     print(f'After unify(A, C). A: {A}; B: {B}; C: {C}; D: {D}')
+  #     for _ in unify(A, D):
+  #       print(f'After unify(A, D). A: {A}; B: {B}; C: {C}; D: {D}')
+  # print(f'Outside the scope of all unifies: ')
+  # print(f'            A: {A}; B: {B}; C: {C}; D: {D}')
+  #
+  # print('End first test\n')
+  #
+  # """
+  # A: abc; B: _2; C: _3; D: def
+  # Attempting: unify_pairs([(A, B), (B, C), (C, D)]).  A, B, C, D will all be the same if it succeeds.
+  # As expected, unify_pairs fails.
+  #
+  # 1. A: _5; B: _6; C: _7; D: def
+  # 2a. After unify(A, B).  A: _6; B: _6; C: _7; D: def
+  # 2b. After unify(A, C). A: _7; B: _7; C: _7; D: def
+  # 2c. After unify(A, D). A: def; B: def; C: def; D: def
+  # 3. Outside the scope of all unifies. A: _5; B: _6; C: _7; D: def
+  # End first test
+  # """
+  #
+  # A = Var( )
+  # B = Var( )
+  # C = Var( )
+  # D = 'xyz'
+  #
+  # print(f'1. A: {A}, B: {B}, C: {C}, D: {D}')
+  # for _ in unify_pairs([(A, B), (B, C)]):
+  #   print(f'2. After unify_pairs([(A, B), (B, C)]):. A: {A}, B: {B}, C: {C}, D: {D}')
+  #
+  #   for _ in unify(D, B):
+  #     print('3. After unify(D, B): A: {A}, B: {B}, C: {C}, D: {D}')
+  #                                                              => A.euc: xyz, B.euc: xyz, C.euc: xyz, D.euc: xyz
+  #
+  #   print(f'\n4. No longer unified with D. A: {A}, B: {B}, C: {C}')  # => A: xyz, B: xyz, C: xyz, D: xyz
+  # print(f'5. No longer unified with each other. A: {A}, B: {B}, C: {C}')  # => A: xyz, B: xyz, C: xyz, D: xyz
+  # print('\nEnd second test\n')
+  #
+  # """
+  # Expected output
+  #
+  # 1. A: _13, B: _14, C: _15
+  # 2. A: _15, B: _15, C: _15
+  # 3. A.euc: _15, B.euc: _15, C.euc: _15
+  # 4. A.euc: xyz, B.euc: xyz, C.euc: xyz, D.euc: xyz
+  #
+  # 5. A: _15, B: _15, C: _15
+  # 6. A: _13, B: _14, C: _15
+  #
+  # End second test
+  # """
+  #
+  # X = Var( )
+  # Y = Var( )
+  # Z = Var( )
+  # print(f'X: {X}, Y: {Y}, Z: {Z}')
+  # for _ in unify('abc', X):
+  #   print(f'After unify("abc", X): X: {X}, Y: {Y}, Z: {Z}')  # => abc
+  #   for _ in unify(X, Y):
+  #     print(f'After unify(X, Y): X: {X}, Y: {Y}, Z: {Z}')  # => abc
+  #     for _ in unify(Z, Y):
+  #       print(f'After unify(Z, Y): X: {X}, Y: {Y}, Z: {Z}')  # => abc
+  #     print(f'Outside unify(Z, Y): X: {X}, Y: {Y}, Z: {Z}')  # => abc
+  #   print(f'Outside unify(X, Y): X: {X}, Y: {Y}, Z: {Z}')  # => abc
+  # print('\nEnd third test\n')
+  #
+  # V1 = Var()
+  # T1 = Structure( ('t', 1, V1, V1))
+  # V2 = Var()
+  # V3 = Var()
+  # T2 = Structure( ('t', V2, V2, V3))
+  #
+  # print(f'V1: {V1}, V2: {V2}, V3: {V3}, ')
+  # print(f'T1: t(1, V1, V1), T2: t(V2, V2, V3)')
+  # for _ in unify(T1, T2):
+  #   print('After unify(T1, T2):')
+  #   print(f'V1: {V1}, V2: {V2}, V3: {V3}, ')
+  #   print(f'T1: {T1}, T2: {T2}')
+  #   print('End of fourth test.')
+  #
+  # """
+  # Expected output
+  #
+  # T1: t(1, 1, 1), T2: t(1, 1, 1)
+  # V1: 1, V2: 1, V3: 1,
+  # End of fourth test.
+  #
+  # """
+  #
+  # V4 = Var()
+  # T4 = Structure( ('t', 1, V4))
+  # print(f'\nV4: {V4}')
+  # print(f'T4: t(1, V4)')
+  # for _ in unify(T4, V4):
+  #   print('After unify(T4, V4):')
+  #   print(f'V4[0]: {V4[0]}')
+  #   print(f'V4[1] is T4: {V4[1] is T4}')
+  #   print(f'V4[1] == T4: {V4[1] == T4}, '
+  #         f'because: V4[1].unification_chain_end() is T4: {V4[1].unification_chain_end() is T4}')
+  #   print('An attempt to print T4 or V4 will produce "RecursionError: maximum recursion depth exceeded"')
+  #   print('\nEnd of fifth test.')
+  #
+  # """
+  # Expected output
+  #
+  # V4: _23
+  # T4: t(1, V4)
+  # After unify(T4, V4):
+  # V4[0]: 1
+  # V4[1] is T4: False
+  # V4[1] == T4: True, because: V4[1].unification_chain_end() is T4: True
+  # An attempt to print T4 or V4 will produce "RecursionError: maximum recursion depth exceeded"
+  #
+  # End of fifth test.
+  #
+  # """
+  #
+  # T5 = Structure( ('g', 1, 2, 3) )
+  # print(f'\nT5 = Structure( ("g", 1, 2, 3) ): {T5}')
+  # T6 = Structure( ('t', *range(4), T5, *range(5, 9)) )
+  # print(f'T6 = Structure( ("t", *range(4), T5, *range(5, 9) ): {T6}')
+  # print(f'(", ".join(map(str, T6[3:8]))): ({", ".join(map(str, T6[3:8]))})')
+  # print(f'tuple(x.get_py_value( ) for x in T6[4][1:3]): { tuple(x.get_py_value() for x in T6[4][1:3]) }')
+  # print('\nEnd of sixth test.')
+  #
+  # """
+  # Expected output
+  #
+  # T5 = Structure( ("g", 1, 2, 3) ): g(1, 2, 3)
+  # T6 = Structure( ("t", *range(4), T5, *range(5, 9) ): t(0, 1, 2, 3, g(1, 2, 3), 5, 6, 7, 8)
+  # (", ".join(map(str, T6[3:8]))): (3, g(1, 2, 3), 5, 6, 7)
+  # tuple(x.get_py_value( ) for x in T6[4][1:3]): (2, 3)
+  #
+  # End of sixth test.
+  # """
 
-  PV1 = PyValue()
-  PV2 = PyValue()
-  print(f'\nTrying unify({PV1}, {PV2}). '
-        f"Should fail because we explicitly don't allow two uninstantiated PV's to unify.")
-  for _ in unify(PV1, PV2):
-    print("Shouldn't have succeeded.")
-  print("Failed, as expected, if nothing before this.")
-  print(f'Trying unify({PV1}, 1). Should succeed.')
-  for _ in unify(PV1, 1):
-    print(f"PV1.is_instantiated(): {PV1.is_instantiated()}: {PV1}")
-  print(f"PV1.is_instantiated(): {PV1.is_instantiated()}: {PV1}")
+  def print_ABCDE(label, A, B, C, D, E):
+      print(f'{label}\n\t => A: {A}, B: {B}, C: {C}, D: {D}, E: {E}')
 
-  A = Var( )
-  B = Var( )
-  C = Var( )
-  D = 'def'
-
-  print(f'\n1. A: {A}; B: {B}; C: {C}; D: {D}')
+  print()
+  (A, B, C, D) = (Var(), Var(), Var(), Var())
+  print(A, B, C, D)  # => _1 _2 _3 _4
   for _ in unify(A, B):
-    print(f'After unify(A, B).  A: {A}; B: {B}; C: {C}; D: {D}')
-    for _ in unify(A, C):
-      print(f'After unify(A, C). A: {A}; B: {B}; C: {C}; D: {D}')
-      for _ in unify(A, D):
-        print(f'After unify(A, D). A: {A}; B: {B}; C: {C}; D: {D}')
-  print(f'Outside the scope of all unifies: ')
-  print(f'            A: {A}; B: {B}; C: {C}; D: {D}')
-
-  print('End first test\n')
-
-  """
-  A: abc; B: _2; C: _3; D: def
-  Attempting: unify_pairs([(A, B), (B, C), (C, D)]).  A, B, C, D will all be the same if it succeeds.
-  As expected, unify_pairs fails.
-  
-  1. A: _5; B: _6; C: _7; D: def
-  2a. After unify(A, B).  A: _6; B: _6; C: _7; D: def
-  2b. After unify(A, C). A: _7; B: _7; C: _7; D: def
-  2c. After unify(A, D). A: def; B: def; C: def; D: def
-  3. Outside the scope of all unifies. A: _5; B: _6; C: _7; D: def
-  End first test
-  """
-
-  A = Var( )
-  B = Var( )
-  C = Var( )
-  D = 'xyz'
-
-  print(f'1. A: {A}, B: {B}, C: {C}, D: {D}')
-  for _ in unify_pairs([(A, B), (B, C)]):
-    print(f'2. After unify_pairs([(A, B), (B, C)]):. A: {A}, B: {B}, C: {C}, D: {D}')
-
-    for _ in unify(D, B):
-      print('3. After unify(D, B): A: {A}, B: {B}, C: {C}, D: {D}'  # => A.euc: xyz, B.euc: xyz, C.euc: xyz, D.euc: xyz
-            )
-
-    print(f'\n4. No longer unified with D. A: {A}, B: {B}, C: {C}')  # => A: xyz, B: xyz, C: xyz, D: xyz
-  print(f'5. No longer unified with each other. A: {A}, B: {B}, C: {C}')  # => A: xyz, B: xyz, C: xyz, D: xyz
-  print('\nEnd second test\n')
-
-  """
-  Expected output
-
-  1. A: _13, B: _14, C: _15
-  2. A: _15, B: _15, C: _15
-  3. A.euc: _15, B.euc: _15, C.euc: _15
-  4. A.euc: xyz, B.euc: xyz, C.euc: xyz, D.euc: xyz
-
-  5. A: _15, B: _15, C: _15
-  6. A: _13, B: _14, C: _15
-
-  End second test
-  """
-
-  X = Var( )
-  Y = Var( )
-  Z = Var( )
-  print(f'X: {X}, Y: {Y}, Z: {Z}')
-  for _ in unify('abc', X):
-    print(f'After unify("abc", X): X: {X}, Y: {Y}, Z: {Z}')  # => abc
-    for _ in unify(X, Y):
-      print(f'After unify(X, Y): X: {X}, Y: {Y}, Z: {Z}')  # => abc
-      for _ in unify(Z, Y):
-        print(f'After unify(Z, Y): X: {X}, Y: {Y}, Z: {Z}')  # => abc
-      print(f'Outside unify(Z, Y): X: {X}, Y: {Y}, Z: {Z}')  # => abc
-    print(f'Outside unify(X, Y): X: {X}, Y: {Y}, Z: {Z}')  # => abc
-  print('\nEnd third test\n')
-
-  V1 = Var()
-  T1 = Structure( ('t', 1, V1, V1))
-  V2 = Var()
-  V3 = Var()
-  T2 = Structure( ('t', V2, V2, V3))
-
-  print(f'V1: {V1}, V2: {V2}, V3: {V3}, ')
-  print(f'T1: t(1, V1, V1), T2: t(V2, V2, V3)')
-  for _ in unify(T1, T2):
-    print('After unify(T1, T2):')
-    print(f'V1: {V1}, V2: {V2}, V3: {V3}, ')
-    print(f'T1: {T1}, T2: {T2}')
-    print('End of fourth test.')
-
-  """
-  Expected output
-  
-  T1: t(1, 1, 1), T2: t(1, 1, 1)
-  V1: 1, V2: 1, V3: 1, 
-  End of fourth test.
-
-  """
-
-  V4 = Var()
-  T4 = Structure( ('t', 1, V4))
-  print(f'\nV4: {V4}')
-  print(f'T4: t(1, V4)')
-  for _ in unify(T4, V4):
-    print('After unify(T4, V4):')
-    print(f'V4[0]: {V4[0]}')
-    print(f'V4[1] is T4: {V4[1] is T4}')
-    print(f'V4[1] == T4: {V4[1] == T4}, '
-          f'because: V4[1].unification_chain_end() is T4: {V4[1].unification_chain_end() is T4}')
-    print('An attempt to print T4 or V4 will produce "RecursionError: maximum recursion depth exceeded"')
-    print('\nEnd of fifth test.')
-
-  """
-  Expected output
-
-  V4: _23
-  T4: t(1, V4)
-  After unify(T4, V4):
-  V4[0]: 1
-  V4[1] is T4: False
-  V4[1] == T4: True, because: V4[1].unification_chain_end() is T4: True
-  An attempt to print T4 or V4 will produce "RecursionError: maximum recursion depth exceeded"
-  
-  End of fifth test.
-
-  """
-
-  T5 = Structure( ('g', 1, 2, 3) )
-  print(f'\nT5 = Structure( ("g", 1, 2, 3) ): {T5}')
-  T6 = Structure( ('t', *range(4), T5, *range(5, 9)) )
-  print(f'T6 = Structure( ("t", *range(4), T5, *range(5, 9) ): {T6}')
-  print(f'(", ".join(map(str, T6[3:8]))): ({", ".join(map(str, T6[3:8]))})')
-  print(f'tuple(x.get_py_value( ) for x in T6[4][1:3]): { tuple(x.get_py_value() for x in T6[4][1:3]) }')
-  print('\nEnd of sixth test.')
-
-  """
-  Expected output
-  
-  T5 = Structure( ("g", 1, 2, 3) ): g(1, 2, 3)
-  T6 = Structure( ("t", *range(4), T5, *range(5, 9) ): t(0, 1, 2, 3, g(1, 2, 3), 5, 6, 7, 8)
-  (", ".join(map(str, T6[3:8]))): (3, g(1, 2, 3), 5, 6, 7)
-  tuple(x.get_py_value( ) for x in T6[4][1:3]): (2, 3)
-  
-  End of sixth test.
-  """
-
-  def print_ABCDE(A, B, C, D, E):
-      print(f'A: {A}, B: {B}, C: {C}, D: {D}, E: {E}')
-
-
-  (A, B, C, D, E) = (Var(), Var(), Var(), Var(), 'abc')
-  print_ABCDE(A, B, C, D, E)
-  for _ in unify(A, B):
-    print_ABCDE(A, B, C, D, E)
     for _ in unify(D, C):
-      print_ABCDE(A, B, C, D, E)
-      for _ in unify(A, C):
-        print_ABCDE(A, B, C, D, E)
-        for _ in unify(E, D):
-          print_ABCDE(A, B, C, D, E)
-        print_ABCDE(A, B, C, D, E)
-      print_ABCDE(A, B, C, D, E)
-    print_ABCDE(A, B, C, D, E)
-  print_ABCDE(A, B, C, D, E)
+      print(A, B, C, D)  # => _2 _2 _3 _3
+      for _ in unify(A, 'abc'):
+        print(A, B, C, D)  # => abc abc _3 _3
+        for _ in unify(A, D):
+          print(A, B, C, D)  # => abc abc abc abc
+        print(A, B, C, D)  # => abc abc _3 _3
+      print(A, B, C, D)  # => _2 _2 _3 _3
+    print(A, B, C, D)  # => _2 _2 _3 _4
+  print(A, B, C, D)  # => _1 _2 _3 _4
+
+# print()
+  # A = Var()
+  # print(A)
+  # for _ in unify(A, 'abc'):
+  #   print(A)
+  #   print(A.get_py_value())
+  # print(A)
+  #
+  # print()
+  # (A, B, C, D, E) = (Var(), Var(), Var(), Var(), 'abc')
+  # print_ABCDE("(A, B, C, D, E) = (Var(), Var(), Var(), Var(), 'abc')", A, B, C, D, E)
+  # for _ in unify(A, B):
+  #   print_ABCDE('unify(A, B)', A, B, C, D, E)
+  #   for _ in unify(A, E):
+  #     print_ABCDE('unify(A, E)', A, B, C, D, E)
+  #   print_ABCDE('Leave unify(A, E)', A, B, C, D, E)
+  #   for _ in unify(D, C):
+  #     print_ABCDE('unify(D, C)', A, B, C, D, E)
+  #     for _ in unify(B, C):
+  #       print_ABCDE('unify(B, C)', A, B, C, D, E)
+  #       for _ in unify(E, D):
+  #         print_ABCDE('unify(E, D)', A, B, C, D, E)
+  #       print_ABCDE('Leave unify(E, D)', A, B, C, D, E)
+  #     print_ABCDE('Leave unify(B, C)', A, B, C, D, E)
+  #   print_ABCDE('Leave unify(D, C)', A, B, C, D, E)
+  # print_ABCDE('Leave unify(A, B)', A, B, C, D, E)

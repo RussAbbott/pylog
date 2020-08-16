@@ -1,7 +1,8 @@
 # from inspect import getmembers
+from inspect import isgeneratorfunction, signature
 from typing import Generator
 
-from logic_variables import euc, PyValue, unify, unify_pairs, Var
+from logic_variables import PyValue, Var, euc, unify, unify_pairs
 
 
 class Bool_Yield_Wrapper:
@@ -157,6 +158,47 @@ def forany(gens):
     # for _ in gen( ):
     #   yield
     yield from gen( )
+
+
+class Trace:
+  trace = True
+
+  def __init__(self, f):
+    self.param_names = [param.name for param in signature(f).parameters.values()]
+    self.f = f
+    self.depth = 0
+
+  def __call__(self, *args):
+    if Trace.trace:
+      print(self.trace_line(args))
+    self.depth += 1
+    if isgeneratorfunction(self.f):
+      return self.yield_from(*args)
+    else:
+      f_return = self.f(*args)
+      self.depth -= 1
+      return f_return
+
+  def yield_from(self, *args):
+    yield from self.f(*args)
+    self.depth -= 1
+
+  @staticmethod
+  def to_str(xs):
+    if type(xs) in [list, tuple]:
+      (left, right) = ('[', ']') if isinstance(xs, list) else ('(', ')')
+      xs_string = f'{left}{", ".join(Trace.to_str(x) for x in xs)}{right}'
+    else:
+      xs_string = str(xs)
+    return xs_string
+
+  def trace_line(self, args):
+    prefix = "  " * self.depth
+    params = ", ".join([f'{param_name}: {Trace.to_str(arg)}'
+                        for (param_name, arg) in zip(self.param_names, args)])
+    # Special case for the transversal functions
+    termination = ' <=' if not args[0] else ''
+    return prefix + params + termination
 
 
 def trace(x, succeed=True, show_trace=True):
