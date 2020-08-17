@@ -7,14 +7,14 @@ To discuss solvers, it helps to refer to an example problem. We will use the com
 This is clearly a search problem. It can be solved with a simple depth-first search. First a utility function.
 
 \begin{minipage}[c]{0.45\textwidth}
-\begin{python1}[numbers=left]
+\begin{python1}  
 unassigned = '_'
 def uninstantiated_indices(transversal):
   """ Find indices of uninstantiated components. """
   return [indx for indx in range(len(transversal)) 
                if transversal[indx] is unassigned]
-\end{python1}
-\begin{lstlisting} [caption={\textit{uninstantiated\_indices}}, label={lis:uninstantiated}]
+\end{python1}\linv
+\begin{lstlisting} [caption={\textit{uninstantiated\_indices}}]
 \end{lstlisting}
 \end{minipage}
 
@@ -31,7 +31,7 @@ First, a high level description of how \textit{tnvsl\_dfs} works.
 Now the code.
 
 \begin{minipage}[c]{0.45\textwidth}
-\begin{python1}[numbers=left]
+\begin{python1}  
 def tnvsl_dfs(sets, tnvsl):
   remaining_indices = uninstantiated_indices(tnvsl)
   if not remaining_indices: return tnvsl
@@ -44,8 +44,8 @@ def tnvsl_dfs(sets, tnvsl):
                   + tnvsl[nxt_indx+1:]
       full_tnvsl = tnvsl_dfs(sets, new_tnvsl)
       if full_tnvsl is not None: return full_tnvsl
-\end{python1}
-\begin{lstlisting} [caption={\textit{tnvsl\_dfs}}, label={lis:dfs}]
+\end{python1}\linv
+\begin{lstlisting} [caption={\textit{tnvsl\_dfs}}]
 \end{lstlisting}
 \end{minipage}
 
@@ -74,7 +74,7 @@ Here's a trace of the recursive calls.
 
 \smallv
 \begin{minipage}[c]{0.45\textwidth}
-\begin{python1}[numbers=left]
+\begin{python1}  
 sets: [{1,2,3}, {1,2,4}, {1}], tnvsl: (_,_,_)
   sets: [{1,2,3}, {1,2,4}, {1}], tnvsl: (1,_,_)
     sets: [{1,2,3}, {1,2,4}, {1}], tnvsl: (1,2,_)
@@ -83,8 +83,8 @@ sets: [{1,2,3}, {1,2,4}, {1}], tnvsl: (_,_,_)
     sets: [{1,2,3}, {1,2,4}, {1}], tnvsl: (2,1,_)
     sets: [{1,2,3}, {1,2,4}, {1}], tnvsl: (2,4,_)
       sets: [{1,2,3}, {1,2,4}, {1}], tnvsl: (2,4,1)
-\end{python1}
-\begin{lstlisting} [caption={\textit{tnvsl\_dfs trace}}, label={lis:dfs-trace}]
+\end{python1}\linv
+\begin{lstlisting} [caption={\textit{tnvsl\_dfs trace}}]
 \end{lstlisting}
 \end{minipage}
 
@@ -134,49 +134,52 @@ Because the empty sets in lines 2 and 4  trigger immediate backtracking, the exe
 
 \smallv
 \begin{minipage}[c]{0.45\textwidth}
-\begin{python1}[numbers=left]
+\begin{python1}  
 sets: [{1,2,3}, {1,2,4}, {1}], tnvsl: (_,_,_)
   sets: [{2,3}, {2,4}, set()], tnvsl: (1,_,_)
   sets: [{1,3}, {1,4}, {1}], tnvsl: (2,_,_)
     sets: [{3}, {4}, set()], tnvsl: (2,1 _)
     sets: [{1,3}, {1}, {1}], tnvsl: (2,4,_)
       sets: [{3}, set(), set()], tnvsl: (2,4,1)
-\end{python1}
-\begin{lstlisting} [caption={\textit{tnvsl\_dfs\_prop trace}}, label={lis:dfs-prop-trace}]
+\end{python1}\linv
+\begin{lstlisting} [caption={\textit{tnvsl\_dfs\_prop trace}}]
 \end{lstlisting}
 \end{minipage}
 
 \noindent\textbf{Smallest first}. When selecting which \textit{tnvsl} index to fill next, pick the position associated with the smallest remaining set. 
 
-In the original code, replace line 5 with 
+In the original code, replace line 5 with
+\begin{center}
+\begin{minipage}[c]{0.45\textwidth}
 \begin{python1}
  nxt_indx = min(remaining_indices,
                 key=lambda indx: len(sets[indx]))
 \end{python1}
-
+\end{minipage}
+\end{center}
 The resulting trace is only 4 lines. (At line 3, the first two sets are the same size. By convention, \textit{min} selects the first.)
 
 \begin{minipage}[c]{0.45\textwidth}
-\begin{python1}[numbers=left]
+\begin{python1}  
 sets: [{1,2,3}, {1,2,4}, {1}], tnvsl: (_,_,_)
   sets: [{1,2,3}, {1,2,4}, {1}], tnvsl: (_,_,1)
     sets: [{1,2,3}, {1,2,4}, {1}], tnvsl: (2,_,1)
       sets: [{1,2,3}, {1,2,4}, {1}, tnvsl: (2,4,1)
-\end{python1}
-\begin{lstlisting} [caption={\textit{tnvsl\_dfs\_smallest trace}}, label={lis:dfs-smallest-trace}]
+\end{python1}\linv
+\begin{lstlisting} [caption={\textit{tnvsl\_dfs\_smallest trace}}]
 \end{lstlisting}
 \end{minipage}
 
 One could apply both heuristics. Since in this case there was no backtracking, adding the \textit{propagate} heuristic makes no effective difference. Since you can see the pending sets shrinking however, the trace is a bit prettier.
 
 \begin{minipage}[c]{0.45\textwidth}
-\begin{python1}[numbers=left]
+\begin{python1} 
 sets: [{1,2,3}, {1,2,4}, {1}], tnvsl: (_,_,_)
   sets: [{2,3}, {2,4}, {}], tnvsl: (_,_,1)
     sets: [{3}, {4}, {}], tnvsl: (2,_,1)
       sets: [{3}, {}, {}, tnvsl: (2,4,1)
-\end{python1}
-\begin{lstlisting} [caption={\textit{tnvsl\_dfs\_both\_heuristics trace}}, label={lis:dfs-both-trace}]
+\end{python1}\linv
+\begin{lstlisting} [caption={\textit{tnvsl\_dfs\_both\_heuristics trace}}]
 \end{lstlisting}
 \end{minipage}
 
@@ -194,7 +197,7 @@ We need a solver than can return results while keeping track of where it is with
 Here is our solver, \textit{including both heuristics}, as a generator.
 
 \begin{minipage}[c]{0.45\textwidth}
-\begin{python1}[numbers=left]
+\begin{python1}  
 def tnvsl_dfs_gen(sets, tnvsl):
   remaining_indices = uninstantiated_indices(tnvsl)
 
@@ -214,7 +217,7 @@ def tnvsl_dfs_gen(sets, tnvsl):
         for full_tnvsl in tnvsl_dfs_gen(sets, 
                                         new_tnvsl):
           yield full_tnvsl
-\end{python1}
+\end{python1}\linv
 \begin{lstlisting} [caption={\textit{tnvsl\_dfs\_gen}}, label={lis:dfs-gen}]
 \end{lstlisting}
 \end{minipage}
@@ -222,7 +225,7 @@ def tnvsl_dfs_gen(sets, tnvsl):
 When called as in the following,
 
 \begin{minipage}[c]{0.45\textwidth}
-\begin{python1}[numbers=left]
+\begin{python1}  
 for tnvsl in tnvsl_dfs_gen(sets, ('_','_','_')):
     print('=> ', tnvsl)
 \end{python1}
@@ -231,7 +234,7 @@ for tnvsl in tnvsl_dfs_gen(sets, ('_','_','_')):
 the Trace looks like this.
 
 \begin{minipage}[c]{0.45\textwidth}
-\begin{python1}[numbers=left]
+\begin{python1}  
 sets: [{1,2,3}, {1,2,4}, {1}], tnvsl: (_,_,_)
   sets: [{2,3}, {2,4}, {}], tnvsl: (_,_,1)
     sets: [{3}, {4}, {}], tnvsl: (2,_,1)
@@ -242,8 +245,8 @@ sets: [{1,2,3}, {1,2,4}, {1}], tnvsl: (_,_,_)
 =>  (3, 2, 1)
       sets: [{2}, {2}, {}], tnvsl: (3,4,1)
 =>  (3, 4, 1)
-\end{python1}
-\begin{lstlisting} [caption={\textit{tnvsl\_dfs\_gen trace}}, label={lis:dfs-gen1}]
+\end{python1}\linv
+\begin{lstlisting} [caption={\textit{tnvsl\_dfs\_gen trace}}]
 \end{lstlisting}
 \end{minipage}
 
@@ -257,13 +260,14 @@ Some comments on \textit{tnvsl\_dfs\_gen}.
     
     \smallv
 Using \textbf{yield from}, lines 17-20 can be replaced by a line that \textbf{yield}s, one at a time, what \textit{tnvsl\_dfs\_gen} \textbf{yield}s to it.
+\end{itemize}
+\begin{center}
+\begin{minipage}[c]{0.45\textwidth}
 \begin{python1}
 yield from tnvsl_dfs_gen(new_sets, new_tnvsl)
 \end{python1}
-    
-     
-    
-\end{itemize}
+\end{minipage}   
+\end{center}
 
 Let's turn off \textit{trace} and solve our initial problem: find a transversal whose elements sum to 6.
 
@@ -274,19 +278,19 @@ for tnvsl in tnvsl_dfs_gen(sets, ('_','_','_')):
   equals = '==' if sum(tnvsl) == 6 else '!='
   print(f'{sum_string} {equals} 6')
   if sum(tnvsl) == 6: break
-\end{python1}
+\end{python1}\linv
 \begin{lstlisting} [caption={\textit{running tnvsl\_dfs\_gen}}, label={lis:dfs-gen-call}]
 \end{lstlisting}
 \end{minipage}
-
+\smallv
 The output will be as follows.
 
 \begin{minipage}[c]{0.45\textwidth}
-\begin{python1}[numbers=left]
+\begin{python1}  
 2 + 4 + 1 != 6
 3 + 2 + 1 == 6
-\end{python1}
-\begin{lstlisting} [caption={\textit{tnvsl\_dfs\_gen trace}}, label={lis:dfs-gen2}]
+\end{python1}\linv
+\begin{lstlisting} [caption={\textit{tnvsl\_dfs\_gen trace}}]
 \end{lstlisting}
 \end{minipage}
 

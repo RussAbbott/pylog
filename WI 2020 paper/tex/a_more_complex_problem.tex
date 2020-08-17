@@ -1,20 +1,18 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{A logic puzzle}\label{sec:zebra}
+\section{A logic puzzle}\label{sec:logic-puzzle}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 At this point, one might expect a complex logic puzzle like the Zebra Puzzle\cite{ZebraPuzzle}. Instead we present a similar but simpler puzzle. The techniques are the same, but the following Scholarship Puzzle\cite{ScholarshipPuzzle} fits the available space better. 
 
-\largev
+
 \begin{itemize}
     \item There are 4 students: Ada, Emmy, Lynn, and Marie. Each has a scholarship and a major.  No two students have the same scholarship or the same major. 
-    
     \item The scholarships and majors are \$25,000, \$30,000, \$35,000 and \$40,000 and Bio, CS, Math, and Phys. 
-
 \end{itemize}
 
 From the clues listed below, determine which student studies which major and the amount of each student's scholarship.
 
-\largev
+%\largev
 We create a \textbf{class} \textit{Stdnt}, each of whose instances has two fields: \textit{name} and \textit{major}. (We do \textit{not} keep track of the students' scholarships!) For example, an object that represents \textit{Ada} studying \textit{Phys} would be constructed like this \textit{Stdnt(name='Ada', major='Phys)} and printed as \textit{Ada/Phys}. 
 
 Objects are not always fully instantiated. Missing information is represented by an underscore (\_). An object that represents some person studying \textit{Bio} would look like this \textit{\_/Bio}. It would be constructed as: \textit{Stdnt(major='Bio')}.
@@ -115,9 +113,12 @@ def run_all_clues(self, clue_number):
 
 The \textit{run\_clue} method runs the \textit{all-different} heuristic to prevent the same field value from being used more than once. 
 
-The following execution trace shows the clues in the order executed, including backtracking, followed by the then-current list of partially instantiated students.
+The execution trace at the right shows the clues in the order executed, including backtracking, followed by the then-current list of partially instantiated students.
 
-% \begin{minipage}[c]{0.45\textwidth}
+\begin{figure}[ht]
+    \flushright
+    % \centering
+\begin{minipage}[c]{0.45\textwidth}
 \begin{python1}
 Initially: _/_, _/_, _/_, _/_
 Clue 1: _/Phys, Emmy/_, _/_, _/_
@@ -170,12 +171,13 @@ After 3 final rule applications, no more solutions.
 
 The total compute time was: 0.01 sec
 \end{python1}
-% \end{minipage}
+\end{minipage}
+\end{figure}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Conclusion} \label{sec:conclusion}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-We have explained how constraint programming solvers work and how to integrate them into Python programs. 
+We have explained how solvers for constraint problems work and how they can be integrated into Python programs. 
 
-It would difficult to imagine a neural net (of any depth!) solving the problems discussed here.
+It's difficult to imagine a neural net (of any depth!) solving the problems discussed here---although preliminary work toward that end has been reported. \cite{xu2018towards, amel2019shallow, dubois2019towards}

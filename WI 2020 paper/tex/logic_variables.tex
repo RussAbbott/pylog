@@ -5,7 +5,8 @@
 The final technical issue is logic variables and their implementation. You can think of a logic variable as an object with an internal value field.
 
 \smallv
-\noindent \textbf{Instantiation}. Logic variables are either instantiated, i.e., have a value, or not instantiated, have no value. The instantiation operation is called \textit{unify}.  \textit{unify} can do more than simple instantiation, but for now let's limit ourselves to instantiation. 
+\subsection{Instantiation}
+Logic variables are either instantiated, i.e., have a value, or not instantiated, have no value. The instantiation operation is called \textit{unify}.  \textit{unify} can do more than simple instantiation, but for now let's limit ourselves to instantiation. 
 
 \textit{unify} is a \textit{generator}, similar to the generators we've already seen.  That's the case even though the act of instantiation \textit{does not} \textbf{yield} a value.
 
@@ -58,7 +59,8 @@ print(A)  # => _1
 \end{minipage}
 
 \smallv
-\noindent \textbf{The power of \textit{unify}}. Besides instantiating logic variables, \textit{unify} can also, as its name suggests, identify logic variables with each other. After two logic variables are unified, whenever either gets a value, the other gets that same value.
+\subsection{The power of \textit{unify}}
+Besides instantiating logic variables, \textit{unify} can also, as its name suggests, identify logic variables with each other. After two logic variables are unified, whenever either gets a value, the other gets that same value.
 
 \begin{minipage}[c]{0.45\textwidth}
 \begin{python1}
@@ -75,14 +77,15 @@ for _ in unify(A, B):
     print(A, B, C, D) # => _2 _2 _3 _3
   print(A, B, C, D) # => _2 _2 _3 _4
 print(A, B, C, D) # => _1 _2 _3 _4
-\end{python1}
-\begin{lstlisting} [caption={\textit{Unification example}}, label={lis:unif-example}]
+\end{python1}\linv
+\begin{lstlisting} [caption={\textit{Unification example}},  label={unif-example}]
 \end{lstlisting}
 \end{minipage}
 
 Unification is surprisingly easy to implement. Each \textit{Var} object includes a \textit{next} field, which is initially \textbf{None}. When two \textit{Var}s are unified, the \textit{next} field of one is set to point to the other. If both are uninstantiated, it makes no difference, which points to which. A chain of linked  \textit{Var}s unify all the \textit{Var}s in the chain. If only one is uninstantiated, it points to the other.
 
-We can trace the unifications from Listing \ref{lis:unif-example}. The first unifications, lines 3 and 4, produce the following. 
+We can trace the unifications in Listing \ref{unif-example}.  %the listing above. % from Listing \ref{lis:unifexample}. 
+The first unifications, lines 3 and 4, produce the following. 
 \begin{equation}\label{eq:one}
 \begin{array}{c c c c c c c c }
 A & \to & B \\
@@ -92,10 +95,10 @@ D & \to & C
 
 Line 6 unifies \textit{A} and \textit{'abc'}. The first step in unification is to go to the ends of the unification chains of the elements to be unified. In this case, \textit{B} (the end of \textit{A}'s unification chain) is pointed to \textit{'abc'}. Since  \textit{'abc'} is instantiated, the arrow can only go from \textit{B} to \textit{'abc'}. 
 
-\begin{equation}\label{eq:three}
+\begin{equation}\label{eq:two}
 \begin{array}{c c c c c c c c c c c}
 A & \to & B            & \to & 'abc'    \\ 
-D &     &       \to    &     & C        
+  &     & D            & \to & C        
 \end{array}
 \end{equation}
 
@@ -105,7 +108,7 @@ Finally, line 8  unifies \textit{A} with \textit{D}. \textit{C} (the end of \tex
 \begin{array}{c c c c c c c c c c c}
 A & \to & B            & \to & 'abc'      \\ 
   &     &              &     & \uparrow   \\ 
-D &     &       \to    &     & C        
+  &     & D            & \to & C        
 \end{array}
 \end{equation}
 
@@ -115,7 +118,8 @@ To determine the value of a logical variable, one goes to the end of its unifica
 If the end of a unification chain is unintantiated, the internal value associated with that end element is a place-holder value.
 
 \smallv
-\noindent \textbf{A logic-variable version of \textit{tnvsl\_dfs\_gen}}. The following adapts Listing \ref{lis:dfs-gen} for logic variables. The strategy is for \textit{trnsvl} to start as a tuple of uninstantiated \textit{Var}s, which become instantiated as the program runs.
+\subsection{A logic-variable version of \textit{tnvsl\_dfs\_gen}}
+The following adapts Listing \ref{lis:dfs-gen} for logic variables. The strategy is for \textit{trnsvl} to start as a tuple of uninstantiated \textit{Var}s, which become instantiated as the program runs.
 
 First, an adapted \textit{uninstan\_indices\_lv} returns the indices in \textit{trnsvl} of the uninstantiated \textit{Var}s.
 
@@ -167,6 +171,7 @@ Some comments on this code. (We reformatted some of the lines and changed some o
 \end{itemize}
 
 When run, we get the same result as before---except that the uninstantiated transversal variables appear as we saw above.
+\begin{center}
 \begin{minipage}[c]{0.45\textwidth}
 \begin{python1}
 sets: [{1,2,3}, {1,2,4}, {1}], tnvsl: (_1, _2, _3)
@@ -181,6 +186,7 @@ sets: [{1,2,3}, {1,2,4}, {1}], tnvsl: (_1, _2, _3)
 => (3, 4, 1)
 \end{python1}
 \end{minipage}
+\end{center}
 
 The following logic variable version of Listing \ref{lis:dfs-gen-call} will run \textit{tnvsl\_dfs\_gen\_lv} and produce the same result.
 
@@ -196,7 +202,7 @@ for _ in tnvsl_dfs_gen_lv(Py_Sets, (A, B, C)):
   print(f'{sum_string} {equals} {N}')
   if A + B + C == N: break
 \end{python1}
-\end{minipage}
+https://www.overleaf.com/project/5f2dc382c3626b00014509ba\end{minipage}
 
 We created three logic variables,  \textit{A}, \textit{B}, and \textit{C}, on line 1 and passed them to \textit{tnvsl\_dfs\_gen\_lv} on line 5. Each time a transversal is found, the body of the \textbf{for}-loop is executed with the values to which \textit{A}, \textit{B}, and \textit{C} have been instantiated. 
 
