@@ -1,0 +1,203 @@
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Logic variables} \label{sec:logic-variables}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+The final technical issue is logic variables and their implementation. You can think of a logic variable as an object with an internal value field.
+
+\smallv
+\noindent \textbf{Instantiation}. Logic variables are either instantiated, i.e., have a value, or not instantiated, have no value. The instantiation operation is called \textit{unify}.  \textit{unify} can do more than simple instantiation, but for now let's limit ourselves to instantiation. 
+
+\textit{unify} is a \textit{generator}, similar to the generators we've already seen.  That's the case even though the act of instantiation \textit{does not} \textbf{yield} a value.
+
+Activating \textit{unify} establishes a context within which unification holds. Leaving that context undoes the unification. 
+
+Consider the following code segment. (The printed output is shown on the same line after each \textit{print} statement.)
+
+\begin{minipage}[c]{0.45\textwidth}
+\begin{python1}
+# 'A' is a standard Python identifier. We use an 
+# initial capital letter to distinguish logic 
+# variables from regular Python variables.
+# 'Var' is the constructor for logic variables.
+A = Var()
+
+# A is now an uninstantiated logic variable.
+# When an uninstantiated logic variables is printed, 
+# an internal value is shown to distinguish among 
+# logic variables. As the first logic variable  
+# in this program, A's internal value is _1.
+print(A)  # => _1
+
+# Unify A with 'abc', i.e., instantiate A to 'abc'.
+# Since unify does not yield a value, the for-loop
+# variable is not used. The for-loop establishes
+# a context for unify. Within the for-loop 'body'
+# A is instantiated to 'abc'.
+for _ in unify(A, 'abc'):
+    print(A)  # => abc
+    
+# Leaving the unify context reverses instantiation.
+print(A)  # => _1
+\end{python1}
+\end{minipage}
+
+Within a \textit{unify} context, logic variables are immutable. Once a logic variable has a value, it cannot change within its context.
+
+\begin{minipage}[c]{0.45\textwidth}
+\begin{python1}
+A = Var()
+print(A)  # => _1
+for _ in unify(A, 'abc'):
+    print(A)  # => abc
+    # This unify fails. Its body never runs.
+    for _ in unify(A 'def'):
+      print(A)  # Never executed
+    print(A)  # => abc
+print(A)  # => _1
+\end{python1}
+\end{minipage}
+
+\smallv
+\noindent \textbf{The power of \textit{unify}}. Besides instantiating logic variables, \textit{unify} can also, as its name suggests, identify logic variables with each other. After two logic variables are unified, whenever either gets a value, the other gets that same value.
+
+\begin{minipage}[c]{0.45\textwidth}
+\begin{python1}
+(A, B, C, D) = (Var(), Var(), Var(), Var())
+print(A, B, C, D) # => _1 _2 _3 _4
+for _ in unify(A, B):
+  for _ in unify(D, C):
+    print(A, B, C, D) # => _2 _2 _3 _3
+    for _ in unify(A, 'abc'):
+      print(A, B, C, D) # => abc abc _3 _3
+      for _ in unify(A, D):
+        print(A, B, C, D) # => abc abc abc abc
+      print(A, B, C, D) # => abc abc _3 _3
+    print(A, B, C, D) # => _2 _2 _3 _3
+  print(A, B, C, D) # => _2 _2 _3 _4
+print(A, B, C, D) # => _1 _2 _3 _4
+\end{python1}
+\begin{lstlisting} [caption={\textit{Unification example}}, label={lis:unif-example}]
+\end{lstlisting}
+\end{minipage}
+
+Unification is surprisingly easy to implement. Each \textit{Var} object includes a \textit{next} field, which is initially \textbf{None}. When two \textit{Var}s are unified, the \textit{next} field of one is set to point to the other. If both are uninstantiated, it makes no difference, which points to which. A chain of linked  \textit{Var}s unify all the \textit{Var}s in the chain. If only one is uninstantiated, it points to the other.
+
+We can trace the unifications from Listing \ref{lis:unif-example}. The first unifications, lines 3 and 4, produce the following. 
+\begin{equation}\label{eq:one}
+\begin{array}{c c c c c c c c }
+A & \to & B \\
+D & \to & C 
+\end{array}
+\end{equation}
+
+Line 6 unifies \textit{A} and \textit{'abc'}. The first step in unification is to go to the ends of the unification chains of the elements to be unified. In this case, \textit{B} (the end of \textit{A}'s unification chain) is pointed to \textit{'abc'}. Since  \textit{'abc'} is instantiated, the arrow can only go from \textit{B} to \textit{'abc'}. 
+
+\begin{equation}\label{eq:three}
+\begin{array}{c c c c c c c c c c c}
+A & \to & B            & \to & 'abc'    \\ 
+D &     &       \to    &     & C        
+\end{array}
+\end{equation}
+
+Finally, line 8  unifies \textit{A} with \textit{D}. \textit{C} (the end of \textit{D}'s unification chain) is set to point to \textit{'abc'} (the end of \textit{A}'s unification chain). The arrow can go only from \textit{C} to \textit{'abc'}.
+
+\begin{equation}\label{eq:three}
+\begin{array}{c c c c c c c c c c c}
+A & \to & B            & \to & 'abc'      \\ 
+  &     &              &     & \uparrow   \\ 
+D &     &       \to    &     & C        
+\end{array}
+\end{equation}
+
+
+To determine the value of a logical variable, one goes to the end of its unification chain. If the end element is instantiated, that is the (current) value of the variable. That's why all the variables have \textit{abc} as their values after line 8. 
+
+If the end of a unification chain is unintantiated, the internal value associated with that end element is a place-holder value.
+
+\smallv
+\noindent \textbf{A logic-variable version of \textit{tnvsl\_dfs\_gen}}. The following adapts Listing \ref{lis:dfs-gen} for logic variables. The strategy is for \textit{trnsvl} to start as a tuple of uninstantiated \textit{Var}s, which become instantiated as the program runs.
+
+First, an adapted \textit{uninstan\_indices\_lv} returns the indices in \textit{trnsvl} of the uninstantiated \textit{Var}s.
+
+\begin{minipage}[c]{0.45\textwidth}
+\begin{python1}
+def uninstan_indices_lv(tnvsl):
+  return [indx for indx in range(len(tnvsl)) 
+               if not tnvsl[indx].is_instantiated()]
+\end{python1}
+\end{minipage}
+
+Note that \textit{tnvsl[indx]} retrieves the \textit{indx\textsuperscript{th}} \textit{tnvsl} element. If it's instantiated, it represents the value associated with the \textit{indx\textsuperscript{th}} set. If not, we don't yet have a value for the  \textit{indx\textsuperscript{th}} set.
+
+\begin{minipage}[c]{0.45\textwidth}
+\begin{python1}
+def tnvsl_dfs_gen_lv(sets, tnvsl):
+  var_indxs = uninstan_indices_lv(tnvsl)
+    
+  if not var_indxs: yield tnvsl
+  else:
+    empty_sets = [sets[indx].is_empty() 
+                  for indx in var_indxs]
+    if any(empty_sets): return None
+
+    nxt_indx = min(var_indxs,
+                   key=lambda indx: len(sets[indx]))
+    used_values = PyList([tnvsl[i] 
+                          for i in range(len(tnvsl)) 
+                          if i not in var_indxs])
+    T_Var = tnvsl[nxt_indx]
+      for _ in member(T_Var, sets[nxt_indx]):
+        for _ in fails(member)(T_Var, used_values):
+          new_sets = [set.discard(T_Var) 
+                      for set in sets]
+          yield from tnvsl_dfs_gen_lv(new_sets, 
+                                      tnvsl)
+\end{python1}
+\end{minipage}
+
+Some comments on this code. (We reformatted some of the lines and changed some of the names from \textit{tnvsl\_dfs\_gen} (Listing \ref{lis:dfs-gen}) so that the program will fit the width of a column.)
+
+\begin{itemize}
+    \item \textit{line 6}. The parameter \textit{sets} is a list of \textit{PySet}s. These are logic variable versions of sets. An \textit{is\_empty} method is defined for them.
+    \item \textit{lines 12-14}. \textit{used\_values} are the values of the instantiated \textit{tnvsl} elements.
+    \item \textit{line 15}. \textit{T\_Var} is the element at the \textit{nxt\_indx\textsuperscript{th}} position of \textit{tnvsl}. Since \textit{nxt\_indx} was selected from the uninstantiated variables, \textit{T\_Var} is an uninstantited \textit{Var}.
+    \item \textit{line 16}. \textit{member} successively unifies its first argument with the elements of its second argument. It's equivalent to \textit{\textbf{for} T\_Var \textbf{in} sets[nxt\_indx]} but using unification.
+    \item  \textit{line 17}. \textit{fails} takes a predicate as its argument. It converts the predicate to its negation. So \textit{fails(member)} succeeds if and only if \textit{member} fails.
+    \item  \textit{line 18}. \textit{PySet}s have a \textit{discard} method that produces a copy of the \textit{PySet} without the argument.
+\end{itemize}
+
+When run, we get the same result as before---except that the uninstantiated transversal variables appear as we saw above.
+\begin{minipage}[c]{0.45\textwidth}
+\begin{python1}
+sets: [{1,2,3}, {1,2,4}, {1}], tnvsl: (_1, _2, _3)
+  sets: [{2,3}, {2,4}, {}], tnvsl: (_1, _2, 1)
+    sets: [{3}, {4}, {}], tnvsl: (2, _2, 1)
+      sets: [{3}, {}, {}], tnvsl: (2, 4, 1)
+=> (2, 4, 1)
+    sets: [{2}, {2,4}, {}], tnvsl: (3, _2, 1)
+      sets: [{}, {4}, {}], tnvsl: (3, 2, 1)
+=> (3, 2, 1)
+      sets: [{2}, {2}, {}], tnvsl: (3, 4, 1)
+=> (3, 4, 1)
+\end{python1}
+\end{minipage}
+
+The following logic variable version of Listing \ref{lis:dfs-gen-call} will run \textit{tnvsl\_dfs\_gen\_lv} and produce the same result.
+
+\begin{minipage}[c]{0.45\textwidth}
+\begin{python1}
+(A, B, C) = (Var(), Var(), Var())
+Py_Sets = [PySet(set) for set in sets]
+# PyValue creates a logic variable constant.
+N = PyValue(6)
+for _ in tnvsl_dfs_gen_lv(Py_Sets, (A, B, C)):
+  sum_string = ' + '.join(str(i) for i in (A, B, C))
+  equals = '==' if A + B + C == N else '!='
+  print(f'{sum_string} {equals} {N}')
+  if A + B + C == N: break
+\end{python1}
+\end{minipage}
+
+We created three logic variables,  \textit{A}, \textit{B}, and \textit{C}, on line 1 and passed them to \textit{tnvsl\_dfs\_gen\_lv} on line 5. Each time a transversal is found, the body of the \textbf{for}-loop is executed with the values to which \textit{A}, \textit{B}, and \textit{C} have been instantiated. 
+
+The preceding offers some sense of what one can do with logic variables. The next section really puts them to work.

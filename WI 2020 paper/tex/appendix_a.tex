@@ -1,0 +1,967 @@
+\appendix 
+
+\newpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction} 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+There are no listings from the \textit{Introduction}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Related work} 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+There are no listings from \textit{Related work}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{From Python to Prolog (Listings from Section \ref{sec:pylog})} \label{appsec:pylog}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{tvsl\_dfs\_first (Listings from Section \ref{subsec:tvsl_dfs_first})} \label{appsubsec:tvsl_dfs_first}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{minipage}{\linewidth}   \hrulefill
+\begin{python}[numbers=left]
+@Trace
+def tvsl_dfs_first(sets: List[List[int]], partial_transversal: Tuple = ()) -> Optional[Tuple]:
+  if not sets:
+    return partial_transversal
+  else:
+    for element in sets[0]:
+      if element not in partial_transversal:
+        complete_transversal = tvsl_dfs_first(sets[1:], partial_transversal + (element, ))
+        if complete_transversal is not None:
+          return complete_transversal 
+    return None
+\end{python}
+\begin{lstlisting} [caption={\textit{tvsl\_dfs\_first}}, label={lis:dfsfirst}]
+\end{lstlisting}
+\end{minipage}
+
+\noindent
+\begin{minipage}{\linewidth}
+\largev   
+\begin{python}[numbers=left]
+sets: [[1, 2, 3], [2, 4], [1]]
+  sets: [[2, 4], [1]], partial_transversal: (1,)
+    sets: [[1]], partial_transversal: (1, 2)
+    sets: [[1]], partial_transversal: (1, 4)
+  sets: [[2, 4], [1]], partial_transversal: (2,)
+    sets: [[1]], partial_transversal: (2, 4)
+      sets: [], partial_transversal: (2, 4, 1) <=
+\end{python}
+\begin{lstlisting} [caption={\textit{transversal\_dfs\_first trace}},  label={lis:dfs_first_trace}]
+\end{lstlisting}
+\end{minipage}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{\textbf{for}-loops as choice points and as computational aggregators (Listings from Section \ref{subsec:forloops})} \label{appsubsec:forloops}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{minipage}{\linewidth}  \largev \begin{python}[numbers=left]
+def find_largest(lst):
+    largest = lst[0]
+    for element in lst[1:]:
+        largest = max(largest, element)
+    return largest
+
+a_list = [3, 5, 2, 7, 4]
+print(f'Largest of {a_list} is {find_largest(a_list)}.)
+\end{python}
+\begin{lstlisting} [caption={find largest},  label={lis:find_largest}]
+\end{lstlisting}
+\end{minipage}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{tvsl\_dfs\_all (Listings from Section \ref{subsec:tvsl_dfs_all})} \label{appsubsec:tvsl_dfs_all}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{minipage}{\linewidth} \largev   \hrulefill
+\begin{python}[numbers=left]
+@Trace
+def tvsl_dfs_all(sets: List[List[int]], partial_transversal: Tuple = ()) -> List[Tuple]:
+  if not sets:
+    return [partial_transversal]
+  else:
+    all_transversals = []
+    for element in sets[0]:
+      if element not in partial_transversal:
+        all_transversals += tvsl_dfs_all(sets[1:], partial_transversal + (element, ))
+    return all_transversals
+\end{python}
+\begin{lstlisting} [caption={transversal\_dfs\_all},  label={lis:dfsall}]
+\end{lstlisting}
+\end{minipage}
+
+\noindent
+\begin{minipage}{\linewidth}   \hrulefill  
+\begin{python}
+sets: [[1, 2, 3], [2, 4], [1]]
+  sets: [[2, 4], [1]], partial_transversal: (1,)
+    sets: [[1]], partial_transversal: (1, 2)
+    sets: [[1]], partial_transversal: (1, 4)
+  sets: [[2, 4], [1]], partial_transversal: (2,)
+    sets: [[1]], partial_transversal: (2, 4)
+      sets: [], partial_transversal: (2, 4, 1) <=
+  sets: [[2, 4], [1]], partial_transversal: (3,)
+    sets: [[1]], partial_transversal: (3, 2)
+      sets: [], partial_transversal: (3, 2, 1) <=
+    sets: [[1]], partial_transversal: (3, 4)
+      sets: [], partial_transversal: (3, 4, 1) <=
+\end{python}
+\begin{lstlisting} [caption={\textit{transversal\_dfs\_all trace}},  label={lis:dfsalltrace}]
+\end{lstlisting}
+\end{minipage}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{tvsl\_yield (Listings from Section \ref{subsec:tvsl_yield})} \label{appsubsec:tvsl_yield}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{minipage}{\linewidth}   \hrulefill
+\begin{python}[numbers=left]
+@Trace
+def tvsl_yield(sets: List[List[int]], partial_transversal: Tuple = ()) -> Generator[Tuple, None, None]:
+  if not sets:
+    yield partial_transversal
+  else:
+    for element in sets[0]:
+      if element not in partial_transversal:
+        yield from tvsl_yield(sets[1:], partial_transversal + (element, ))
+\end{python}
+\begin{lstlisting} [caption={transversal\_dfs\_yield},  label={lis:dfsyield}]
+\end{lstlisting}
+\end{minipage}
+
+\noindent
+\begin{minipage}{\linewidth} \largev
+\begin{python}
+sets: [[1, 2, 3], [2, 4], [1]]
+  sets: [[2, 4], [1]], partial_transversal: (1,)
+    sets: [[1]], partial_transversal: (1, 2)
+    sets: [[1]], partial_transversal: (1, 4)
+  sets: [[2, 4], [1]], partial_transversal: (2,)
+    sets: [[1]], partial_transversal: (2, 4)
+      sets: [], partial_transversal: (2, 4, 1) <=
+Transversal: (2, 4, 1)
+  sets: [[2, 4], [1]], partial_transversal: (3,)
+    sets: [[1]], partial_transversal: (3, 2)
+      sets: [], partial_transversal: (3, 2, 1) <=
+Transversal: (3, 2, 1)
+    sets: [[1]], partial_transversal: (3, 4)
+      sets: [], partial_transversal: (3, 4, 1) <=
+Transversal: (3, 4, 1)
+\end{python}
+\begin{lstlisting} [caption={tvrsl\_yield trace},  label={lis:tvrsl_yield_trace}]
+\end{lstlisting}
+\end{minipage}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{tvsl\_yield\_lv (Listings from Section \ref{subsec:tvsl_yield_lv})} \label{appsubsec:tvsl_yield_lv}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{minipage}{\linewidth}   \hrulefill
+\begin{python}[numbers=left]
+@Trace
+def tvsl_yield_lv(Sets: List[PyList], Partial_Transversal: PyTuple, Complete_Tvsl: Var):
+  if not Sets:
+    yield from unify(Partial_Transversal, Complete_Tvsl)
+  else:
+    Element = Var()
+    for _ in member(Element, Sets[0]):
+      for _ in fails(member)(Element, Partial_Transversal):
+        yield from tvsl_yield_lv(Sets[1:], Partial_Transversal + PyList([Element]), Complete_Tvsl)
+\end{python}
+\begin{lstlisting} [caption={tvsl\_yield\_lv},  label={lis:yieldlv}]
+\end{lstlisting}
+\end{minipage}
+
+\noindent
+\begin{minipage}{\linewidth} \largev 
+\begin{python}
+Sets: [[1, 2, 3], [2, 4], [1]], Partial_Transversal: (), Complete_Transversal: _10
+  Sets: [[2, 4], [1]], Partial_Transversal: (1, ), Complete_Transversal: _10
+    Sets: [[1]], Partial_Transversal: (1, 2), Complete_Transversal: _10
+    Sets: [[1]], Partial_Transversal: (1, 4), Complete_Transversal: _10
+  Sets: [[2, 4], [1]], Partial_Transversal: (2, ), Complete_Transversal: _10
+    Sets: [[1]], Partial_Transversal: (2, 4), Complete_Transversal: _10
+      Sets: [], Partial_Transversal: (2, 4, 1), Complete_Transversal: _10 <=
+Transversal: (2, 4, 1)
+
+  Sets: [[2, 4], [1]], Partial_Transversal: (3, ), Complete_Transversal: _10
+    Sets: [[1]], Partial_Transversal: (3, 2), Complete_Transversal: _10
+      Sets: [], Partial_Transversal: (3, 2, 1), Complete_Transversal: _10 <=
+Transversal: (3, 2, 1)
+
+    Sets: [[1]], Partial_Transversal: (3, 4), Complete_Transversal: _10
+      Sets: [], Partial_Transversal: (3, 4, 1), Complete_Transversal: _10 <=
+Transversal: (3, 4, 1)
+\end{python}
+\begin{lstlisting} [caption={Trace of tvsl\_yield\_lv},  label={lis:tvsl_yield_lv_output}]
+\end{lstlisting}
+\end{minipage}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{tvsl\_prolog (Listings from Section \ref{subsec:tvsl_prolog})} \label{appsubsec:tvsl_prolog}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{minipage}{\linewidth} \largev
+\begin{python}[numbers=left]
+tvsl_prolog(Sets, Partial_Transversal, _Complete_Transversal) :-
+    writeln('Sets': Sets;'  Partial_Transversal': Partial_Transversal), 
+    fail.
+
+tvsl_prolog([], Complete_Transversal, Complete_Transversal) :-
+    format(' => '),
+    writeln(Complete_Transversal).
+
+tvsl_prolog([S|Ss], Partial_Transversal, Complete_Transversal_X) :-
+    member(X, S),
+    \+ member(X, Partial_Transversal),
+    append(Partial_Transversal, [X], Partial_Transversal_X),
+    tvsl_prolog(Ss, Partial_Transversal_X, Complete_Transversal_X).
+
+\end{python}
+\begin{lstlisting} [caption={transversal\_prolog},  label={lis:transversalprolog1}]
+\end{lstlisting}
+\end{minipage}
+
+
+\noindent
+\begin{minipage}{\linewidth} \largev 
+\begin{python}
+?- tvsl_prolog([[1, 2, 3], [2, 4], [1]], [], Complete_Transversal).
+
+Sets:[[1, 2, 3], [2, 4], [1]]; Partial_Transversal:[]
+Sets:[[2, 4], [1]]; Partial_Transversal:[1]
+Sets:[[1]]; Partial_Transversal:[1, 2]
+Sets:[[1]]; Partial_Transversal:[1, 4]
+Sets:[[2, 4], [1]]; Partial_Transversal:[2]
+Sets:[[1]]; Partial_Transversal:[2, 4]
+Sets:[]; Partial_Transversal:[2, 4, 1]
+ => [2, 4, 1]
+ Complete_Transversal = [2, 4, 1]
+
+Sets:[[2, 4], [1]]; Partial_Transversal:[3]
+Sets:[[1]]; Partial_Transversal:[3, 2]
+Sets:[]; Partial_Transversal:[3, 2, 1]
+ => [3, 2, 1]
+ Complete_Transversal = [3, 2, 1]
+
+Sets:[[1]]; Partial_Transversal:[3, 4]
+Sets:[]; Partial_Transversal:[3, 4, 1]
+ => [3, 4, 1]
+ Complete_Transversal = [3, 4, 1]
+\end{python}
+\begin{lstlisting} [caption={transversal\_prolog trace},  label={lis:transversal_prolog_trace}]
+\end{lstlisting}
+\end{minipage}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Control Functions (Listings From Section \ref{sec:control_functions})} \label{appsec:control_functions}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Control flow in Prolog (Listings from Section \ref{subsec:control_flow_prolog})} \label{appsubsec:control_flow_prolog}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{minipage}{\linewidth} \hrulefill
+\begin{python}[numbers=left]
+solve([]).
+solve([Term|Terms]):-
+  clause(Term, Body), 
+  append(Body, Terms, New_Terms), 
+  solve(New_Terms).
+\end{python}
+\begin{lstlisting} [caption={A prolog interpreter in prolog},  label={lis:prologInterpreter}]
+\end{lstlisting}
+\end{minipage}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Prolog control flow in Pylog (Listings from Section \ref{subsec:control_flow_pylog})} \label{appsubsec:control_flow_pylog}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{minipage}{\linewidth}   \hrulefill
+\begin{python}[numbers=left]
+    for element in sets[0]:
+      if element not in partial_transversal:
+        complete_transversal = tvsl_dfs_first(sets[1:], partial_transversal + (element, ))
+        if complete_transversal is not None:
+          return complete_transversal 
+    return None
+\end{python}
+\begin{lstlisting} [caption={The \textbf{else} branch of \textittt{tvsl\_dfs\_first}}, label={lis:dfsfirstelse}]
+\end{lstlisting}
+\end{minipage}
+
+
+
+\noindent
+\begin{minipage}{\linewidth} \largev  
+\begin{python}[numbers=left]
+    for element in sets[0]:
+      if element not in partial_transversal:
+        yield from tvsl_yield(sets[1:], partial_transversal + (element, ))
+\end{python}
+\begin{lstlisting} [caption={The \textbf{else} branch of \textittt{tvsl\_yield}}, label={lis:yieldelse}]
+\end{lstlisting}
+\end{minipage}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{A review of Python generators (Listings from Section \ref{subsec:generators})} \label{appsubsec:generators}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\begin{minipage}{\linewidth}  \hrulefill  
+\begin{python}[numbers=left]
+def find_number(search_number):
+    i = 0
+    while True:
+        i += 1
+        if i == search_number:
+            print("\nFound the number:", search_number)
+            return
+        else:
+            yield i
+
+search_number = 5
+find_number_object = find_number(search_number)
+while True:
+    k = next(find_number_object)
+    print(f'{k} is not {search_number}')
+\end{python}
+\begin{lstlisting} [caption={\textittt{Generator example}},  label={lis:generatorExample1}]
+\end{lstlisting}
+\end{minipage}
+
+
+\noindent
+\begin{minipage}{\linewidth}  \largev   
+\begin{verbatim}
+1 is not 5
+2 is not 5
+3 is not 5
+4 is not 5
+
+Found the number: 5
+
+Traceback (most recent call last):
+  <line number where error occurred> 
+    k = next(find_number_object)
+StopIteration
+
+Process finished with exit code 1
+\end{verbatim}
+\begin{lstlisting} [caption={\textittt{Generator example output}},  label={lis:generatorExample2}]
+\end{lstlisting}
+\end{minipage}
+
+\noindent
+\begin{minipage}{\linewidth}  \largev   
+\begin{python}
+def use_yield_from():
+    yield from find_number_object
+    print('find_number failed, but "yield from" caught the Stop Iteration exception.')
+    return
+
+for k in use_yield_from():
+    print(f'{k} is not 5')
+\end{python}
+\begin{lstlisting} [caption={\textittt{yield from example}},  label={lis:yieldfromExample}]
+\end{lstlisting}
+\end{minipage}
+
+\noindent
+\begin{minipage}{\linewidth}  \largev   
+\begin{verbatim}
+1 is not 5
+2 is not 5
+3 is not 5
+4 is not 5
+Found the number: 5
+find_number failed, but "yield from" caught the Stop Iteration exception.
+
+Process finished with exit code 0
+\end{verbatim}
+\begin{lstlisting} [caption={\textittt{yield from example output}},  label={lis:yieldFromExampleOutput}]
+\end{lstlisting}
+\end{minipage}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{\textbf{yield} : \textit{succeed} :: \textit{return} : \textit{fail} (Listings from Section \ref{subsec:yield_succeed})} \label{appsubsec:yield_succeed}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{minipage}{\linewidth}   \hrulefill  
+\begin{python}
+head :- body_1.
+head :- body_2.
+\end{python}
+\begin{lstlisting} [caption={Prolog multiple clauses},  label={lis:prologmultipleclauses}]
+\end{lstlisting}
+\end{minipage}
+
+\noindent
+\begin{minipage}{\linewidth}  \largev   
+\begin{python}
+def head():
+    <some code>
+    yield
+    
+    <other code>
+    yield
+\end{python}
+\begin{lstlisting} [caption={Pylog multiple sequential yields},  label={lis:pylogmultipleyields}]
+\end{lstlisting}
+\end{minipage}
+
+\noindent
+\begin{minipage}{\linewidth}  \largev   
+\begin{python}
+head :- !, body_1.
+head :- body_2.
+\end{python}
+\begin{lstlisting} [caption={Prolog multiple clauses with a cut},  label={lis:prologmultipleclauseswithcut}]
+\end{lstlisting}
+\end{minipage}
+
+\noindent
+\begin{minipage}{\linewidth}  \largev   
+\begin{python}
+def head():
+    if <condition>:
+      <some code>
+      yield
+    else
+      <other code>
+      yield
+\end{python}
+\begin{lstlisting} [caption={Multiple Pylog \textbf{yield}s in separate \textbf{if}-\textbf{else} arms},  label={lis:pylogmultipleclauseswithifelse}]
+\end{lstlisting}
+\end{minipage}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Control functions (Listings from Section \ref{subsec:controlfunctions})} \label{appsubsec:controlfunctions}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{minipage}{\linewidth}  \largev 
+\begin{python}[numbers=left]
+def fails(f):
+  """
+  Applied to a function so that the resulting function succeeds if and only if the original fails.
+  Note that fails is applied to the function itself, not to a function call.
+  Similar to a decorator but applied explicitly when used.
+  """
+  def fails_wrapper(*args, **kwargs):
+    for _ in f(*args, **kwargs):
+      # Fail, i.e., don't yield, if f succeeds
+      return  
+    # Succeed if f fails.
+    yield     
+
+  return fails_wrapper
+\end{python}
+\begin{lstlisting} [caption={fails},  label={lis:fails}]
+\end{lstlisting}
+\end{minipage}
+
+\noindent
+\begin{minipage}{\linewidth}  \largev 
+\begin{python}[numbers=left]
+def forall(gens):
+  """
+  Succeeds if all generators in the gens list succeed. The elements in the gens list
+  are embedded in lambda functions to avoid premature evaluation.
+  """
+  if not gens:
+    # They have all succeeded.
+    yield
+  else:
+    # Get gens[0] and evaluate the lambda expression to get a fresh iterator.
+    # The parentheses after gens[0] evaluates the lambda expression.
+    # If it succeeds, run the rest of the generators in the list.
+    for _ in gens[0]( ):
+      yield from forall(gens[1:])
+\end{python}
+\begin{lstlisting} [caption={forall},  label={lis:forall}]
+\end{lstlisting}
+\end{minipage}
+
+
+\noindent
+\begin{minipage}{\linewidth}  \largev 
+\begin{python}[numbers=left]
+def forany(gens):
+  """
+  Succeeds if any of the generators in the gens list succeed. On backtracking, tries them all. 
+  The gens elements must be embedded in lambda functions.
+  """
+  for gen in gens:
+    yield from gen( )
+
+\end{python}
+\begin{lstlisting} [caption={forany},  label={lis:forany}]
+\end{lstlisting}
+\end{minipage}
+
+\noindent
+\begin{minipage}{\linewidth}  \largev 
+\begin{python}[numbers=left]
+def trace(x, succeed=True, show_trace=True):
+  """
+  Can be included in a list of generators (as in forall and forany) to see where we are.
+  The second argument determines whether trace succeeds or fails. The third turns printing on or off.
+  When included in a list of forall generators, succeed should be set to True so that
+  it doesn't prevent forall from succeeding.
+  When included in a list of forany generators, succeed should be set to False so that forany
+  will go on the the next generator and won't take trace as an extraneous successes.
+  """
+  if show_trace:
+    print(x)
+  if succeed:
+    yield
+
+\end{python}
+\begin{lstlisting} [caption={trace},  label={lis:trace}]
+\end{lstlisting}
+\end{minipage}
+
+\noindent
+\begin{minipage}{\linewidth}  \largev 
+\begin{python}[numbers=left]
+def would_succeed(f):
+  """
+  Applied to a function so that the resulting function succeeds/fails if and only if the original
+  function succeeds/fails. If the original function succeeds, this also succeeds but without 
+  binding any variables. Similar to a decorator but applied explicitly when used.
+  """
+  def would_succeed_wrapper(*args, **kwargs):
+    succeeded = False
+    for _ in f(*args, **kwargs):
+      succeeded = True
+      # Do not yield in the context of f succeeding.
+      
+    # Exit the for-loop so that unification will be undone.
+    if succeeded:
+      # Succeed if f succeeded.
+      yield  
+    # The else clause is redundant. It is included here for clarity.
+    # else:
+    #   Fail if f failed.
+    #   pass   
+
+  return would_succeed_wrapper
+
+\end{python}
+\begin{lstlisting} [caption={would\_succeed},  label={lis:wouldsucceed}]
+\end{lstlisting}
+\end{minipage}
+
+\noindent
+\begin{minipage}{\linewidth}  \largev 
+\begin{python}[numbers=left]
+def bool_yield_wrapper(gen):
+  """
+  A decorator. Produces a function that generates a Bool_Yield_Wrapper object. 
+  """
+  def wrapped_func(*args, **kwargs):
+    return Bool_Yield_Wrapper(gen(*args, **kwargs))
+
+  return wrapped_func
+\end{python}
+\begin{lstlisting} [caption={bool\_yield\_wrapper},  label={lis:boolYieldWrapper}]
+\end{lstlisting}
+\end{minipage}
+
+
+\noindent
+\begin{minipage}{\linewidth}  \largev 
+\begin{python}[numbers=left]
+  @bool_yield_wrapper
+  def squares(n: int, X2: Var) -> Bool_Yield_Wrapper:
+    for i in range(n):
+      unify_gen = bool_yield_wrapper(unify)(X2, i**2)
+      while unify_gen.has_more():
+        yield
+
+  Square = Var()
+  squares_gen = squares(5, Square)
+  while squares_gen.has_more():
+    print(Square)
+\end{python}
+\begin{lstlisting} [caption={bool\_yield\_wrapper example},  label={lis:boolYieldWrapperExample}]
+\end{lstlisting}
+\end{minipage}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Logic variables (Listings from Section \ref{sec:logic_variables})} \label{appsec:logic_variables} 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{PyValue (Listings from Section \ref{subsec:pyvalue})} \label{appsubsec:pyvalue}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+No listings from this section.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Var (Listings from Section \ref{subsec:var})} \label{appsubsec:var}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{minipage}{\linewidth}   \hrulefill
+\begin{python}[numbers=left]
+def print_ABCDE(A, B, C, D, E):
+    print(f'A: {A}, B: {B}, C: {C}, D: {D}, E: {E}')
+
+(A, B, C, D, E) = (Var(), Var(), Var(), Var(), 'abc')
+print_ABCDE(A, B, C, D, E) 
+for _ in unify(A, B):
+  print_ABCDE(A, B, C, D, E) 
+  for _ in unify(D, C):
+    print_ABCDE(A, B, C, D, E) 
+    for _ in unify(A, C):
+      print_ABCDE(A, B, C, D, E) 
+      for _ in unify(E, D):
+        print_ABCDE(A, B, C, D, E) 
+      print_ABCDE(A, B, C, D, E) 
+    print_ABCDE(A, B, C, D, E) 
+  print_ABCDE(A, B, C, D, E) 
+print_ABCDE(A, B, C, D, E) 
+\end{python}
+\begin{lstlisting} [caption={Unifying logic variables},  label={lis:unifylogicvars1}]
+\end{lstlisting}
+\end{minipage}
+
+\noindent
+\begin{minipage}{\linewidth} \largev  
+\begin{python}[numbers=left]
+A: _195, B: _196, C: _197, D: _198, E: abc
+A: _196, B: _196, C: _197, D: _198, E: abc
+A: _196, B: _196, C: _197, D: _197, E: abc
+A: _197, B: _197, C: _197, D: _197, E: abc
+A: abc, B: abc, C: abc, D: abc, E: abc
+A: _197, B: _197, C: _197, D: _197, E: abc
+A: _196, B: _196, C: _197, D: _197, E: abc
+A: _196, B: _196, C: _197, D: _198, E: abc
+A: _195, B: _196, C: _197, D: _198, E: abc
+\end{python}
+\begin{lstlisting} [caption={Unifying logic variables},  label={lis:unifylogicvars2}]
+\end{lstlisting}
+\end{minipage}
+
+\noindent
+\begin{minipage}{\linewidth} \largev  
+\begin{python}
+(A, B, C, D, E) = (*n_Vars(4), 'abc')
+for _ in unify_pairs([(A, B), (D, C), (A, C), (E, D)]):
+\end{python}
+\begin{lstlisting} [caption={Unifying logic variables shortened},  label={lis:unifylogicvarsshortened}]
+\end{lstlisting}
+\end{minipage}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Structure (Listings from Section \ref{subsec:structure})} \label{appsubsec:structure}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+No listings from this section.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Lists (Listings from Section \ref{subsec:lists})} \label{appsubsec:lists}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+No listings from this section.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{\textit{append} (Listings from Section \ref{subsec:append})} \label{appsubsec:append}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{minipage}{\linewidth} \hrulefill
+\begin{python}
+(Xs, Ys, Zs) = (Var(), Var(), LinkedList([1, 2, 3]))
+for _ in append(Xs, Ys, Zs):
+  print(f'Xs = {Xs}\nYs = {Ys}\n')
+\end{python}
+\begin{lstlisting} [caption={append},  label={lis:append}]
+\end{lstlisting}
+\end{minipage}
+
+\noindent
+\begin{minipage}{\linewidth}  \largev 
+\begin{python}
+Xs = []
+Ys = [1, 2, 3]
+
+Xs = [1]
+Ys = [2, 3]
+
+Xs = [1, 2]
+Ys = [3]
+
+Xs = [1, 2, 3]
+Ys = []
+\end{python}
+\begin{lstlisting} [caption={append output},  label={lis:append_output}]
+\end{lstlisting}
+\end{minipage}
+\smallv
+
+\noindent
+\begin{minipage}{\linewidth}  \largev 
+\begin{python}
+append([], Ys, Ys).
+append([XZ|Xs], Ys, [XZ|Zs]) :- append(Xs, Ys, Zs).
+\end{python}
+\begin{lstlisting} [caption={prolog append code},  label={lis:prolog_append_code}]
+\end{lstlisting}
+\end{minipage}
+
+% Now the wordier but isomorphic Pylog version.
+
+
+\noindent
+\begin{minipage}{\linewidth}  \largev 
+\begin{python}[numbers=left]
+# For a cleaner presentation, declarations are dropped. All variables are Union[LinkedList, Var].
+def append(Xs, Ys, Zs):
+
+  # Corresponds to: append([], Ys, Ys).
+  yield from unify_pairs([(Xs, LinkedList([])), (Ys, Zs)])
+
+  # Corresponds to: append([XZ|Xs], Ys, [XZ|Zs]) :- append(Xs, Ys, Zs).
+  (XZ_Head, Xs_Tail, Zs_Tail) = n_Vars(3)
+  for _ in unify_pairs([(Xs, LinkedList(XZ_Head, Xs_Tail)),
+                       (Zs, LinkedList(XZ_Head, Zs_Tail))]):
+    yield from append(Xs_Tail, Ys, Zs_Tail)
+
+\end{python}
+\begin{lstlisting} [caption={Pylog append code},  label={lis:append_code}]
+\end{lstlisting}
+\end{minipage}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Unification (Listings from Section \ref{subsec:unify})} \label{appsubsec:unify}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{minipage}{\linewidth} \hrulefill
+\begin{python}[numbers=left]
+@euc
+def unify(Left: Any, Right: Any):
+
+  (Left, Right) = map(ensure_is_logic_variable, (Left, Right))
+
+  # Case 1.
+  if Left == Right:
+    yield
+
+  # Case 2.
+  elif isinstance(Left, PyValue) and isinstance(Right, PyValue) and \
+       (not Left.is_instantiated( ) or not Right.is_instantiated( )) and \
+       (Left.is_instantiated( ) or Right.is_instantiated( )):
+    (assignedTo, assignedFrom) = (Left, Right) if Right.is_instantiated( ) else (Right, Left)
+    assignedTo._set_py_value(assignedFrom.get_py_value( ))
+    yield
+
+    assignedTo._set_py_value(None)
+
+  # Case 3.
+  elif isinstance(Left, Structure) and isinstance(Right, Structure) and Left.functor == Right.functor:
+    yield from unify_sequences(Left.args, Right.args)
+
+  # Case 4.
+  elif isinstance(Left, Var) or isinstance(Right, Var):
+    (pointsFrom, pointsTo) = (Left, Right) if isinstance(Left, Var) else (Right, Left)
+    pointsFrom.unification_chain_next = pointsTo
+    yield
+
+    pointsFrom.unification_chain_next = None
+
+\end{python}
+\begin{lstlisting} [caption={unify},  label={lis:unify}]
+\end{lstlisting}
+\end{minipage}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Back to tvsl\_yield\_lv (Listings from Section \ref{subsec:more_tvsl_yield_lv})} \label{appsubsec:more_tvsl_yield_lv}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+No listing from this section.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{The Zebra Puzzle (Listings From Section \ref{sec:zebra})} \label{appsec:zebra}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{The clues and a Prolog solution (Listings from Section \ref{subsec:clues})} \label{appsubsec:clues}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{minipage}{\linewidth}
+\hrulefill
+\begin{python}
+zebra_problem(Houses) :-
+    Houses = [house(_, _, _, _, _), house(_, _, _, _, _), house(_, _, _, _, _), 
+              house(_, _, _, _, _), house(_, _, _, _, _)], 
+
+    % 1. The English live in the red house.
+    member(house(english, _, _, _, red), Houses), 
+
+    % 2. The Spanish have a dog.
+    member(house(spanish, _, dog, _, _), Houses), 
+
+    % 3. They drink coffee in the green house.
+    member(house(_, _, _, coffee, green), Houses), 
+
+    % 4. The Ukrainians drink tea.
+    member(house(ukranians, _, _, tea, _), Houses), 
+
+    % 5. The green house is immediately to the right of the white house.
+    nextto(house(_, _, _, _, white), house(_, _, _, _, green), Houses), 
+
+    % 6. The Old Gold smokers have snails.
+    member(house(_, old_gold, snails, _, _), Houses), 
+
+    % 7. They smoke Kool in the yellow house.
+    member(house(_, kool, _, _, yellow), Houses), 
+
+    % 8. They drink milk in the middle house.
+    Houses = [_, _, house(_, _, _, milk, _), _, _], 
+
+    % 9. The Norwegians live in the first house on the left.
+    Houses = [house(norwegians, _, _, _, _) | _], 
+
+    % 10. The Chesterfield smokers live next to the fox.
+    next_to(house(_, chesterfield, _, _, _), house(_, _, fox, _, _), Houses), 
+
+    % 11. They smoke Kool in the house next to the horse.
+    next_to(house(_, kool, _, _, _), house(_, _, horse, _, _), Houses), 
+
+    % 12. The Lucky smokers drink juice.
+    member(house(_, lucky, _, juice, _), Houses), 
+
+    % 13. The Japanese smoke Parliament.
+    member(house(japanese, parliament, _, _, _), Houses), 
+
+    % 14. The Norwegians live next to the blue house.
+    next_to(house(norwegians, _, _, _, _), house(_, _, _, _, blue), Houses), 
+\end{python}
+\begin{lstlisting} [caption={Zebra puzzle in Prolog},  label={lis:zebra_prolog}]
+\end{lstlisting}
+\end{minipage}
+
+\noindent
+\begin{minipage}{\linewidth}
+\begin{python}
+?- zebra_problem(Houses).
+[    
+    house(norwegians, kool, fox, water, yellow), 
+    house(ukranians, chesterfield, horse, tea, blue), 
+    house(english, old_gold, snails, milk, red), 
+    house(spanish, lucky, dog, juice, white), 
+    house(japanese, parliament, zebra, coffee, green)     
+]
+\end{python}
+\begin{lstlisting} [caption={Zebra puzzle in Prolog},  label={lis:zebra_solution}]
+\end{lstlisting}
+\end{minipage}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{A Pylog solution (Listings from Section \ref{subsec:pylog_solution})} \label{appsubsec:pylog_solution}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{minipage}{\linewidth}
+\hrulefill
+\begin{python}
+  def clue_1(self, Houses: SuperSequence):
+    """ 1. The English live in the red house.  """
+    yield from member(House(nationality='English', color='red'), Houses)
+
+  ...
+
+  def clue_8(self, Houses: SuperSequence):
+    """ 8. They drink milk in the middle house. """
+    yield from unify(House(drink='milk'), Houses[2])
+
+  ...
+\end{python}
+\begin{lstlisting} [caption={Clues as Pylog functions},  label={lis:clues_as_pylog_functions}]
+\end{lstlisting}
+\end{minipage}
+
+\noindent
+\begin{minipage}{\linewidth} \largev
+\begin{python}
+After 1392 rule applications, 
+	1. Norwegians(Kool, fox, water, yellow)
+	2. Ukrainians(Chesterfield, horse, tea, blue)
+	3. English(Old Gold, snails, milk, red)
+	4. Spanish(Lucky, dog, juice, white)
+	5. Japanese(Parliament, zebra, coffee, green)
+The Japanese own a zebra, and the Norwegians drink water.
+\end{python}
+\begin{lstlisting} [caption={Pylog solution},  label={lis:pylog_solution}]
+\end{lstlisting}
+\end{minipage}
+
+\noindent
+\begin{minipage}{\linewidth} \largev
+\begin{python}
+def zebra_problem(Houses) :-
+    for _ in forall{[
+        # 1. The English live in the red house.
+        lambda: member(house(english, _, _, _, red), Houses), 
+        # 2. The Spanish have a dog.
+        lambda: member(house(spanish, _, dog, _, _), Houses), 
+        # ...
+        ]}
+\end{python}
+\begin{lstlisting} [caption={Pylog solution},  label={lis:zebra_forall}]
+\end{lstlisting}
+\end{minipage}
+
+\noindent
+\begin{minipage}{\linewidth} \largev
+\begin{python}
+def run_all_clues(World_List: List[Term], clues: List[Callable]):
+    if not clues:
+      # Ran all the clues. Succeed.
+      yield
+    else:
+      # Run the current clue and then the rest of the clues.
+      for _ in clues[0](World_List):
+        yield from run_all_clues(World_List, clues[1:])
+\end{python}
+\begin{lstlisting} [caption={Pylog solution},  label={lis:zebra_ run_all_clues}]
+\end{lstlisting}
+\end{minipage}
+
+\noindent
+\begin{minipage}{\linewidth} \largev
+\begin{python}
+  def clue_1(Houses: SuperSequence):
+    """ 1. The English live in the red house.  """
+    for _ in member(House(nationality='English', color='red'), Houses):
+      yield from clue_2(Houses)
+
+  def clue_2(Houses: SuperSequence):
+    """ 2. The Spanish have a dog. """
+    for _ in member(House(nationality='Spanish', pet='dog'), Houses):
+      yield from clue_3(Houses)
+      
+  ...
+\end{python}
+\begin{lstlisting} [caption={Pylog solution},  label={lis:zebra_rule_chaining}]
+\end{lstlisting}
+\end{minipage}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Conclusion (Listings from Section \ref{sec:conclusion})} \label{appsec:conclusion}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{minipage}{\linewidth}
+\hrulefill
+\begin{python}
+   def some_clause(...):
+     for _ in <generate options>:
+       <local conditions>
+       yield from next_clause(...)
+\end{python}
+\begin{lstlisting} [caption={A Pylog/Prolog template},  label={lis:template}]
+\end{lstlisting}
+\end{minipage}

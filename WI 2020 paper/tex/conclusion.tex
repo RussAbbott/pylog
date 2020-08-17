@@ -1,0 +1,73 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Conclusion (Listings in Appendix \ref{appsec:conclusion})} \label{sec:conclusion}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Embedding rule chaining in the clues suggests the template for Pylog as in Listing \ref{lis:template}.
+
+% \begin{minipage}{\linewidth}
+% \begin{python}
+%   def some_clause(...):
+%      for _ in <generate options>:
+%       <local conditions>
+%       yield from next_clause(...)
+% \end{python}
+% \begin{lstlisting} [caption={The Trace decorator},  label={lis:template}]
+% \end{lstlisting}
+% \end{minipage}
+
+% More generally, 
+Pylog offers a way to integrate constraint programming into Python. It would difficult to imagine a neural net solving any of the problems discussed here.
+
+% \begin{itemize}
+%   \item The magic of unification requires little more than linked chains.
+%   \item Prolog's control structures can be implemented as nested \textbf{for}-loops (for both choicepoints and scope setting), with \textbf{yield} and \textbf{yield from} gluing the pieces together.
+% \end{itemize}
+
+% \appendix 
+% \section{The Trace decorator}
+
+% The \textit{Trace} decorator is defined as a class rather than a function. \textit{Trace} logs parameter values for both regular functions and generators, but \textit{Trace} does not handle keyword parameters.
+
+% \begin{minipage}{\linewidth} \largev \hrulefill
+% \begin{python}[numbers=left]
+% from inspect import isgeneratorfunction, signature
+
+% class Trace:
+
+%     def __init__(self, f):
+%         self.param_names = [param.name for param in signature(f).parameters.values()]
+%         self.f = f
+%         self.depth = 0
+
+%     def __call__(self, *args):
+%         print(self.trace_line(args))
+%         self.depth += 1
+%         if isgeneratorfunction(self.f):
+%             return self.yield_from(*args)
+%         else:
+%             f_return = self.f(*args)
+%             self.depth -= 1
+%             return f_return
+
+%     def yield_from(self, *args):
+%         yield from self.f(*args)
+%         self.depth -= 1
+
+%     @staticmethod
+%     def to_str(xs):
+%         xs_string = f'[{", ".join(Trace.to_str(x) for x in xs)}]' if isinstance(xs, list) else str(xs)
+%         return xs_string
+
+%     def trace_line(self, args):
+%         # The quoted string on the next line is two spaces.
+%         prefix = "  " * self.depth
+%         params = ", ".join([f'{param_name}: {Trace.to_str(arg)}'
+%                             for (param_name, arg) in zip(self.param_names, args)])
+%         # Special case for the transversal functions
+%         termination = ' <=' if not args[0] else ''
+%         return prefix + params + termination
+% \end{python}
+
+% \begin{lstlisting} [caption={The Trace decorator},  label={lis:Trace}]
+% \end{lstlisting}
+% \end{minipage}

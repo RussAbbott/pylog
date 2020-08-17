@@ -1,0 +1,293 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Solver basics and heuristics} \label{sec:solver-basics}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+To discuss solvers, it helps to refer to an example problem. We will use the computation of a transversal. Given a sequence of sets, a transversal is a non-repeating sequence of elements with the property that the \textit{n\textsuperscript{th}} element of the traversal belongs to the \textit{n\textsuperscript{th}} set in the sequence.  For example, the sets \[\{1, 2, 3\}, \{1, 2, 4\}, \{1\}\] has three transversals: [2, 4, 1], [3, 2, 1], and [3, 4, 1]. 
+
+This is clearly a search problem. It can be solved with a simple depth-first search. First a utility function.
+
+\begin{minipage}[c]{0.45\textwidth}
+\begin{python1}[numbers=left]
+unassigned = '_'
+def uninstantiated_indices(transversal):
+  """ Find indices of uninstantiated components. """
+  return [indx for indx in range(len(transversal)) 
+               if transversal[indx] is unassigned]
+\end{python1}
+\begin{lstlisting} [caption={\textit{uninstantiated\_indices}}, label={lis:uninstantiated}]
+\end{lstlisting}
+\end{minipage}
+
+We apologize in advance for our Python code style deficiencies. This seemed to be the only way to include our code in the article given the column width and page limit.
+
+First, a high level description of how \textit{tnvsl\_dfs} works. 
+\begin{itemize}
+    \item \textit{tnvsl\_dfs} looks for a transversal by finding transversal elements from left to right.
+    \item It selects an element from the first set and (tentatively) assigns that as the first element of the transversal.
+    \item It then recursively looks for a transversal for the rest of the sets---making sure that the element it selected from the first set is not repeated.
+    \item If, at any point, it cannot proceed, say because it has reached a set all of whose elements have already been used, it ``fails,'' goes back to an earlier set, selects a different element from that set, and proceeds forward.
+\end{itemize}
+
+Now the code.
+
+\begin{minipage}[c]{0.45\textwidth}
+\begin{python1}[numbers=left]
+def tnvsl_dfs(sets, tnvsl):
+  remaining_indices = uninstantiated_indices(tnvsl)
+  if not remaining_indices: return tnvsl
+
+  nxt_indx = min(remaining_indices)
+  for elmt in sets[nxt_indx]:
+    if elmt not in tnvsl:
+      new_tnvsl = tnvsl[:nxt_indx] \
+                  + (elmt, ) \
+                  + tnvsl[nxt_indx+1:]
+      full_tnvsl = tnvsl_dfs(sets, new_tnvsl)
+      if full_tnvsl is not None: return full_tnvsl
+\end{python1}
+\begin{lstlisting} [caption={\textit{tnvsl\_dfs}}, label={lis:dfs}]
+\end{lstlisting}
+\end{minipage}
+
+Here's an explanation of the code in some detail.
+\begin{itemize}
+    \item The function \textit{tnvsl\_dfs} takes two parameters: 
+        \begin{enumerate}
+            \item \textit{sets}: a list of sets
+            \item \textit{tnvsl}: a tuple with as many positions as there are sets, but initialized to undefined.
+        \end{enumerate}
+    \item \textit{line 2}. Let \textit{remaining\_indices} be the indices of uninstantiated elements of \textit{tnvsl}. Initially this will be all of them. Since this first version of \textit{tnvsl\_dfs} generates values from left to right, the first element of \textit{remaining\_indices} will always be the leftmost undefined index position.
+    \item \textit{line 3}. If \textit{remaining\_indices} is null, we have a complete transversal. Return it. Otherwise, go on to \textit{line 5}.
+    \item \textit{line 5}. Set \textit{nxt\_indx} to the first undefined index position.
+    \item \textit{line 6}. Begin a loop that looks at the elements of \textit{sets[nxt\_indx]}, the set at position  \textit{nxt\_indx}. We want an element from that set to represent it in the transversal.
+    \item \textit{line 7}. If the currently selected \textit{elmt} of \textit{sets[nxt\_indx]} is not already in \textit{tnvsl}:
+    \begin{enumerate}
+        \item \textit{lines 8-10}. Put \textit{elmt} at position \textit{nxt\_indx}.
+        \item \textit{line 11}. Call \textit{tnvsl\_dfs} recursively to complete the transversal, passing \textit{new\_tnvsl}, the extended \textit{tnvsl}. Assign the returned result to \textit{full\_tnvsl}.
+        \item \textit{line 12}. If the returned result is not \textbf{None}, we have found a transversal. Return it to the caller. If the  returned result is \textbf{None}, the \textit{elmt} we selected from \textit{sets[nxt\_indx]} did not lead to a complete transversal. Return to \textit{line 6} to select another element.
+    \end{enumerate}
+\end{itemize}
+
+This is standard depth first search. If there is at least one transversal, \textit{tnvsl\_dfs} will find the first one. Otherwise \textit{tnvsl\_dfs} will run off the end and return \textbf{None}.
+
+Here's a trace of the recursive calls.
+
+\smallv
+\begin{minipage}[c]{0.45\textwidth}
+\begin{python1}[numbers=left]
+sets: [{1,2,3}, {1,2,4}, {1}], tnvsl: (_,_,_)
+  sets: [{1,2,3}, {1,2,4}, {1}], tnvsl: (1,_,_)
+    sets: [{1,2,3}, {1,2,4}, {1}], tnvsl: (1,2,_)
+    sets: [{1,2,3}, {1,2,4}, {1}], tnvsl: (1,4,_)
+  sets: [{1,2,3}, {1,2,4}, {1}], tnvsl: (2,_,_)
+    sets: [{1,2,3}, {1,2,4}, {1}], tnvsl: (2,1,_)
+    sets: [{1,2,3}, {1,2,4}, {1}], tnvsl: (2,4,_)
+      sets: [{1,2,3}, {1,2,4}, {1}], tnvsl: (2,4,1)
+\end{python1}
+\begin{lstlisting} [caption={\textit{tnvsl\_dfs trace}}, label={lis:dfs-trace}]
+\end{lstlisting}
+\end{minipage}
+
+\begin{itemize}
+    \item \textit{line 1}. Initially (and on each call) the \textit{sets} are \[\{1, 2, 3\}, \{1, 2, 4\}, \{1\}\] Initially \textit{tnvsl} is completely undefined: \textit{(\_, \_, \_)}
+    \item  \textit{line 2}. \textit{1} is selected as the first element of \textit{trvs}.
+    \item  \textit{line 3}. \textit{1}  and \textit{2} are selected as the first two elements.
+    \item \textit{line 4}. But now we are stuck. Since \textit{1} is already in \textit{trvs}, we can't use it as the third element of \textit{trvs}. Depth first search operates blindly. Instead of selecting an alternative for the first set, it backs up to the most recent selection and selects \textit{4} to represent the second set. 
+    \item \textit{lines 5}. Of course, that doesn't solve the problem. So we back up again. Since we have already tried all elements of the second set, we back up to the first set and select \textit{2} as its representative. 
+    \item \textit{lines 6}. Going forward, we select \textit{1} for second set.
+    \item \textit{lines 7}. Again, we cannot use \textit{1} for the third set. So we back up and select \text{4} to represent the second set. (We can't use \textit{2} since it is already taken.)
+    \item \textit{lines 8}. Finally, we can select \textit{1} as the third element of \textit{trvs}, and we're done.
+\end{itemize}
+
+Even though this is a simple depth-first search, it incorporates (what appears to be and what we have been referring to as) backtracking. In fact, there is no backtracking. The recursively nested \textbf{for}-loops produce a backtracking effect.  
+
+It is common to use the term \textit{choicepoint} for places when (a) multiple choices are possible and (b) one wants to try them all, if necessary. Our simple solver implements choicepoints via (recursively) nested \textbf{for}-loops. 
+
+We can see, though, that there is lots of room for improvement. We'll discuss two heuristics. 
+
+\noindent\textbf{Propagate}. When we select an element for \textit{trvs} we can \textit{propagate} that selection by removing that element from the remaining sets. We can do that with the following changes to our original code. (Of course, a real solver would not hard-code heuristics. This is just to show how it works.)
+\begin{enumerate}
+    \item Before \textit{line 11}, insert this line.
+    
+\begin{minipage}[c]{0.45\textwidth}
+\begin{python1}
+new_sets = [set - {elmt} for set in sets]
+\end{python1}
+\end{minipage}
+
+Then replace \textit{sets} with \textit{new\_sets} in \textit{line 11}.
+This will remove \textit{elmt} from the remaining sets.
+
+    \item Before \textit{line 5}, insert
+    
+\begin{python1}
+if any(not sets[idx] for idx in remaining_indices):
+  return None
+\end{python1}
+
+This tests whether any of our unrepresented sets are now empty. If so, we can't continue. (Recall that Python style recommends treating a set as a boolean when testing for emptiness. An empty set is considered \textbf{False}.)
+
+
+\end{enumerate}
+
+Because the empty sets in lines 2 and 4  trigger immediate backtracking, the execution takes 6 steps rather than 8.
+
+\smallv
+\begin{minipage}[c]{0.45\textwidth}
+\begin{python1}[numbers=left]
+sets: [{1,2,3}, {1,2,4}, {1}], tnvsl: (_,_,_)
+  sets: [{2,3}, {2,4}, set()], tnvsl: (1,_,_)
+  sets: [{1,3}, {1,4}, {1}], tnvsl: (2,_,_)
+    sets: [{3}, {4}, set()], tnvsl: (2,1 _)
+    sets: [{1,3}, {1}, {1}], tnvsl: (2,4,_)
+      sets: [{3}, set(), set()], tnvsl: (2,4,1)
+\end{python1}
+\begin{lstlisting} [caption={\textit{tnvsl\_dfs\_prop trace}}, label={lis:dfs-prop-trace}]
+\end{lstlisting}
+\end{minipage}
+
+\noindent\textbf{Smallest first}. When selecting which \textit{tnvsl} index to fill next, pick the position associated with the smallest remaining set. 
+
+In the original code, replace line 5 with 
+\begin{python1}
+ nxt_indx = min(remaining_indices,
+                key=lambda indx: len(sets[indx]))
+\end{python1}
+
+The resulting trace is only 4 lines. (At line 3, the first two sets are the same size. By convention, \textit{min} selects the first.)
+
+\begin{minipage}[c]{0.45\textwidth}
+\begin{python1}[numbers=left]
+sets: [{1,2,3}, {1,2,4}, {1}], tnvsl: (_,_,_)
+  sets: [{1,2,3}, {1,2,4}, {1}], tnvsl: (_,_,1)
+    sets: [{1,2,3}, {1,2,4}, {1}], tnvsl: (2,_,1)
+      sets: [{1,2,3}, {1,2,4}, {1}, tnvsl: (2,4,1)
+\end{python1}
+\begin{lstlisting} [caption={\textit{tnvsl\_dfs\_smallest trace}}, label={lis:dfs-smallest-trace}]
+\end{lstlisting}
+\end{minipage}
+
+One could apply both heuristics. Since in this case there was no backtracking, adding the \textit{propagate} heuristic makes no effective difference. Since you can see the pending sets shrinking however, the trace is a bit prettier.
+
+\begin{minipage}[c]{0.45\textwidth}
+\begin{python1}[numbers=left]
+sets: [{1,2,3}, {1,2,4}, {1}], tnvsl: (_,_,_)
+  sets: [{2,3}, {2,4}, {}], tnvsl: (_,_,1)
+    sets: [{3}, {4}, {}], tnvsl: (2,_,1)
+      sets: [{3}, {}, {}, tnvsl: (2,4,1)
+\end{python1}
+\begin{lstlisting} [caption={\textit{tnvsl\_dfs\_both\_heuristics trace}}, label={lis:dfs-both-trace}]
+\end{lstlisting}
+\end{minipage}
+
+This concludes our discussion of a basic depth-first solver and two useful heuristics. We have yet to mention generators.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Generators} \label{sec:generators}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+In our previous examples, we have been happy to stop once we found a transversal,  any transversal. But what if the problem were a bit harder and we were looking for a transversal whose elements added to a given sum. The solvers we have seen so far wouldn't help---unless we added the new constraint to the solver itself. But we don't want to do that. We want to keep the transversal solvers independent of other constraints. (Adding heuristics don't violate this principle. Heuristics only make solvers more efficient.)
+
+One approach would be to modify our solver to find and return all transversals. We could then select the one(s) that satisfied our additional constraints. But what if there were a great many transversals? Generating them all before looking at any of them would waste a colossal amount of time. 
+
+We need a solver than can return results while keeping track of where it is with respect to its choice points so that it can continue from there if necessary. That's what a generator does. 
+
+Here is our solver, \textit{including both heuristics}, as a generator.
+
+\begin{minipage}[c]{0.45\textwidth}
+\begin{python1}[numbers=left]
+def tnvsl_dfs_gen(sets, tnvsl):
+  remaining_indices = uninstantiated_indices(tnvsl)
+
+  if not remaining_indices: yield tnvsl
+  else:
+    if any(not sets[i] for i in remaining_indices):
+      return None
+      
+    nxt_indx = min(remaining_indices,
+                   key=lambda indx: len(sets[indx]))
+    for elmt in sets[nxt_indx]:
+      if elmt not in tnvsl:
+        new_tnvsl = tnvsl[:nxt_indx] \
+                    + (elmt, ) \
+                    + tnvsl[nxt_indx+1:]
+        new_sets = [set - {elmt} for set in sets]
+        for full_tnvsl in tnvsl_dfs_gen(sets, 
+                                        new_tnvsl):
+          yield full_tnvsl
+\end{python1}
+\begin{lstlisting} [caption={\textit{tnvsl\_dfs\_gen}}, label={lis:dfs-gen}]
+\end{lstlisting}
+\end{minipage}
+
+When called as in the following,
+
+\begin{minipage}[c]{0.45\textwidth}
+\begin{python1}[numbers=left]
+for tnvsl in tnvsl_dfs_gen(sets, ('_','_','_')):
+    print('=> ', tnvsl)
+\end{python1}
+\end{minipage}
+
+the Trace looks like this.
+
+\begin{minipage}[c]{0.45\textwidth}
+\begin{python1}[numbers=left]
+sets: [{1,2,3}, {1,2,4}, {1}], tnvsl: (_,_,_)
+  sets: [{2,3}, {2,4}, {}], tnvsl: (_,_,1)
+    sets: [{3}, {4}, {}], tnvsl: (2,_,1)
+      sets: [{3}, {}, {}], tnvsl: (2,4,1)
+=>  (2, 4, 1)
+    sets: [{2}, {2,4}, {}], tnvsl: (3,_,1)
+      sets: [{}, {4}, {}], tnvsl: (3,2,1)
+=>  (3, 2, 1)
+      sets: [{2}, {2}, {}], tnvsl: (3,4,1)
+=>  (3, 4, 1)
+\end{python1}
+\begin{lstlisting} [caption={\textit{tnvsl\_dfs\_gen trace}}, label={lis:dfs-gen1}]
+\end{lstlisting}
+\end{minipage}
+
+All transversals are generated with no unnecessary backtracking.
+
+Some comments on \textit{tnvsl\_dfs\_gen}.
+\begin{itemize}
+    \item The newly added \textbf{else} on line 5 is necessary. Previously, if there were no \textit{remaining\_indices}, we returned \textit{tnvsl}. That was the end of execution for this recursive call. But if we \textbf{yield} instead of \textbf{return}, when \textit{tnvsl\_dfs\_gen} is asked for more results, it continues with the line after the \textbf{yield}. But if have already found a transversal, we are done. We don't want to continue. The \textbf{else} divides the code into two mutually exclusive components. In effect \textbf{return} had done that implicitly.
+    
+    \item Lines 17-20 call \textit{tnvsl\_dfs\_gen} recursively and ask for all the transversals that can be constructed from the current state. Each one is then \textbf{yield}ed. No need to exclude \textbf{None}.  \textit{tnvsl\_dfs\_gen} will \textbf{yield} only complete transversals. 
+    
+    \smallv
+Using \textbf{yield from}, lines 17-20 can be replaced by a line that \textbf{yield}s, one at a time, what \textit{tnvsl\_dfs\_gen} \textbf{yield}s to it.
+\begin{python1}
+yield from tnvsl_dfs_gen(new_sets, new_tnvsl)
+\end{python1}
+    
+     
+    
+\end{itemize}
+
+Let's turn off \textit{trace} and solve our initial problem: find a transversal whose elements sum to 6.
+
+\begin{minipage}[c]{0.45\textwidth}
+\begin{python1}
+for tnvsl in tnvsl_dfs_gen(sets, ('_','_','_')):
+  sum_string = ' + '.join(str(i) for i in tnvsl)
+  equals = '==' if sum(tnvsl) == 6 else '!='
+  print(f'{sum_string} {equals} 6')
+  if sum(tnvsl) == 6: break
+\end{python1}
+\begin{lstlisting} [caption={\textit{running tnvsl\_dfs\_gen}}, label={lis:dfs-gen-call}]
+\end{lstlisting}
+\end{minipage}
+
+The output will be as follows.
+
+\begin{minipage}[c]{0.45\textwidth}
+\begin{python1}[numbers=left]
+2 + 4 + 1 != 6
+3 + 2 + 1 == 6
+\end{python1}
+\begin{lstlisting} [caption={\textit{tnvsl\_dfs\_gen trace}}, label={lis:dfs-gen2}]
+\end{lstlisting}
+\end{minipage}
+
+We generated transversals until we found one whose elements summed to 6. Then we stopped.
