@@ -137,7 +137,7 @@ A & \to & B            & \to & 'abc'      \\
 
 \smallv
 \subsection{A logic-variable version of \textit{tnvsl\_dfs\_gen}}
-Listing \ref{lis:dfs-with-gen-and-logic-variables} adapts Listing \ref{lis:dfs-gen} for logic variables. The strategy is for \textit{trnsvl} to start as a tuple of uninstantiated \textit{Var}s, which become instantiated as the program runs.
+Listing \ref{lis:dfs-gen-lv} adapts Listing \ref{lis:dfs-gen} for logic variables. The strategy is for \textit{trnsvl} to start as a tuple of uninstantiated \textit{Var}s, which become instantiated as the program runs.
 
 First, an adapted \textit{uninstan\_indices\_lv} returns the indices of the uninstantiated \textit{Var}s in \textit{trnsvl}.
 \begin{center}
@@ -178,12 +178,12 @@ def tnvsl_dfs_gen_lv(sets, tnvsl):
           yield from tnvsl_dfs_gen_lv(new_sets, 
                                       tnvsl)
 \end{python1}\linv
-\begin{lstlisting} [caption={\textit{dfs-with-gen-and-logic-variables}},  label={lis:dfs-with-gen-and-logic-variables}]
+\begin{lstlisting} [caption={\textit{dfs-with-gen-and-logic-variables}},  label={lis:dfs-gen-lv}]
 \end{lstlisting}
 \end{minipage}\linv
 \end{figure}
 
-Some comments on Listing \ref{lis:dfs-with-gen-and-logic-variables}. (We reformatted some of the lines and changed some of the names from \textit{tnvsl\_dfs\_gen} (Listing \ref{lis:dfs-gen}) so that the program will fit the width of a column.)
+Some comments on Listing \ref{lis:dfs-gen-lv}. (We reformatted some of the lines and changed some of the names from \textit{tnvsl\_dfs\_gen} (Listing \ref{lis:dfs-gen}) so that the program will fit the width of a column.)
 
 \begin{itemize}
     \item \textit{line 6}. The parameter \textit{sets} is a list of \textit{PySet}s. These are logic variable versions of sets. An \textit{is\_empty} method is defined for them.
