@@ -7,40 +7,43 @@ This section discusses logic variables and their realization.
 \subsection{Instantiation}
 Logic variables are either instantiated, i.e., have a value, or uninstantiated. The instantiation operation is called \textit{unify}.   
 
-\textit{unify} is a \textit{generator}, similar to the generators we've already seen.  That's the case even though the act of instantiation \textit{does not} \textbf{yield} a value.
+\textit{unify} is a \textit{generator}---even though the act of instantiation \textit{does not} \textbf{yield} a value. Activating \textit{unify} establishes a context within which unification holds. Leaving that context undoes the unification. 
 
-Activating \textit{unify} establishes a context within which unification holds. Leaving that context undoes the unification. 
-
-Consider the following code segment. (The output is shown on the same line as each \textit{print} statement.)
+Consider the following sequence of short code segments. 
 \begin{center}
 \begin{minipage}[c]{0.45\textwidth}
 \begin{python1}
-# 'A' is a standard Python identifier. We use an 
-# initial capital letter to distinguish logic 
-# variables from regular Python variables.
-# 'Var' is the constructor for logic variables.
 A = Var()
+\end{python1}
+\end{minipage}
+\end{center}
+\textit{A} is a standard Python identifier. We use an initial capital letter to distinguish logic variables from regular Python variables. \textit{Var} is the constructor for logic variables.
 
-# A is now an uninstantiated logic variable.
-# When an uninstantiated logic variables is printed, 
-# an internal value is shown to distinguish among 
-# logic variables. As the first logic variable  
-# in this program, A's internal value is _1.
-print(A)  # => _1
+\textit{A} is now an uninstantiated logic variable. When an uninstantiated logic variables is printed, an internal value is shown to distinguish among logic variables. As the first logic variable in this program, \textit{A}'s internal value is \textit{\_1}.
 
-# Unify A with 'abc', i.e., instantiate A to 'abc'.
-# Since unify does not yield a value, the for-loop
-# variable is not used. The for-loop establishes
-# a context for unify. Within the for-loop 'body'
-# A is instantiated to 'abc'.
-for _ in unify(A, 'abc'):
-    print(A)  # => abc
-    
-# Leaving the unify context reverses instantiation.
+\begin{center}
+\begin{minipage}[c]{0.45\textwidth}
+\begin{python1}
 print(A)  # => _1
 \end{python1}
 \end{minipage}
 \end{center}
+
+Now we \textit{unify A} with \textit{abc}, i.e., instantiate \textit{A} to \textit{abc}. Since \textit{unify} does not \textbf{yield} a value, the \textbf{for}-loop variable is not used. 
+
+The \textbf{for}-loop establishes a context for \textit{unify}. Within the \textbf{for}-loop body \textit{A} is instantiated to  \textit{abc}.
+
+\begin{center}
+\begin{minipage}[c]{0.45\textwidth}
+\begin{python1}
+for _ in unify(A, 'abc'):
+    print(A)  # => abc
+print(A)  # => _1
+\end{python1}
+\end{minipage}
+\end{center}
+
+Since there is only one way to \textit{unify A} with \textit{abc}, the  \textbf{for}-loop body runs only once.  Leaving the \textit{unify} context undoes the instantiation.
 
 Within a \textit{unify} context, logic variables are immutable. Once a logic variable has a value, it cannot change within its context.
 
@@ -61,10 +64,23 @@ print(A)  # => _1
 \end{center}
 
 \subsection{The power of \textit{unify}}
-Besides instantiating logic variables, \textit{unify} can also, as its name suggests, identify logic variables with each other. After two logic variables are unified, whenever either gets a value, the other gets that same value.
+\textit{unify} can also identify logic variables with each other. After two uninstantiated logic variables are unified, whenever either gets a value, the other gets that same value.
 
-\begin{figure}[hbt]
-\centering
+Unification is surprisingly straightforward. Each \textit{Var} includes a \textit{next} field, which is initially \textbf{None}. When two \textit{Var}s are unified, the result depends on their states of instantiation.  
+\begin{itemize}
+    \item If both are uninstantiated the \textit{next} field of one points to the other. It makes no difference which points to which. A chain of linked  \textit{Var}s unifies all the \textit{Var}s in the chain. 
+    \item If only one is uninstantiated, the uninstantiated one points to the other.  
+    \item If both are instantiated to the same value, they are effectively unified. \textit{unify succeeds} but nothing changes.
+    \item If both are instantiated but to different values, \textit{unify fails}.
+\end{itemize}
+
+A note on terminology. When called (as part of a \textbf{for}-loop) a generator will either \textbf{yield} or \textbf{return}. When a generator \textbf{yield}s, it is said to \textit{succeed}; the \textbf{for}-loop body runs. When a generator \textbf{return}s, it is said to fail; the \textbf{for}-loop body does not run. Instead we exit the \textbf{for}-loop.
+
+We can trace the unifications in Listing \ref{unif-example}.  
+
+% \begin{figure}[hbt]
+% \centering
+\begin{center}
 \begin{minipage}[c]{0.45\textwidth}
 \begin{python1}
 (A, B, C, D) = (Var(), Var(), Var(), Var())
@@ -83,12 +99,10 @@ print(A, B, C, D) # => _1 _2 _3 _4
 \end{python1}\linv
 \begin{lstlisting} [caption={\textit{Unification example}},  label={unif-example}]
 \end{lstlisting}
-\end{minipage}\linv
-\end{figure}
+\end{minipage}
+\end{center}
+% \end{figure}
 
-Unification is surprisingly easy to implement. Each \textit{Var} object includes a \textit{next} field, which is initially \textbf{None}. When two \textit{Var}s are unified, the \textit{next} field of one is set to point to the other. If both are uninstantiated, it makes no difference which points to which. A chain of linked  \textit{Var}s unify all the \textit{Var}s in the chain. If only one is uninstantiated, it points to the other.
-
-We can trace the unifications in Listing \ref{unif-example}.  %the listing above. % from Listing \ref{lis:unifexample}. 
 The first unifications, lines 3 and 4, produce the following. 
 \begin{equation}\label{eq:one}
 \begin{array}{c c c c c c c c }
@@ -97,7 +111,7 @@ D & \to & C
 \end{array}
 \end{equation}
 
-Line 6 unifies \textit{A} and \textit{'abc'}. The first step in unification is to go to the ends of the unification chains of the elements to be unified. In this case, \textit{B} (the end of \textit{A}'s unification chain) is pointed to \textit{'abc'}. Since  \textit{'abc'} is instantiated, the arrow can only go from \textit{B} to \textit{'abc'}. 
+Line 6 unifies \textit{A} and \textit{'abc'}. The first step is to go to the ends of the relevant unification chains. In this case, \textit{B} (the end of \textit{A}'s unification chain) is pointed to \textit{'abc'}. Since  \textit{'abc'} is instantiated, the arrow can only go from \textit{B} to \textit{'abc'}. 
 
 \begin{equation}\label{eq:two}
 \begin{array}{c c c c c c c c c c c}
@@ -117,9 +131,9 @@ A & \to & B            & \to & 'abc'      \\
 \end{equation}
 
 
-To determine the value of a logical variable, one goes to the end of its unification chain. If the end element is instantiated, that is the (current) value of the variable. That's why all the variables have \textit{abc} as their values after line 8. 
+% To determine the value of a logical variable, one goes to the end of its unification chain. If the end element is instantiated, that is the (current) value of the variable. That's why all the variables have \textit{abc} as their values after line 8. 
 
-If the end of a unification chain is unintantiated, the internal value associated with that end element is a place-holder value.
+% If the end of a unification chain is unintantiated, the internal value associated with that end element is a place-holder value.
 
 \smallv
 \subsection{A logic-variable version of \textit{tnvsl\_dfs\_gen}}
@@ -216,6 +230,6 @@ for _ in tnvsl_dfs_gen_lv(Py_Sets, (A, B, C)):
 \end{minipage}
 \end{center}
 
-We created three logic variables,  \textit{A}, \textit{B}, and \textit{C}, on line 1 and passed them to \textit{tnvsl\_dfs\_gen\_lv} on line 5. Each time a transversal is found, the body of the \textbf{for}-loop is executed with the values to which \textit{A}, \textit{B}, and \textit{C} have been instantiated. 
+Here we created three logic variables,  \textit{A}, \textit{B}, and \textit{C} and passed them to \textit{tnvsl\_dfs\_gen\_lv} on line 5. Each time a transversal is found, the body of the \textbf{for}-loop is executed with the values to which \textit{A}, \textit{B}, and \textit{C} have been instantiated. 
 
 The preceding offers some sense of what one can do with logic variables. The next section really puts them to work.

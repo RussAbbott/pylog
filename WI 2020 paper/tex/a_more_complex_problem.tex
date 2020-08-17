@@ -6,18 +6,18 @@ At this point, one might expect a complex logic puzzle like the Zebra Puzzle\cit
 
 
 \begin{itemize}
-    \item There are 4 students: Ada, Emmy, Lynn, and Marie. Each has a scholarship and a major.  No two students have the same scholarship or the same major. 
+    \item There are four students: Ada, Emmy, Lynn, and Marie. Each has a scholarship and a major.  No two students have the same scholarship or the same major. 
     \item The scholarships and majors are \$25,000, \$30,000, \$35,000 and \$40,000 and Bio, CS, Math, and Phys. 
 \end{itemize}
 
 From the clues listed below, determine which student studies which major and the amount of each student's scholarship.
 
 %\largev
-We create a \textbf{class} \textit{Stdnt}, each of whose instances has two fields: \textit{name} and \textit{major}. (We do \textit{not} keep track of the students' scholarships!) For example, an object that represents \textit{Ada} studying \textit{Phys} would be constructed like this \textit{Stdnt(name='Ada', major='Phys)} and printed as \textit{Ada/Phys}. 
+We create a \textbf{class} \textit{Stdnt}, each of whose instances has two fields: \textit{name} and \textit{major}. (We do \textit{not} keep track of the students' scholarships!) For example, a \textit{Stdnt} object that represents \textit{Ada} studying \textit{Phys} is constructed like this \textit{Stdnt(name='Ada', major='Phys)} and printed as \textit{Ada/Phys}. 
 
 Objects are not always fully instantiated. Missing information is represented by an underscore (\_). An object that represents some person studying \textit{Bio} would look like this \textit{\_/Bio}. It would be constructed as: \textit{Stdnt(major='Bio')}.
 
-Our \textit{world} consists of a list of \textit{Stdnt} objects with scholarships of increasing size. (Although we do not record scholarship amounts, we know their relative sizes!)
+Our \textit{world} consists of a list (\textit{Stdnts}) of \textit{Stdnt} objects with scholarships of increasing size. (Although we do not record scholarship amounts, we know their relative sizes!)
 
 A number of utility methods are defined.
 \begin{itemize}
@@ -44,7 +44,9 @@ def clue_1(self, Stdnts):
     [Stdnt(major='Phys'),Stdnt(name='Emmy')],Stdnts)
 \end{python1}
 \end{minipage}
+\end{center}
 
+\begin{center}
 \begin{minipage}[c]{0.45\textwidth}
 \begin{python1}
 def clue_2(self, Stdnts):
@@ -53,11 +55,12 @@ def clue_2(self, Stdnts):
   Major = Var()
   for _ in member(Stdnt(name='Emmy', major=Major), 
                   Stdnts):
-    yield from member(Major, PyList(['Math', 
-                                     'Bio']))
+    yield from member(Major, PyList(['Math','Bio']))
 \end{python1}
 \end{minipage}
+\end{center}
 
+\begin{center}
 \begin{minipage}[c]{0.45\textwidth}
 \begin{python1}
 def clue_3(self, Stdnts):
@@ -67,7 +70,9 @@ def clue_3(self, Stdnts):
     [Stdnt(name='Lynn'), Stdnt(major='CS')], Stdnts)
 \end{python1}
 \end{minipage}
+\end{center}
 
+\begin{center}
 \begin{minipage}[c]{0.45\textwidth}
 \begin{python1}
 def clue_4(self, Stdnts):
@@ -77,7 +82,9 @@ def clue_4(self, Stdnts):
     Stdnts)
 \end{python1}
 \end{minipage}
+\end{center}
 
+\begin{center}
 \begin{minipage}[c]{0.45\textwidth}
 \begin{python1}
 def clue_5(self, Stdnts):
@@ -90,7 +97,7 @@ def clue_5(self, Stdnts):
 \end{minipage}
 \end{center}
 
-We start with a list of clue names: 
+We construct a list of clue, i.e., method,  names. 
 \begin{center}
 \begin{minipage}[c]{0.46\textwidth}
 \begin{python1}
@@ -175,7 +182,7 @@ The total compute time was: 0.01 sec
 \end{python1}\linv
 \begin{lstlisting} [caption={\textit{Trace of the scholarship problem}}, label={scholarship-problem}]
 \end{lstlisting}
-\end{minipage}
+\end{minipage} \linv
 \end{figure}
 
 
