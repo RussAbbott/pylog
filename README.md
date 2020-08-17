@@ -1,4 +1,4 @@
-## Abstract (from [WI 2020](http://wi2020.vcrab.com.au/))
+## Abstract (from [WI 2020](http://wi2020.vcrab.com.au/) paper)
 
 We examine the history of Artificial Intelligence, from its audacious beginnings to the current day. We argue that constraint programming (a) is the rightful heir and modern-day descendent of that early work and (b) offers a more stable and reliable platform then deep machine learning for AI.
 
