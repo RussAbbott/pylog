@@ -18,7 +18,6 @@ def uninstantiated_indices(transversal):
 \end{lstlisting}
 \end{minipage}
 
-We apologize in advance for our Python code style deficiencies. This seemed to be the only way to include our code in the article given the column width and page limit.
 
 First, a high level description of how \textit{tnvsl\_dfs} works. 
 \begin{itemize}
@@ -28,7 +27,8 @@ First, a high level description of how \textit{tnvsl\_dfs} works.
     \item If, at any point, it cannot proceed, say because it has reached a set all of whose elements have already been used, it ``fails,'' goes back to an earlier set, selects a different element from that set, and proceeds forward.
 \end{itemize}
 
-Now the code.
+Now the code. (Please pardon our Python code style deficiencies. This seemed to be the only way to include our code given the column width and page limit.)
+
 
 \begin{minipage}[c]{0.45\textwidth}
 \begin{python1}  
@@ -170,7 +170,7 @@ sets: [{1,2,3}, {1,2,4}, {1}], tnvsl: (_,_,_)
 \end{lstlisting}
 \end{minipage}
 
-One could apply both heuristics. Since in this case there was no backtracking, adding the \textit{propagate} heuristic makes no effective difference. Since you can see the pending sets shrinking however, the trace is a bit prettier.
+One could apply both heuristics. Since in this case there was no backtracking, adding the \textit{propagate} heuristic makes no effective difference. Since you can see the sets shrinking however, the trace is a bit prettier.
 
 \begin{minipage}[c]{0.45\textwidth}
 \begin{python1} 
@@ -250,7 +250,7 @@ sets: [{1,2,3}, {1,2,4}, {1}], tnvsl: (_,_,_)
 \end{lstlisting}
 \end{minipage}
 
-All transversals are generated with no unnecessary backtracking.
+All transversals are generated. No needless backtracking.
 
 Some comments on \textit{tnvsl\_dfs\_gen}.
 \begin{itemize}

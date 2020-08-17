@@ -90,13 +90,13 @@ def clue_5(self, Stdnts):
 \end{minipage}
 
 We start with a list of clue names: 
-
+\begin{center}
 \begin{minipage}[c]{0.46\textwidth}
 \begin{python1}
 self.clues = [clue_1, clue_2, clue_3, clue_4, clue_5] 
 \end{python1}
 \end{minipage}
-
+\end{center}
 Our search engine is the following.
 
 \begin{minipage}[c]{0.45\textwidth}
@@ -113,7 +113,7 @@ def run_all_clues(self, clue_number):
 
 The \textit{run\_clue} method runs the \textit{all-different} heuristic to prevent the same field value from being used more than once. 
 
-The execution trace at the right shows the clues in the order executed, including backtracking, followed by the then-current list of partially instantiated students.
+The execution trace in Listing \ref{scholarship-problem} shows the clues in the order executed, including backtracking, followed by the then-current list of partially instantiated students.
 
 \begin{figure}[ht]
     \flushright
@@ -170,7 +170,9 @@ Clue 4: Lynn/_, _/CS, Marie/Phys, Emmy/Bio
 After 3 final rule applications, no more solutions.
 
 The total compute time was: 0.01 sec
-\end{python1}
+\end{python1}\linv
+\begin{lstlisting} [caption={\textit{Trace of the scholarship problem}},  label={scholarship-problem}]
+\end{lstlisting}
 \end{minipage}
 \end{figure}
 
@@ -181,3 +183,4 @@ The total compute time was: 0.01 sec
 We have explained how solvers for constraint problems work and how they can be integrated into Python programs. 
 
 It's difficult to imagine a neural net (of any depth!) solving the problems discussed here---although preliminary work toward that end has been reported. \cite{xu2018towards, amel2019shallow, dubois2019towards}
+

@@ -82,7 +82,9 @@ postbreak=\mbox{\textcolor{red}{$\hookrightarrow$}\space},
 \global\ATOfontsizefalse
 \lstset{style=mypython,
     numbers=none,
-    #1
+    #1,
+    mathescape=true,
+    basicstyle=\ttfamily
 }
 \ifATOfontsize
     \lstset{basicstyle=\fontfamily{cmss}\ATOfontsize\setstretch{1}}
