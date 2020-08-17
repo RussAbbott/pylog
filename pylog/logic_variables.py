@@ -407,14 +407,20 @@ def unify_sequences(seq_1: Sequence, seq_2: Sequence):
 
 if __name__ == '__main__':
 
-  # A = 'abc'
-  # B = Var( )
-  # C = Var( )
-  # D = 'def'
-  # print(f'\nA: {A}; B: {B}; C: {C}; D: {D}')
-  # print(f'Attempting: unify_pairs([(A, B), (B, C), (C, D)]).  A, B, C, D will all be the same if it succeeds.')
-  # for _ in unify_pairs([(A, B), (B, C), (C, D)]):
-  #   print(f'b. A: {A}; B: {B}; C: {C}; D: {D}')
+  B = Var( )
+  C = Var( )
+  print(f'\na) B: {B}; C: {C}')
+  print(f"Attempting: unify_pairs([('abc', B), ('abc', C)]).  B and C will be the same.")
+  for _ in unify_pairs([('abc', B), ('abc', C)]):
+    print(f'b) B: {B}; C: {C}')
+    print(f'Attempting: unify(B, C).  Will succeed with no changes.')
+    for _ in unify(B, C):
+      print(f'c) B: {B}; C: {C}')
+    print(f'Leave unify(B, C) context')
+    print(f'd) B: {B}; C: {C}')
+  print(f'e) B: {B}; C: {C}')
+
+
   # print('As expected, unify_pairs fails -- because A and D have distinct PyValues.')
   #
   # PV1 = PyValue()
