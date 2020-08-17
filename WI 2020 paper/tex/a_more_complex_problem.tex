@@ -30,11 +30,11 @@ A number of utility methods are defined.
     But \textit{Marie/\_} would unify with \textit{\_/Phys}. After unification, the two objects would each have both fields identically instantiated: \textit{Mia/Physics}.
     
     \item \textit{is\_subseq(list1, list2)} is the same as \textit{is\_contiguous\_in}, but the elements of \textit{list1} may appear in \textit{list2} with gaps between them.
-    \item \textit{member(student, list)} unifies the \textit{student} with elements of the \textit{list} if possible. On backtracking, yields all possible matches. This is the same method we used in the transversal problem.
+    \item \textit{member(student, list)} unifies \textit{student} with eligible elements of \textit{list}. On backtracking, yields all matches. This is the same method we used in the transversal problem.
 \end{itemize}
 
 We express the clues in the form of simple methods. 
-
+\begin{center}
 \begin{minipage}[c]{0.45\textwidth}
 \begin{python1}
 def clue_1(self, Stdnts):
@@ -88,6 +88,7 @@ def clue_5(self, Stdnts):
     Stdnts)
 \end{python1}
 \end{minipage}
+\end{center}
 
 We start with a list of clue names: 
 \begin{center}
@@ -99,6 +100,7 @@ self.clues = [clue_1, clue_2, clue_3, clue_4, clue_5]
 \end{center}
 Our search engine is the following.
 
+\begin{center}
 \begin{minipage}[c]{0.45\textwidth}
 \begin{python1}
 def run_all_clues(self, clue_number):
@@ -110,6 +112,7 @@ def run_all_clues(self, clue_number):
       yield from self.run_all_clues(clue_number + 1)
 \end{python1}
 \end{minipage}
+\end{center}
 
 The \textit{run\_clue} method runs the \textit{all-different} heuristic to prevent the same field value from being used more than once. 
 
@@ -117,7 +120,6 @@ The execution trace in Listing \ref{scholarship-problem} shows the clues in the 
 
 \begin{figure}[ht]
     \flushright
-    % \centering
 \begin{minipage}[c]{0.45\textwidth}
 \begin{python1}
 Initially: _/_, _/_, _/_, _/_
@@ -171,10 +173,11 @@ After 3 final rule applications, no more solutions.
 
 The total compute time was: 0.01 sec
 \end{python1}\linv
-\begin{lstlisting} [caption={\textit{Trace of the scholarship problem}},  label={scholarship-problem}]
+\begin{lstlisting} [caption={\textit{Trace of the scholarship problem}}, label={scholarship-problem}]
 \end{lstlisting}
 \end{minipage}
 \end{figure}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Conclusion} \label{sec:conclusion}

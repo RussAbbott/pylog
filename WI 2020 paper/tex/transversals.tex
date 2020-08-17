@@ -2,10 +2,22 @@
 \section{Solver basics and heuristics} \label{sec:solver-basics}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-To discuss solvers, it helps to refer to an example problem. We will use the computation of a transversal. Given a sequence of sets, a transversal is a non-repeating sequence of elements with the property that the \textit{n\textsuperscript{th}} element of the traversal belongs to the \textit{n\textsuperscript{th}} set in the sequence.  For example, the sets \[\{1, 2, 3\}, \{1, 2, 4\}, \{1\}\] has three transversals: [2, 4, 1], [3, 2, 1], and [3, 4, 1]. 
+As an example problem we will use the computation of a transversal. Given a sequence of sets, a transversal is a non-repeating sequence of elements with the property that the \textit{n\textsuperscript{th}} element of the traversal belongs to the \textit{n\textsuperscript{th}} set in the sequence.  
 
-This is clearly a search problem. It can be solved with a simple depth-first search. First a utility function.
+For example, the sets \[\{1, 2, 3\}, \{1, 2, 4\}, \{1\}\] has three transversals: [2, 4, 1], [3, 2, 1], and [3, 4, 1]. 
 
+This problem can be solved with a simple depth-first search, which we call \textit{tnvsl\_dfs}. Here's a high level description. 
+\begin{itemize}
+    \item \textit{tnvsl\_dfs} looks for a transversal by finding transversal elements from left to right.
+    \item It selects an element from the first set and (tentatively) assigns that as the first element of the transversal.
+    \item It then recursively looks for a transversal for the rest of the sets---making sure that the element it selected from the first set is not repeated.
+    \item If, at any point, it cannot proceed, say because it has reached a set all of whose elements have already been used, it ``fails,'' goes back to an earlier set, selects a different element from that set, and proceeds forward.
+\end{itemize}
+
+Now the code. (Please pardon our Python code style deficiencies. This seemed to be the only way to include our code given the column width and page limit.)
+
+First a utility function.
+\begin{center}
 \begin{minipage}[c]{0.45\textwidth}
 \begin{python1}  
 unassigned = '_'
@@ -18,18 +30,7 @@ def uninstantiated_indices(transversal):
 \end{lstlisting}
 \end{minipage}
 
-
-First, a high level description of how \textit{tnvsl\_dfs} works. 
-\begin{itemize}
-    \item \textit{tnvsl\_dfs} looks for a transversal by finding transversal elements from left to right.
-    \item It selects an element from the first set and (tentatively) assigns that as the first element of the transversal.
-    \item It then recursively looks for a transversal for the rest of the sets---making sure that the element it selected from the first set is not repeated.
-    \item If, at any point, it cannot proceed, say because it has reached a set all of whose elements have already been used, it ``fails,'' goes back to an earlier set, selects a different element from that set, and proceeds forward.
-\end{itemize}
-
-Now the code. (Please pardon our Python code style deficiencies. This seemed to be the only way to include our code given the column width and page limit.)
-
-
+%\midiumlv
 \begin{minipage}[c]{0.45\textwidth}
 \begin{python1}  
 def tnvsl_dfs(sets, tnvsl):
@@ -48,6 +49,7 @@ def tnvsl_dfs(sets, tnvsl):
 \begin{lstlisting} [caption={\textit{tnvsl\_dfs}}]
 \end{lstlisting}
 \end{minipage}
+\end{center}
 
 Here's an explanation of the code in some detail.
 \begin{itemize}
@@ -72,7 +74,7 @@ This is standard depth first search. If there is at least one transversal, \text
 
 Here's a trace of the recursive calls.
 
-\smallv
+\midiumlv
 \begin{minipage}[c]{0.45\textwidth}
 \begin{python1}  
 sets: [{1,2,3}, {1,2,4}, {1}], tnvsl: (_,_,_)
@@ -103,12 +105,12 @@ Even though this is a simple depth-first search, it incorporates (what appears t
 
 It is common to use the term \textit{choicepoint} for places when (a) multiple choices are possible and (b) one wants to try them all, if necessary. Our simple solver implements choicepoints via (recursively) nested \textbf{for}-loops. 
 
-We can see, though, that there is lots of room for improvement. We'll discuss two heuristics. 
+There is room for improvement. Here are two heuristics. 
 
 \noindent\textbf{Propagate}. When we select an element for \textit{trvs} we can \textit{propagate} that selection by removing that element from the remaining sets. We can do that with the following changes to our original code. (Of course, a real solver would not hard-code heuristics. This is just to show how it works.)
 \begin{enumerate}
     \item Before \textit{line 11}, insert this line.
-    
+  
 \begin{minipage}[c]{0.45\textwidth}
 \begin{python1}
 new_sets = [set - {elmt} for set in sets]
@@ -119,11 +121,14 @@ Then replace \textit{sets} with \textit{new\_sets} in \textit{line 11}.
 This will remove \textit{elmt} from the remaining sets.
 
     \item Before \textit{line 5}, insert
-    
+
+\begin{minipage}[c]{0.45\textwidth}
 \begin{python1}
 if any(not sets[idx] for idx in remaining_indices):
   return None
 \end{python1}
+\end{minipage}
+
 
 This tests whether any of our unrepresented sets are now empty. If so, we can't continue. (Recall that Python style recommends treating a set as a boolean when testing for emptiness. An empty set is considered \textbf{False}.)
 
@@ -132,7 +137,7 @@ This tests whether any of our unrepresented sets are now empty. If so, we can't 
 
 Because the empty sets in lines 2 and 4  trigger immediate backtracking, the execution takes 6 steps rather than 8.
 
-\smallv
+\begin{flushright}
 \begin{minipage}[c]{0.45\textwidth}
 \begin{python1}  
 sets: [{1,2,3}, {1,2,4}, {1}], tnvsl: (_,_,_)
@@ -145,6 +150,7 @@ sets: [{1,2,3}, {1,2,4}, {1}], tnvsl: (_,_,_)
 \begin{lstlisting} [caption={\textit{tnvsl\_dfs\_prop trace}}]
 \end{lstlisting}
 \end{minipage}
+\end{flushright}
 
 \noindent\textbf{Smallest first}. When selecting which \textit{tnvsl} index to fill next, pick the position associated with the smallest remaining set. 
 
@@ -159,6 +165,8 @@ In the original code, replace line 5 with
 \end{center}
 The resulting trace is only 4 lines. (At line 3, the first two sets are the same size. By convention, \textit{min} selects the first.)
 
+\midiumlv 
+\begin{center}
 \begin{minipage}[c]{0.45\textwidth}
 \begin{python1}  
 sets: [{1,2,3}, {1,2,4}, {1}], tnvsl: (_,_,_)
@@ -169,9 +177,11 @@ sets: [{1,2,3}, {1,2,4}, {1}], tnvsl: (_,_,_)
 \begin{lstlisting} [caption={\textit{tnvsl\_dfs\_smallest trace}}]
 \end{lstlisting}
 \end{minipage}
+\end{center}
 
 One could apply both heuristics. Since in this case there was no backtracking, adding the \textit{propagate} heuristic makes no effective difference. Since you can see the sets shrinking however, the trace is a bit prettier.
 
+\midiumlv
 \begin{minipage}[c]{0.45\textwidth}
 \begin{python1} 
 sets: [{1,2,3}, {1,2,4}, {1}], tnvsl: (_,_,_)
@@ -194,8 +204,10 @@ One approach would be to modify our solver to find and return all transversals. 
 
 We need a solver than can return results while keeping track of where it is with respect to its choice points so that it can continue from there if necessary. That's what a generator does. 
 
-Here is our solver, \textit{including both heuristics}, as a generator.
+Listing \ref{lis:dfs-gen} shows a generator version of our solver, \textit{including both heuristics}. When called as in Listing \ref{lis:dfs-gen-call}, it produces the trace as shown in Listing \ref{lis:dfs-gen-trace}. % All transversals are generated. No needless backtracking.
 
+\begin{figure}[htb]
+    \centering
 \begin{minipage}[c]{0.45\textwidth}
 \begin{python1}  
 def tnvsl_dfs_gen(sets, tnvsl):
@@ -214,25 +226,31 @@ def tnvsl_dfs_gen(sets, tnvsl):
                     + (elmt, ) \
                     + tnvsl[nxt_indx+1:]
         new_sets = [set - {elmt} for set in sets]
-        for full_tnvsl in tnvsl_dfs_gen(sets, 
+        for full_tnvsl in tnvsl_dfs_gen(new_sets, 
                                         new_tnvsl):
           yield full_tnvsl
 \end{python1}\linv
 \begin{lstlisting} [caption={\textit{tnvsl\_dfs\_gen}}, label={lis:dfs-gen}]
 \end{lstlisting}
-\end{minipage}
+\end{minipage}\linv
+\end{figure}
 
-When called as in the following,
 
+\begin{figure}[htb]
+    \centering
 \begin{minipage}[c]{0.45\textwidth}
 \begin{python1}  
 for tnvsl in tnvsl_dfs_gen(sets, ('_','_','_')):
     print('=> ', tnvsl)
-\end{python1}
-\end{minipage}
+\end{python1}\linv
+\begin{lstlisting} [caption={\textit{tnvsl\_dfs\_gen}}, label={lis:dfs-gen-call}]
+\end{lstlisting}
+\end{minipage}\linv
+\end{figure}
 
-the Trace looks like this.
 
+\begin{figure}[!ht]
+    \centering
 \begin{minipage}[c]{0.45\textwidth}
 \begin{python1}  
 sets: [{1,2,3}, {1,2,4}, {1}], tnvsl: (_,_,_)
@@ -246,31 +264,31 @@ sets: [{1,2,3}, {1,2,4}, {1}], tnvsl: (_,_,_)
       sets: [{2}, {2}, {}], tnvsl: (3,4,1)
 =>  (3, 4, 1)
 \end{python1}\linv
-\begin{lstlisting} [caption={\textit{tnvsl\_dfs\_gen trace}}]
+\begin{lstlisting} [caption={\textit{tnvsl\_dfs\_gen trace}}, label={lis:dfs-gen-trace}]
 \end{lstlisting}
-\end{minipage}
+\end{minipage}\linv
+\end{figure}
 
-All transversals are generated. No needless backtracking.
-
-Some comments on \textit{tnvsl\_dfs\_gen}.
+Some comments on Listing \ref{lis:dfs-gen}.  % \textit{tnvsl\_dfs\_gen}.
 \begin{itemize}
-    \item The newly added \textbf{else} on line 5 is necessary. Previously, if there were no \textit{remaining\_indices}, we returned \textit{tnvsl}. That was the end of execution for this recursive call. But if we \textbf{yield} instead of \textbf{return}, when \textit{tnvsl\_dfs\_gen} is asked for more results, it continues with the line after the \textbf{yield}. But if have already found a transversal, we are done. We don't want to continue. The \textbf{else} divides the code into two mutually exclusive components. In effect \textbf{return} had done that implicitly.
+    \item The newly added \textbf{else} on line 5 is necessary. Previously, if there were no \textit{remaining\_indices}, we returned \textit{tnvsl}. That was the end of execution for this recursive call. But if we \textbf{yield} instead of \textbf{return}, when \textit{tnvsl\_dfs\_gen} is asked for more results, \textit{it continues with the line after the \textbf{yield}}. But if have already found a transversal, we don't want to continue. The \textbf{else} divides the code into two mutually exclusive components. \textbf{return} had done that implicitly.
     
     \item Lines 17-20 call \textit{tnvsl\_dfs\_gen} recursively and ask for all the transversals that can be constructed from the current state. Each one is then \textbf{yield}ed. No need to exclude \textbf{None}.  \textit{tnvsl\_dfs\_gen} will \textbf{yield} only complete transversals. 
     
     \smallv
-Using \textbf{yield from}, lines 17-20 can be replaced by a line that \textbf{yield}s, one at a time, what \textit{tnvsl\_dfs\_gen} \textbf{yield}s to it.
+Lines 17-20 can be replaced by the following line.
 \end{itemize}
 \begin{center}
 \begin{minipage}[c]{0.45\textwidth}
 \begin{python1}
-yield from tnvsl_dfs_gen(new_sets, new_tnvsl)
+    yield from tnvsl_dfs_gen(new_sets, new_tnvsl)
 \end{python1}
 \end{minipage}   
 \end{center}
 
 Let's turn off \textit{trace} and solve our initial problem: find a transversal whose elements sum to 6.
 
+\begin{center}
 \begin{minipage}[c]{0.45\textwidth}
 \begin{python1}
 for tnvsl in tnvsl_dfs_gen(sets, ('_','_','_')):
@@ -279,19 +297,20 @@ for tnvsl in tnvsl_dfs_gen(sets, ('_','_','_')):
   print(f'{sum_string} {equals} 6')
   if sum(tnvsl) == 6: break
 \end{python1}\linv
-\begin{lstlisting} [caption={\textit{running tnvsl\_dfs\_gen}}, label={lis:dfs-gen-call}]
+\begin{lstlisting} [caption={\textit{running tnvsl\_dfs\_gen}}, label={lis:dfs-gen-call2}]
 \end{lstlisting}
 \end{minipage}
-\smallv
-The output will be as follows.
+\end{center}
 
+The output will be as follows.
+\begin{center}
 \begin{minipage}[c]{0.45\textwidth}
 \begin{python1}  
-2 + 4 + 1 != 6
-3 + 2 + 1 == 6
+    2 + 4 + 1 != 6
+    3 + 2 + 1 == 6
 \end{python1}\linv
 \begin{lstlisting} [caption={\textit{tnvsl\_dfs\_gen trace}}]
 \end{lstlisting}
 \end{minipage}
-
+\end{center}
 We generated transversals until we found one whose elements summed to 6. Then we stopped.

@@ -16,12 +16,12 @@ Perhaps not unexpectedly, such extreme optimism about the power of symbolic AI, 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \smallv\noindent\textbf{Deep learning}. All was not lost. Winter was followed by spring and the green shoots of (non-symbolic) deep neural networks sprang forth. Andrew Ng said of that development, 
 \begin{quote}
-Just as electricity transformed almost everything 100 years ago, today I actually have a hard time thinking of an industry that I don’t think AI will transform in the next several years.\cite{ng2018ai}
+Just as electricity transformed almost everything 100 years ago, today I have a hard time thinking of an industry that won't be transformed by AI.\cite{ng2018ai}
 \end{quote}
 
 But another disappointment followed. Deep neural nets 
 \begin{quote}
-are surprisingly susceptible to what are known as \textit{adversarial} attacks. Small perturbations to images that are (almost) imperceptible to human vision can cause a neural network to completely change its prediction. When minimally modified, a correctly classified image of a school bus is reclassified as an ostrich. Even worse, the classifiers report high confidence in this wrong prediction.\cite{akhtar2018threat}
+are surprisingly susceptible to what are known as \textit{adversarial} attacks. Small perturbations that are (almost) imperceptible to humans can cause a neural network to completely change its prediction: a correctly classified image of a school bus is reclassified as an ostrich. Even worse, the classifiers report high confidence in this wrong prediction.\cite{akhtar2018threat}
 \end{quote}
 % (Adversarial images did not kill off deep learning. They have been co-opted, and their use is now built into  deep neural network training methodologies.\cite{shrivastava2017learning})
 
@@ -30,14 +30,14 @@ are surprisingly susceptible to what are known as \textit{adversarial} attacks. 
 
 By that we don't mean that the work is trivial. We suggest that many deep learning systems learn little more than surface patterns. The patterns may be both subtle and complex, but they are surface patterns nevertheless.
 
-Lacker\cite{lacker-gpt3} elicits many examples of such superficial (but very sophisticated) patterns from GPT-3\cite{brown2020language}, a highly acclaimed natural language system. In one, GPT-3, acting as a personal assistant, offers to read to its interlocutor his latest email. The problem is that GPT-3 has no access to that person's email---and doesn't "know" that without access it can't read the email. (Much of the excitement surrounding GPT-3 derives from its skill as a fiction author.) 
+Lacker\cite{lacker-gpt3} elicits many examples of such superficial (but sophisticated) patterns from GPT-3\cite{brown2020language}, a highly acclaimed natural language system. In one, offers to read to its interlocutor his latest email. The problem is that GPT-3 has no access to that person's email---and doesn't "know" that without access it can't read the email. (Much of the excitement surrounding GPT-3 derives from its skill as a fiction author.) 
 
 Both the conversational interaction and the made-up email sound plausible and natural. In reality, each consists of words strung together based simply on co-occurrences that GPT-3 found in the billions upon billions of word sequences it had scanned. Although what GPT-3 produces sounds like coherent English, it's all surface patterns with no underlying semantics.
 
 Recent work\cite{geirhos2018imagenet} (see \cite{Cepelewicz-textures-2020} for a popular discussion) suggests that much of the success of deep learning, at least when applied to image categorization, derives from the tendency of deep learning systems to focus on textures---the ultimate surface feature---rather than shapes.  This insight offers an explanation for some of deep learning's brittleness and superficiality as well as a possible mitigation strategy.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\smallv\noindent\textbf{The Holy Grail: constraint programming}. In the mean time, work on symbolic AI continued. Constraint programming was born in the 1980s as an outgrowth of the interest in logic programming triggered by the Japanese Fifth Generation initiative.\cite{shapiro1983fifth} Logic Programming led to Constraint Logic Programming, which evolved into Constraint Programming. (A familiar constraint programming example is the well-known n-queens problem: how can you place n queens on an n \textit{x} n chess board so that no queen threatens any other queen? There are, of course, many practical constraint programming applications as well.)
+\smallv\noindent\textbf{The Holy Grail: constraint programming}. In the mean time, work on symbolic AI continued. Constraint programming was born in the 1980s as an outgrowth of the interest in logic programming triggered by the Japanese Fifth Generation initiative.\cite{shapiro1983fifth} Logic Programming led to Constraint Logic Programming, which evolved into Constraint Programming. (A familiar example is the well-known n-queens problem: how can you place n queens on an n \textit{x} n chess board so that no queen threatens any other queen? There are, of course, many practical constraint programming applications as well.)
 
 In 1997, Eugene Frueder characterized constraint programming as \textit{the Holy Grail of computer science: the user simply states the problem and the computer solves it.}\cite{freuder1997pursuit}  Software that solves constraint programming problems is known as a solver. Constraint programming has many desirable properties. 
 \begin{itemize}
@@ -47,7 +47,7 @@ In 1997, Eugene Frueder characterized constraint programming as \textit{the Holy
 
     \item  The structure and limits of constraint programming are well understood: there will be no grand disappointments similar to those that followed the birth of artificial intelligence---unless quantum computing, once implemented, turns out to be a bust. 
     
-    \item Constraint programming is closely related to computational complexity, which provides a well-studied theoretical framework for it. 
+    \item Constraint programming is closely related to computational complexity, which provides a well-studied theoretical framework. 
     
     \item There will be no surprises such as adversarial images. 
 
@@ -63,7 +63,7 @@ Solvers are also available as package add-ons to many programming languages: Cho
 
 In the systems just mentioned, the solver is a black box. One sets up a problem, either directly in predicate calculus or in the host language, and then calls on the solver to solve it. 
 
-This can be frustrating for those who want more insight into the internal workings of the solvers they use. Significantly more insight is available when working either (a) in a system like Picat\cite{zhou2015constraint}, a language that combines features of logic programming and imperative programming, or (b) with Prolog (say either SICStus Prolog\cite{carlsson2014sicstus} or SWI Prolog\cite{swi-prolog}) to which a Finite Domain package has been added. But neither option helps those without a logic programming background. 
+This can be frustrating for those who want more insight into the internal workings of the solvers. Significantly more insight is available when working either (a) in a system like Picat\cite{zhou2015constraint}, a language that combines features of logic programming and imperative programming, or (b) with Prolog (say either SICStus Prolog\cite{carlsson2014sicstus} or SWI Prolog\cite{swi-prolog}) to which a Finite Domain package has been added. But neither option helps those without a logic programming background. 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \smallv\noindent\textbf{Shallow embeddings}.  Solver capabilities may be implemented directly in a host language and made available to programs in that language.\cite{hoare1998unifying, gibbons2014folding} Recent examples include Kanren\cite{Rocklin2019}, a Python embedding, and Muli\cite{dageforde2018constraint}, a Java embedding.
@@ -75,15 +75,16 @@ Most shallow embeddings have well-defined APIs; but like libraries, their inner 
 
 One can think of Prolog as the skeleton of a constraint satisfaction solver. Consequently, we focus on Prolog as a basic paradigmatic solver. We describe Pylog, a Python shallow embedding of Prolog's core capabilities. 
 
-Our primary focus will be on helping readers understand how Prolog's two fundamental features, backtracking and logic variables, can be implemented \textit{simply and cleanly}. We also show how two of the heuristics common to Finite Domain packages can be added. 
+Our primary focus will be on helping readers understand how Prolog's two fundamental features, backtracking and logic variables, can be implemented \textit{simply and cleanly}. We also show how two common heuristics can be added. 
 
-Pylog should be accessible to anyone reasonable fluent in Python. In addition, the techniques used in the implementation are easily transferred to many other languages. 
+Pylog should be accessible to anyone reasonable fluent in Python. In addition, the techniques we use are easily transferred to many other languages. 
 
-We stress \textit{simply and cleanly}. There are many ways to implement backtracking and logic variables, some quite complex. Our approach is straightforward and easy to understand. 
+% We stress \textit{simply and cleanly}. There are many ways to implement backtracking and logic variables, some quite complex. Our approach is straightforward and easy to understand. 
 
-An advantage we have over earlier Prolog embeddings is Python generators. Without generators, one is pushed to use more complex backtracking implementations, such as continuation passing\cite{amin2019lightweight} or monads\cite{seres1999embedding}. Generators, which are now widespread\cite{wikipedia-generators}, eliminate the need for such complexity. 
+We stress \textit{simply and cleanly}. An advantage we have over earlier Prolog embeddings is Python generators. Without generators, one is pushed to more complex implementations, such as continuation passing\cite{amin2019lightweight} or monads\cite{seres1999embedding}. Generators, which are now widespread\cite{wikipedia-generators}, eliminate such complexity. 
 
-To be clear, we did not invent the use of generators for implementing backtracking. It has a nearly two-decade history: \cite{berger2004, Bolz2007, Delford2009, Frederiksen2011, Meyers2015, Thompson2017, Santini2018, Cesar2019, Miljkovic2019}. We would like especially to thank Ian Piumarta\cite{Piumarta2017}; Pylog began as a fork of his efforts. 
+To be clear, we did not invent the use of generators for implementing backtracking. It has a nearly two-decade history: \cite{berger2004, Bolz2007, Delford2009, Frederiksen2011, Meyers2015, Thompson2017, Santini2018, Cesar2019, Miljkovic2019}. We would like especially to thank Ian Piumarta\cite{Piumarta2017}; Pylog began as a fork of his efforts. We build on this work and offer a cleanly coded, well-explained, and fully operational solver.
 
-The preceding are sketches and prototypes. We offer a cleanly coded, well-explained, and fully operational solver.
+
+% The preceding are sketches and prototypes. 
 
