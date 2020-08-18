@@ -21,7 +21,7 @@ Just as electricity transformed almost everything 100 years ago, today I have a 
 
 But another disappointment followed. Deep neural nets 
 \begin{quote}
-are surprisingly susceptible to what are known as \textit{adversarial} attacks. Small perturbations that are (almost) imperceptible to humans can cause a neural network to completely change its prediction: a correctly classified image of a school bus is reclassified as an ostrich. Even worse, the classifiers report high confidence in this wrong prediction.\cite{akhtar2018threat}
+are surprisingly susceptible to what are known as \textit{adversarial} attacks. Small perturbations that are (almost) imperceptible to humans can cause a neural network to completely change its prediction: a correctly classified image of a school bus is reclassified as an ostrich. Even worse, the classifiers report high confidence in these wrong predictions.\cite{akhtar2018threat}
 \end{quote}
 % (Adversarial images did not kill off deep learning. They have been co-opted, and their use is now built into  deep neural network training methodologies.\cite{shrivastava2017learning})
 
@@ -30,22 +30,22 @@ are surprisingly susceptible to what are known as \textit{adversarial} attacks. 
 
 By that we don't mean that the work is trivial. We suggest that many deep learning systems learn little more than surface patterns. The patterns may be both subtle and complex, but they are surface patterns nevertheless.
 
-Lacker\cite{lacker-gpt3} elicits many examples of such superficial (but sophisticated) patterns from GPT-3\cite{brown2020language}, a highly acclaimed natural language system. In one, offers to read to its interlocutor his latest email. The problem is that GPT-3 has no access to that person's email---and doesn't "know" that without access it can't read the email. (Much of the excitement surrounding GPT-3 derives from its skill as a fiction author.) 
+Lacker\cite{lacker-gpt3} elicits many examples of such superficial (but sophisticated) patterns from GPT-3\cite{brown2020language}, a highly acclaimed natural language system. In one, GPT-3 offers to read to its interlocutor his latest email. The problem is that GPT-3 has no access to that person's email---and doesn't "know" that without access it can't read the email. % (Much of the excitement surrounding GPT-3 derives from its skill as a fiction author.) 
 
 Both the conversational interaction and the made-up email sound plausible and natural. In reality, each consists of words strung together based simply on co-occurrences that GPT-3 found in the billions upon billions of word sequences it had scanned. Although what GPT-3 produces sounds like coherent English, it's all surface patterns with no underlying semantics.
 
 Recent work\cite{geirhos2018imagenet} (see \cite{Cepelewicz-textures-2020} for a popular discussion) suggests that much of the success of deep learning, at least when applied to image categorization, derives from the tendency of deep learning systems to focus on textures---the ultimate surface feature---rather than shapes.  This insight offers an explanation for some of deep learning's brittleness and superficiality as well as a possible mitigation strategy.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\smallv\noindent\textbf{The Holy Grail: constraint programming}. In the mean time, work on symbolic AI continued. Constraint programming was born in the 1980s as an outgrowth of the interest in logic programming triggered by the Japanese Fifth Generation initiative.\cite{shapiro1983fifth} Logic Programming led to Constraint Logic Programming, which evolved into Constraint Programming. (A familiar example is the well-known n-queens problem: how can you place n queens on an n \textit{x} n chess board so that no queen threatens any other queen? There are, of course, many practical constraint programming applications as well.)
+\smallv\noindent\textbf{The Holy Grail: constraint programming}. In the meantime, work on symbolic AI continued. Constraint programming was born in the 1980s as an outgrowth of the interest in logic programming triggered by the Japanese Fifth Generation initiative.\cite{shapiro1983fifth} Logic Programming led to Constraint Logic Programming, which evolved into Constraint Programming. (A familiar example is the n-queens problem: place n queens on an n \textit{x} n chess board so that no queen threatens any other. Constraint programming also has many practical  applications.)
 
-In 1997, Eugene Frueder characterized constraint programming as \textit{the Holy Grail of computer science: the user simply states the problem and the computer solves it.}\cite{freuder1997pursuit}  Software that solves constraint programming problems is known as a solver. Constraint programming has many desirable properties. 
+In 1997, Eugene Frueder characterized constraint programming as \textit{the Holy Grail of computer science: the user simply states the problem and the computer solves it.}\cite{freuder1997pursuit}  Software that solves constraint programming problems is known as a solver. Solver technology has many desirable properties. 
 \begin{itemize}
     \item Solutions found by constraint programming solvers actually solve the given problem. There is no issue of how ``confident'' the solver is in the solutions it finds.
     
     \item One can understand how the solver arrived at the solution. This contrasts with the frustrating feature of neural nets that the solutions they find are generally hidden within a maze of parameters, unintelligible to human beings. 
 
-    \item  The structure and limits of constraint programming are well understood: there will be no grand disappointments similar to those that followed the birth of artificial intelligence---unless quantum computing, once implemented, turns out to be a bust. 
+    \item  The structure and limits of constraint programming are well understood: there will be no grand disappointments like those that followed the birth of AI---unless quantum computing turns out to be a bust. 
     
     \item Constraint programming is closely related to computational complexity, which provides a well-studied theoretical framework. 
     
@@ -68,7 +68,7 @@ This can be frustrating for those who want more insight into the internal workin
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \smallv\noindent\textbf{Shallow embeddings}.  Solver capabilities may be implemented directly in a host language and made available to programs in that language.\cite{hoare1998unifying, gibbons2014folding} Recent examples include Kanren\cite{Rocklin2019}, a Python embedding, and Muli\cite{dageforde2018constraint}, a Java embedding.
 
-Most shallow embeddings have well-defined APIs; but like libraries, their inner workings are not visible. This is the case with both Kanren and Muli. Kanren is open source, but it offers no implementation documentation. Dagef{\"o}rde and Kuchen describe the Muli virtual machine\cite{dageforde2019compiler}, but the documentation is quite technical. Many who would like to understand its internal functioning may find it difficult going. 
+Most shallow embeddings have well-defined APIs; but like libraries, their inner workings are not visible.  Kanren is open source, but it offers no implementation documentation. The description of the  Muli virtual machine\cite{dageforde2019compiler} is quite technical. % Many who would like to understand its internal functioning may find it difficult going. Dagef{\"o}rde and Kuchen describe the
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \smallv\noindent\textbf{Back to basics}. This brings us to our goal for the rest of this paper: to offer an under-the-covers tutorial about how a fully functioning embedded solver works. 
@@ -83,7 +83,7 @@ Pylog should be accessible to anyone reasonable fluent in Python. In addition, t
 
 We stress \textit{simply and cleanly}. An advantage we have over earlier Prolog embeddings is Python generators. Without generators, one is pushed to more complex implementations, such as continuation passing\cite{amin2019lightweight} or monads\cite{seres1999embedding}. Generators, which are now widespread\cite{wikipedia-generators}, eliminate such complexity.  %
 
-To be clear, we did not invent the use of generators for implementing backtracking. It has a nearly two-decade history: \cite{berger2004, Bolz2007, Delford2009, Frederiksen2011, Meyers2015, Thompson2017, Santini2018, Cesar2019, Miljkovic2019}. We would like especially to thank Ian Piumarta\cite{Piumarta2017}; Pylog began as a fork of his efforts. We build on this work and offer a cleanly coded, well-explained, and fully operational solver.
+To be clear, we did not invent the use of generators for implementing backtracking. It has a nearly two-decade history: \cite{berger2004, Bolz2007, Delford2009, Frederiksen2011, Meyers2015, Thompson2017, Santini2018, Cesar2019, Miljkovic2019}. We would like especially to thank Ian Piumarta\cite{Piumarta2017}; Pylog began as a fork of his efforts. We build on this record and offer a cleanly coded, well-explained, and fully operational solver.
 
 
 % The preceding are sketches and prototypes. 

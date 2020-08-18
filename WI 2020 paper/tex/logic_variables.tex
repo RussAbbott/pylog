@@ -29,9 +29,11 @@ print(A)  # => _1
 \end{minipage}
 \end{center}
 
-Now we \textit{unify A} with \textit{abc}, i.e., instantiate \textit{A} to \textit{abc}. Since \textit{unify} does not \textbf{yield} a value, the \textbf{for}-loop variable is not used. 
+Now \textit{unify A} with \textit{abc}, i.e., instantiate \textit{A} to \textit{abc}. Since \textit{unify} does not \textbf{yield} a value, the \textbf{for}-loop variable is not used. 
 
 The \textbf{for}-loop establishes a context for \textit{unify}. Within the \textbf{for}-loop body \textit{A} is instantiated to  \textit{abc}.
+
+Since there is only one way to \textit{unify A} with \textit{abc}, no choicepoints, the  \textbf{for}-loop body runs only once.  Leaving the \textit{unify} context undoes the instantiation.
 
 \begin{center}
 \begin{minipage}[c]{0.45\textwidth}
@@ -42,8 +44,6 @@ print(A)  # => _1
 \end{python1}
 \end{minipage}
 \end{center}
-
-Since there is only one way to \textit{unify A} with \textit{abc}, the  \textbf{for}-loop body runs only once.  Leaving the \textit{unify} context undoes the instantiation.
 
 Within a \textit{unify} context, logic variables are immutable. Once a logic variable has a value, it cannot change within its context.
 
@@ -74,13 +74,13 @@ Unification is surprisingly straightforward. Each \textit{Var} includes a \texti
     \item If both are instantiated but to different values, \textit{unify fails}.
 \end{itemize}
 
-A note on terminology. When called (as part of a \textbf{for}-loop) a generator will either \textbf{yield} or \textbf{return}. When a generator \textbf{yield}s, it is said to \textit{succeed}; the \textbf{for}-loop body runs. When a generator \textbf{return}s, it is said to fail; the \textbf{for}-loop body does not run. Instead we exit the \textbf{for}-loop.
+A note on terminology. When called (as part of a \textbf{for}-loop) a generator will either \textbf{yield} or \textbf{return}. When a generator \textbf{yield}s, it is said to \textit{succeed}; the \textbf{for}-loop body runs. When a generator \textbf{return}s, it is said to \textit{fail}; the \textbf{for}-loop body does not run. Instead we exit the \textbf{for}-loop.
 
 We can trace the unifications in Listing \ref{unif-example}.  
 
-% \begin{figure}[hbt]
-% \centering
-\begin{center}
+\begin{figure}[hbt]
+\centering
+% \begin{center}
 \begin{minipage}[c]{0.45\textwidth}
 \begin{python1}
 (A, B, C, D) = (Var(), Var(), Var(), Var())
@@ -99,9 +99,9 @@ print(A, B, C, D) # => _1 _2 _3 _4
 \end{python1}\linv
 \begin{lstlisting} [caption={\textit{Unification example}},  label={unif-example}]
 \end{lstlisting}
-\end{minipage}
-\end{center}
-% \end{figure}
+\end{minipage}\linv
+% \end{center}
+\end{figure}
 
 The first unifications, lines 3 and 4, produce the following. 
 \begin{equation}\label{eq:one}
@@ -130,12 +130,7 @@ A & \to & B            & \to & 'abc'      \\
 \end{array}
 \end{equation}
 
-
-% To determine the value of a logical variable, one goes to the end of its unification chain. If the end element is instantiated, that is the (current) value of the variable. That's why all the variables have \textit{abc} as their values after line 8. 
-
-% If the end of a unification chain is unintantiated, the internal value associated with that end element is a place-holder value.
-
-\smallv
+% \smallv
 \subsection{A logic-variable version of \textit{tnvsl\_dfs\_gen}}
 Listing \ref{lis:dfs-gen-lv} adapts Listing \ref{lis:dfs-gen} for logic variables. The strategy is for \textit{trnsvl} to start as a tuple of uninstantiated \textit{Var}s, which become instantiated as the program runs.
 
@@ -156,7 +151,7 @@ Note that \textit{tnvsl[indx]} retrieves the \textit{indx\textsuperscript{th}} \
 \centering
 \begin{minipage}[c]{0.45\textwidth}
 \begin{python1}
-def tnvsl_dfs_gen_lv(sets, tnvsl):
+def tnvsl_dfs_gn_lv(sets, tnvsl):
   var_indxs = uninstan_indices_lv(tnvsl)
     
   if not var_indxs: yield tnvsl
@@ -175,8 +170,7 @@ def tnvsl_dfs_gen_lv(sets, tnvsl):
         for _ in fails(member)(T_Var, used_values):
           new_sets = [set.discard(T_Var) 
                       for set in sets]
-          yield from tnvsl_dfs_gen_lv(new_sets, 
-                                      tnvsl)
+          yield from tnvsl_dfs_gn_lv(new_sets,tnvsl)
 \end{python1}\linv
 \begin{lstlisting} [caption={\textit{dfs-with-gen-and-logic-variables}},  label={lis:dfs-gen-lv}]
 \end{lstlisting}
@@ -221,7 +215,7 @@ The following logic variable version of Listing \ref{lis:dfs-gen-call} will run 
 Py_Sets = [PySet(set) for set in sets]
 # PyValue creates a logic variable constant.
 N = PyValue(6)
-for _ in tnvsl_dfs_gen_lv(Py_Sets, (A, B, C)):
+for _ in tnvsl_dfs_gn_lv(Py_Sets, (A, B, C)):
   sum_string = ' + '.join(str(i) for i in (A, B, C))
   equals = '==' if A + B + C == N else '!='
   print(f'{sum_string} {equals} {N}')
@@ -230,6 +224,6 @@ for _ in tnvsl_dfs_gen_lv(Py_Sets, (A, B, C)):
 \end{minipage}
 \end{center}
 
-Here we created three logic variables,  \textit{A}, \textit{B}, and \textit{C} and passed them to \textit{tnvsl\_dfs\_gen\_lv} on line 5. Each time a transversal is found, the body of the \textbf{for}-loop is executed with the values to which \textit{A}, \textit{B}, and \textit{C} have been instantiated. 
+Here we created three logic variables,  \textit{A}, \textit{B}, and \textit{C} and passed them to \textit{tnvsl\_dfs\_gn\_lv} on line 5. Each time a transversal is found, the body of the \textbf{for}-loop is executed with the values to which \textit{A}, \textit{B}, and \textit{C} have been instantiated. 
 
 The preceding offers some sense of what one can do with logic variables. The next section really puts them to work.

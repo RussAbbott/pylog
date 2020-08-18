@@ -30,10 +30,10 @@ A number of utility methods are defined.
     But \textit{Marie/\_} would unify with \textit{\_/Phys}. After unification, the two objects would each have both fields identically instantiated: \textit{Mia/Physics}.
     
     \item \textit{is\_subseq(list1, list2)} is the same as \textit{is\_contiguous\_in}, but the elements of \textit{list1} may appear in \textit{list2} with gaps between them.
-    \item \textit{member(student, list)} unifies \textit{student} with eligible elements of \textit{list}. On backtracking, yields all matches. This is the same method we used in the transversal problem.
+    \item \textit{member(student, list)} unifies \textit{student}, successively, with eligible elements of \textit{list}---as in the transversal problem.
 \end{itemize}
 
-Listing \ref{lis:clues} contains the clues as simple methods. Listing \ref{lis:search-engine} contains a list of method names and the search engine.  (The \textit{run\_clue} method runs the \textit{all-different} heuristic to prevent the same field value from being used more than once.) 
+Listing \ref{lis:clues} contains the clues as simple methods. Listing \ref{lis:search-engine} contains a list of method names and the search engine.  \textit{run\_clue} (line 8) runs the \textit{all-different} heuristic to prevent the same field value from being used more than once.
 
 \begin{figure*}[htb]
 \flushright
@@ -67,71 +67,6 @@ def clue_5(self, Stdnts):
 \end{minipage}\linv
 \end{figure*}
 
-% self.clues = [clue_1, clue_2, clue_3, clue_4, clue_5] 
-
-% def run_all_clues(self, clue_number):
-%   # Ran all the clues. Succeed.
-%   if clue_number >= len(self.clues): yield
-%   else:
-%     # Run the current clue and then the rest.
-%     for _ in self.run_clue(clue_number):
-%       yield from self.run_all_clues(clue_number + 1)
-
-% \begin{center}
-% \begin{minipage}[c]{0.45\textwidth}
-% \begin{python1}
-% def clue_1(self, Stdnts):
-%   """ The student who studies Phys gets a 
-%       smaller scholarship than Emmy. """
-%   yield from is_subseq(
-%     [Stdnt(major='Phys'),Stdnt(name='Emmy')],Stdnts)
-% \end{python1}
-% \end{minipage}
-
-% \begin{minipage}[c]{0.45\textwidth}
-% \begin{python1}
-% def clue_2(self, Stdnts):
-%   """ Emmy studies either Math or Bio. """
-%   # Create Major as a local logic variable.
-%   Major = Var()
-%   for _ in member(Stdnt(name='Emmy', major=Major), 
-%                   Stdnts):
-%     yield from member(Major, PyList(['Math','Bio']))
-% \end{python1}
-% \end{minipage}
-
-% \begin{minipage}[c]{0.45\textwidth}
-% \begin{python1}
-% def clue_3(self, Stdnts):
-%   """ The Stdnt who studies CS has 
-%       a $5,000 larger scholarship than Lynn. """
-%   yield from is_contiguous_in(
-%     [Stdnt(name='Lynn'), Stdnt(major='CS')], Stdnts)
-% \end{python1}
-% \end{minipage}
-
-% \begin{minipage}[c]{0.45\textwidth}
-% \begin{python1}
-% def clue_4(self, Stdnts):
-%   """ Marie gets $10,000 more than Lynn. """
-%   yield from is_contiguous_in(
-%     [Stdnt(name='Lynn'),Var(),Stdnt(name='Marie')], 
-%     Stdnts)
-% \end{python1}
-% \end{minipage}
-
-% \begin{minipage}[c]{0.45\textwidth}
-% \begin{python1}
-% def clue_5(self, Stdnts):
-%   """ Ada has a larger scholarship than the Stdnt 
-%       who studies Bio. """
-%   yield from is_subseq(
-%     [Stdnt(major='Bio'), Stdnt(name='Ada')], 
-%     Stdnts)
-% \end{python1}
-% \end{minipage}
-% \end{center}
-
 \begin{center}
 \begin{minipage}[c]{0.46\textwidth}
 \begin{python1}
@@ -145,19 +80,29 @@ def run_all_clues(self, clue_number):
     for _ in self.run_clue(clue_number):
       yield from self.run_all_clues(clue_number + 1)
 \end{python1}\linv
-\begin{lstlisting} [caption={\textit{sample}},  label={lis:search-engine}]
+\begin{lstlisting} [caption={\textit{search engine}},  label={lis:search-engine}]
 \end{lstlisting}
 \end{minipage}
 \end{center}
 
 The execution trace in Listing \ref{scholarship-problem} shows the order (including backtracking) in which the clues were executed. Each line shows the then-current list of partially instantiated students. 
 
-The trace shows that we requested further backtracking to look for other solutions. (There aren't any.) 
+At line 42 we look for other solutions. (There aren't any.) The total compute time on a 3-year-old laptop was 0.01 sec. 
 
-The total compute time on a 3-year-old laptop was 0.01 sec. 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Conclusion} \label{sec:conclusion}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+We have explained how solvers for constraint problems work and how they can be integrated into Python programs. 
+
+It's difficult to imagine a neural net (of any depth!) solving the problems discussed here---although preliminary work toward that end has been reported. \cite{xu2018towards, amel2019shallow, dubois2019towards}
+
+% The Pylog code is available on \href{https://github.com/RussAbbott/pylog/tree/master/pylog}{GitHub} at
+
+% \href{https://github.com/RussAbbott/pylog/tree/master/pylog}{github.com/RussAbbott/pylog/tree/master/pylog}.
 
 
-\begin{figure}[hb]
+\begin{figure}[H]%[!htb]
     \flushright
 \begin{minipage}[c]{0.45\textwidth}
 \begin{python1}
@@ -212,25 +157,26 @@ Clue 4: Lynn/_, _/CS, Marie/Phys, Emmy/Bio
 \end{minipage} \linv
 \end{figure}
 
-% More? (y, or n)? > y
+% % More? (y, or n)? > y
 
-% Clue 2: _/_, _/_, _/Phys, Emmy/Bio
-% Clue 3: Lynn/_, _/CS, _/Phys, Emmy/Bio
-% Clue 4: Lynn/_, _/CS, Marie/Phys, Emmy/Bio
+% % Clue 2: _/_, _/_, _/Phys, Emmy/Bio
+% % Clue 3: Lynn/_, _/CS, _/Phys, Emmy/Bio
+% % Clue 4: Lynn/_, _/CS, Marie/Phys, Emmy/Bio
 
-% After 3 final rule applications, no more solutions.
+% % After 3 final rule applications, no more solutions.
 
-% The total compute time was: 0.01 sec
+% % The total compute time was: 0.01 sec
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Conclusion} \label{sec:conclusion}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \section{Conclusion} \label{sec:conclusion}
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-We have explained how solvers for constraint problems work and how they can be integrated into Python programs. 
+% We have explained how solvers for constraint problems work and how they can be integrated into Python programs. 
 
-It's difficult to imagine a neural net (of any depth!) solving the problems discussed here---although preliminary work toward that end has been reported. \cite{xu2018towards, amel2019shallow, dubois2019towards}
+% It's difficult to imagine a neural net (of any depth!) solving the problems discussed here---although preliminary work toward that end has been reported. \cite{xu2018towards, amel2019shallow, dubois2019towards}
 
-The Pylog code is available on \href{https://github.com/RussAbbott/pylog/tree/master/pylog}{GitHub}:
+\largev
+The Pylog code is available on \href{https://github.com/RussAbbott/pylog/tree/master/pylog}{GitHub} at
 
 \href{https://github.com/RussAbbott/pylog/tree/master/pylog}{github.com/RussAbbott/pylog/tree/master/pylog}.
 
