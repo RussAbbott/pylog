@@ -5,49 +5,10 @@
 This section discusses logic variables and their realization. 
 
 \subsection{Instantiation}
-Logic variables are either instantiated, i.e., have a value, or uninstantiated. The instantiation operation is called \textit{unify}.   
+Logic variables are either instantiated, i.e., have a value, or uninstantiated. The instantiation operation is called \textit{unify}.   \textit{unify} is a \textit{generator}, but it \textit{does not} \textbf{yield} a value. Consider the code segment in Listing \ref{lis:simple-unif-example}. 
 
-\textit{unify} is a \textit{generator}---even though the act of instantiation \textit{does not} \textbf{yield} a value. Activating \textit{unify} establishes a context within which unification holds. Leaving that context undoes the unification. 
-
-Consider the following sequence of short code segments. 
-\begin{center}
-\begin{minipage}[c]{0.45\textwidth}
-\begin{python1}
-A = Var()
-\end{python1}
-\end{minipage}
-\end{center}
-\textit{A} is a standard Python identifier. We use an initial capital letter to distinguish logic variables from regular Python variables. \textit{Var} is the constructor for logic variables.
-
-\textit{A} is now an uninstantiated logic variable. When an uninstantiated logic variables is printed, an internal value is shown to distinguish among logic variables. As the first logic variable in this program, \textit{A}'s internal value is \textit{\_1}.
-
-\begin{center}
-\begin{minipage}[c]{0.45\textwidth}
-\begin{python1}
-print(A)  # => _1
-\end{python1}
-\end{minipage}
-\end{center}
-
-Now \textit{unify A} with \textit{abc}, i.e., instantiate \textit{A} to \textit{abc}. Since \textit{unify} does not \textbf{yield} a value, the \textbf{for}-loop variable is not used. 
-
-The \textbf{for}-loop establishes a context for \textit{unify}. Within the \textbf{for}-loop body \textit{A} is instantiated to  \textit{abc}.
-
-Since there is only one way to \textit{unify A} with \textit{abc}, no choicepoints, the  \textbf{for}-loop body runs only once.  Leaving the \textit{unify} context undoes the instantiation.
-
-\begin{center}
-\begin{minipage}[c]{0.45\textwidth}
-\begin{python1}
-for _ in unify(A, 'abc'):
-    print(A)  # => abc
-print(A)  # => _1
-\end{python1}
-\end{minipage}
-\end{center}
-
-Within a \textit{unify} context, logic variables are immutable. Once a logic variable has a value, it cannot change within its context.
-
-\begin{center}
+\begin{figure}[htb]
+\centering
 \begin{minipage}[c]{0.45\textwidth}
 \begin{python1}
 A = Var()
@@ -59,9 +20,30 @@ for _ in unify(A, 'abc'):
       print(A)  # Never executed
     print(A)  # => abc
 print(A)  # => _1
-\end{python1}
-\end{minipage}
-\end{center}
+\end{python1}\linv
+\begin{lstlisting} [caption={\textit{Unification example}},  label={lis:simple-unif-example}]
+\end{lstlisting}
+\end{minipage}\linv
+\end{figure}
+
+\begin{itemize}
+    \item \textit{line 1}. \textit{A} is a normal Python identifier. We use an initial capital to distinguish logic variables from regular Python variables. \textit{Var} is the constructor for logic variables. After this line, \textit{A} refers to an uninstantiated  logic variable object.
+
+    \item \textit{line 2}. When an uninstantiated logic variable is printed, we see an internal value, which  distinguishes it from other logic variables. As the first logic variable in this program, \textit{A}'s internal value is \textit{\_1}.
+
+    \item \textit{lines 3-8}.  \textit{unify A} with \textit{abc}. Since \textit{unify} does not \textbf{yield} a value, the \textbf{for}-loop variable is not used. 
+    
+    \item \textit{line 4}. The \textbf{for}-loop establishes a context for \textit{unify}. Within the \textbf{for}-loop body \textit{A} is instantiated to  \textit{abc}.
+
+    \item \textit{lines 6-7}. Within a \textit{unify} context, logic variables are immutable. Since \textit{A} already has a value, it cannot be unified with \textit{def}. The \textit{unify} on line 6 fails, and the body of that \textbf{for}-loop (line 7) does not execute. 
+    
+    \item \textit{line 8}, \textit{A} has the same value as on line 4.
+    
+    \smallv Since there is only one way to \textit{unify A} with \textit{abc}, the \textbf{for}-loop body runs only once.  
+    
+    \item \textit{lines 9}. Leaving the \textit{unify} context undoes the instantiation.
+
+\end{itemize}
 
 \subsection{The power of \textit{unify}}
 \textit{unify} can also identify logic variables with each other. After two uninstantiated logic variables are unified, whenever either gets a value, the other gets that same value.
@@ -145,7 +127,7 @@ def uninstan_indices_lv(tnvsl):
 \end{minipage}
 \end{center}
 
-Note that \textit{tnvsl[indx]} retrieves the \textit{indx\textsuperscript{th}} \textit{tnvsl} element. If it's instantiated, it represents the value associated with the \textit{indx\textsuperscript{th}} set. If not, we don't yet have a value for the  \textit{indx\textsuperscript{th}} set.
+Note that \textit{tnvsl[indx]} retrieves the \textit{indx\textsuperscript{th}} \textit{tnvsl} element. If it is instantiated, it represents the value associated with the \textit{indx\textsuperscript{th}} set. If not, we don't yet have a value for the  \textit{indx\textsuperscript{th}} set.
 
 \begin{figure}[htb]
 \centering
@@ -224,6 +206,6 @@ for _ in tnvsl_dfs_gn_lv(Py_Sets, (A, B, C)):
 \end{minipage}
 \end{center}
 
-Here we created three logic variables,  \textit{A}, \textit{B}, and \textit{C} and passed them to \textit{tnvsl\_dfs\_gn\_lv} on line 5. Each time a transversal is found, the body of the \textbf{for}-loop is executed with the values to which \textit{A}, \textit{B}, and \textit{C} have been instantiated. 
+Line 1 created three logic variables,  \textit{A}, \textit{B}, and \textit{C}. Line 5 passed them to \textit{tnvsl\_dfs\_gn\_lv}. Each time a transversal is found, the body of the \textbf{for}-loop is executed with the values to which \textit{A}, \textit{B}, and \textit{C} have been instantiated. 
 
 The preceding offers some sense of what one can do with logic variables. The next section really puts them to work.

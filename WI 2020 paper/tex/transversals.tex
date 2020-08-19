@@ -101,13 +101,25 @@ sets: [{1,2,3}, {1,2,4}, {1}], tnvsl: (_,_,_)
     \item \textit{lines 8}. Finally, we can select \textit{1} as the third element of \textit{trvs}, and we're done.
 \end{itemize}
 
-Even though this is a simple depth-first search, it incorporates (what appears to be and what we have been referring to as) backtracking. In fact, there is no backtracking. The recursively nested \textbf{for}-loops produce a backtracking effect.  
+\noindent\textbf{How recursively nested for-loops implement choicepoints and backtracking}. This simple depth-first search appears to incorporate backtracking. In fact, there is no backtracking. Recursively nested \textbf{for}-loops produce a backtracking effect.  
 
-It is common to use the term \textit{choicepoint} for places when (a) multiple choices are possible and (b) one wants to try them all, if necessary. Our simple solver implements choicepoints via (recursively) nested \textbf{for}-loops. 
+It is common to use the term \textit{choicepoint} for a place in a program where (a) multiple choices are possible and (b) one wants to try them all, if necessary. Our simple solver implements choicepoints via (recursively) nested \textbf{for}-loops. 
 
-There is room for improvement. Here are two heuristics. 
+The \textbf{for}-loop on line 6 generates options until either we find one for which the remainder of the program completes the traversal, or, if the options available have been exhausted, the program fails out of that recursive call and ``backtracks'' to a choicepoint at a higher/earlier level of the recursion.
 
-\noindent\textbf{Propagate}. When we select an element for \textit{trvs} we can \textit{propagate} that selection by removing that element from the remaining sets. We can do that with the following changes. (Of course, a real solver would not hard-code heuristics. This is just to show how it works.)
+In this context, backtracking means popping an element from the call stack and restoring the program at the next higher level. As with any function call, the calling function continues at the point after the function call---in this case, line 12. 
+
+If the function called on line 11 returns a complete transversal, we return it to the \textit{next} higher level, which continues to return it up the stack until we reach the original caller. 
+
+If what was returned on line 11 was not a complete transversal, we go around the \textbf{for}-loop again, bind \textit{element} to the next member of \textit{sets[nxt\_indx]}, and try again. 
+
+The call stack serves as a record of earlier, pending choicepoints. We resume them in reverse order as needed. That's exactly what depth-first search is all about.
+
+\smallv
+\noindent We now turn to two heuristics that improve solver efficiency. 
+
+\smallv
+\noindent\textit{Propagate}. When we select an element for \textit{trvs} we can \textit{propagate} that selection by removing that element from the remaining sets. We can do that with the following changes. (Of course, a real solver would not hard-code heuristics. This is just to show how it works.)
 \begin{enumerate}
     \item Before \textit{line 11}, insert this line.
   
@@ -152,7 +164,7 @@ sets: [{1,2,3}, {1,2,4}, {1}], tnvsl: (_,_,_)
 \end{minipage}
 \end{flushright}
 
-\noindent\textbf{Smallest first}. When selecting which \textit{tnvsl} index to fill next, pick the position associated with the smallest remaining set. 
+\noindent\textit{Smallest first}. When selecting which \textit{tnvsl} index to fill next, pick the position associated with the smallest remaining set. 
 
 In the original code, replace line 5 with
 \begin{center}
@@ -165,7 +177,6 @@ In the original code, replace line 5 with
 \end{center}
 The resulting trace (Listing \ref{lis:dfs-4-lines}) is only 4 lines. (At line 3, the first two sets are the same size. \textit{min} selects the first.) 
 
-% \midiumlv 
 \begin{figure}[htb]
     \centering\begin{minipage}[c]{0.45\textwidth}
 \begin{python1}  
