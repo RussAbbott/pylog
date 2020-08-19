@@ -168,7 +168,7 @@ The \textit{Propagate} heuristic is a partial implementation of the \textit{all-
 
 \noindent\textit{Smallest first}. When selecting which \textit{tnvsl} index to fill next, pick the position associated with the smallest remaining set. 
 
-In the original code, replace line 5 with
+In the original code (Listing \ref{lis:tnvsl-dfs}), replace line 5 with
 \begin{center}
 \begin{minipage}[c]{0.45\textwidth}
 \begin{python1}
@@ -177,6 +177,7 @@ In the original code, replace line 5 with
 \end{python1}
 \end{minipage}
 \end{center}
+
 The resulting trace (Listing \ref{lis:dfs-4-lines}) is only 4 lines. (At line 3, the first two sets are the same size. \textit{min} selects the first.) 
 
 \begin{figure}[htb]
@@ -188,7 +189,7 @@ sets: [{1,2,3}, {1,2,4}, {1}], tnvsl: (_,_,_)
       sets: [{1,2,3}, {1,2,4}, {1}, tnvsl: (2,4,1)
 \end{python1}\linv
 \begin{lstlisting} [caption={\textit{tnvsl\_dfs\_smallest trace}}, label={lis:dfs-4-lines}]
-\end{lstlisting}\inv
+\end{lstlisting}
 \end{minipage}\linv
 \end{figure}
 
@@ -217,7 +218,7 @@ One approach would be to modify the solver to find and return all transversals. 
 
 We need a solver than can return results while keeping track of where it is with respect to its choicepoints so that it can continue from there if necessary. That's what a generator does. 
 
-Listing \ref{lis:dfs-gen} shows a generator version of our solver, including both heuristics. When called as in Listing \ref{lis:dfs-gen-call}, it produces the trace in Listing \ref{lis:dfs-gen-trace}. 
+Listing \ref{lis:dfs-gen} shows a generator version of our solver, including both heuristics. When called as on lines 22-23, it produces the trace in Listing \ref{lis:dfs-gen-trace}. 
 
 \begin{figure}[htb]
     \centering
@@ -242,31 +243,22 @@ def tnvsl_dfs_gen(sets, tnvsl):
         for full_tnvsl in tnvsl_dfs_gen(new_sets, 
                                         new_tnvsl):
           yield full_tnvsl
-\end{python1}\linv
-\begin{lstlisting} [caption={\textit{tnvsl\_dfs\_gen}}, label={lis:dfs-gen}]
-\end{lstlisting}
-\end{minipage}\linv
-\end{figure}
 
 
-\begin{figure}[htb]
-    \centering
-\begin{minipage}[c]{0.45\textwidth}
-\begin{python1}  
 for tnvsl in tnvsl_dfs_gen(sets, ('_','_','_')):
     print('=> ', tnvsl)
 \end{python1}\linv
-\begin{lstlisting} [caption={\textit{tnvsl\_dfs\_gen}}, label={lis:dfs-gen-call}]
+\begin{lstlisting} [caption={\textit{tnvsl\_dfs\_gen}}, label={lis:dfs-gen}]
 \end{lstlisting}
-\end{minipage}\linv
-\end{figure}
+% \end{minipage}\linv
+% \end{figure}
 
 
-\begin{figure}[!ht]
-    \centering
-\begin{minipage}[c]{0.45\textwidth}
+% \begin{figure}[!ht]
+%     \centering
+% \begin{minipage}[c]{0.45\textwidth}
 \begin{python1}  
-sets: [{1,2,3}, {1,2,4}, {1}], tnvsl: (_,_,_)
+sumsets: [{1,2,3}, {1,2,4}, {1}], tnvsl: (_,_,_)
   sets: [{2,3}, {2,4}, {}], tnvsl: (_,_,1)
     sets: [{3}, {4}, {}], tnvsl: (2,_,1)
       sets: [{3}, {}, {}], tnvsl: (2,4,1)
@@ -278,10 +270,11 @@ sets: [{1,2,3}, {1,2,4}, {1}], tnvsl: (_,_,_)
 =>  (3, 4, 1)
 \end{python1}\linv
 \begin{lstlisting} [caption={\textit{tnvsl\_dfs\_gen trace}}, label={lis:dfs-gen-trace}]
-\end{lstlisting}\inv
+\end{lstlisting}
 \end{minipage}\linv
 \end{figure}
 
+\smallv
 Some comments on Listing \ref{lis:dfs-gen}.  % \textit{tnvsl\_dfs\_gen}.
 \begin{itemize}
     \item The newly added \textbf{else} on line 5 is necessary. Previously, if there were no \textit{remaining\_indices}, we returned \textit{tnvsl}. That was the end of execution for this recursive call. But if we \textbf{yield} instead of \textbf{return}, when \textit{tnvsl\_dfs\_gen} is asked for more results, \textit{it continues with the line after the \textbf{yield}}. But if have already found a transversal, we don't want to continue. The \textbf{else} divides the code into two mutually exclusive components. \textbf{return} had done that implicitly.
