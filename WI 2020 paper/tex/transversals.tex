@@ -74,7 +74,7 @@ This is standard depth first search. \textit{tnvsl\_dfs} will either find the fi
 
 Here's a trace of the recursive calls.
 
-\midiumlv
+\mediumv
 \begin{minipage}[c]{0.45\textwidth}
 \begin{python1}  
 sets: [{1,2,3}, {1,2,4}, {1}], tnvsl: (_,_,_)
@@ -164,6 +164,8 @@ sets: [{1,2,3}, {1,2,4}, {1}], tnvsl: (_,_,_)
 \end{minipage}
 \end{flushright}
 
+The \textit{Propagate} heuristic is a partial implementation of the \textit{all-different} constraint. It can be applied to this problem because we know that the transversal elements must all be different from each other.
+
 \noindent\textit{Smallest first}. When selecting which \textit{tnvsl} index to fill next, pick the position associated with the smallest remaining set. 
 
 In the original code, replace line 5 with
@@ -192,7 +194,7 @@ sets: [{1,2,3}, {1,2,4}, {1}], tnvsl: (_,_,_)
 
 One could apply both heuristics. Since \textit{smallest first} eliminated backtracking, adding the \textit{propagate} heuristic makes no effective difference. But, one can watch the sets shrink.
 
-\midiumlv
+\mediumv
 \begin{minipage}[c]{0.45\textwidth}
 \begin{python1} 
 sets: [{1,2,3}, {1,2,4}, {1}], tnvsl: (_,_,_)

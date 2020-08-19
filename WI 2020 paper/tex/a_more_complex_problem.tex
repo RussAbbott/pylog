@@ -30,11 +30,13 @@ def clue_5(self, Stdnts):
 \end{minipage} \linv
 \end{figure*}
 
-\begin{center}
-\begin{figure}[!t]
-\flushright
-\begin{minipage}[c]{0.46\textwidth}
+\begin{figure}[!b]  % [!t]
+    \flushright
+\linv
+\begin{minipage}[c]{0.45\textwidth}
 \begin{python1}
+self.rules = [clue_1,clue_2,clue_3,clue_4,clue_5]
+
 def run_all_clues(self, clue_number):
   if clue_number >= len(self.clues): yield
   else:
@@ -43,13 +45,12 @@ def run_all_clues(self, clue_number):
 \end{python1}\linv
 \begin{lstlisting} [caption={\textit{search engine}},  label={lis:search-engine}]
 \end{lstlisting}
-\end{minipage}  \linv 
-\end{figure}
-\end{center}
+% \end{minipage}  \linv 
+% \end{figure}
 
-\begin{figure}[!b]  % [H]%[!htb]
-    \flushright
-\begin{minipage}[c]{0.45\textwidth}
+% \begin{figure}[!b]  % [H]%[!htb]
+    % \flushright
+% \begin{minipage}[c]{0.45\textwidth}
 \begin{python1}
 Initially: _/_, _/_, _/_, _/_
 Clue 1: _/Phys, Emmy/_, _/_, _/_
@@ -99,7 +100,7 @@ Clue 4: Lynn/_, _/CS, Marie/Phys, Emmy/Bio
 \end{python1}\linv
 \begin{lstlisting} [caption={\textit{Trace of the scholarship problem}}, label={scholarship-problem}]
 \end{lstlisting}
-\end{minipage} \linv
+\end{minipage}\linv
 \end{figure}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -136,7 +137,7 @@ A number of utility methods are defined.
     \item \textit{member(student, list)} unifies \textit{student}, successively, with eligible elements of \textit{list}, as in the transversal problem.
 \end{itemize}
 
-Listing \ref{lis:clues} contains the clues. Listing \ref{lis:search-engine} contains the search engine.  \textit{run\_clue} (line 4) runs the \textit{all-different} heuristic to prevent the same field value from being used more than once. (We hard-coded \textit{all-different} in the transversal problem.)
+Listing \ref{lis:clues} contains the clues. Listing \ref{lis:search-engine} contains a list of the clues names on line 1 followed by the search engine on lines 3-7.  \textit{run\_clue} (line 6) runs the clues by their names. It also applies the \textit{all-different} heuristic to prevent the same field value from being used more than once. (We mentioned the \textit{all-different} constraint in the transversal problem.)
 
 Listing \ref{scholarship-problem} shows the sequence of clue executions, including backtracking. Each line shows the then-current list of partially instantiated students. At line 42 we asked the search engine to look for additional solutions. (There weren't any.) The total compute time on a 3-year-old laptop was 0.01 sec. 
 
@@ -144,13 +145,11 @@ Listing \ref{scholarship-problem} shows the sequence of clue executions, includi
 \section{Conclusion} \label{sec:conclusion}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-We have explained how a simple solver for constraint problems works and how solvers can be integrated into Python programs. 
+We explained how a simple solver for constraint problems works and how solvers can be integrated into Python programs. 
 
 It's difficult to imagine a neural net (of any depth!) solving the problems discussed here---although preliminary work toward that end has been reported. \cite{xu2018towards, amel2019shallow, dubois2019towards}
 
-
-\largev
-The Pylog code is available on \href{https://github.com/RussAbbott/pylog/tree/master/pylog}{GitHub} at
-
+\mediumv
+\noindent Pylog code at: %  on \href{https://github.com/RussAbbott/pylog/tree/master/pylog}{GitHub} at
 \href{https://github.com/RussAbbott/pylog/tree/master/pylog}{github.com/RussAbbott/pylog/tree/master/pylog}.
 
