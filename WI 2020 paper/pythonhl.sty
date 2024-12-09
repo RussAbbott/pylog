@@ -62,8 +62,11 @@ frame=trbl,
 extendedchars=true,
 upquote=true,
 rulecolor=\color{black},
+breakatwhitespace=false,
 backgroundcolor=\color{white},
-breakindent=.5\textwidth,frame=single,breaklines=true%
+breakindent=.1\textwidth,frame=single,
+breaklines=true,
+postbreak=\mbox{\textcolor{red}{$\hookrightarrow$}\space},
 }
 
 \lstnewenvironment{python1}{\lstset{style=mypython}} {}
@@ -79,7 +82,9 @@ breakindent=.5\textwidth,frame=single,breaklines=true%
 \global\ATOfontsizefalse
 \lstset{style=mypython,
     numbers=none,
-    #1
+    #1,
+    mathescape=true,
+    basicstyle=\ttfamily
 }
 \ifATOfontsize
     \lstset{basicstyle=\fontfamily{cmss}\ATOfontsize\setstretch{1}}

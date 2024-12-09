@@ -82,8 +82,8 @@
 
 \newbool{P@submission}
 \P@Key{phase}[final]{%
-  \ifstr{#1}{final}{\boolfalse{P@submission}}{}
-  \ifstr{#1}{submission}{\booltrue{P@submission}}{}
+  \Ifstr{#1}{final}{\boolfalse{P@submission}}{}
+  \Ifstr{#1}{submission}{\booltrue{P@submission}}{}
   \FamilyKeyStateProcessed}
 \P@StdOption{submission}{phase=submission}
 \P@StdOption{crc}{phase=final}
@@ -308,10 +308,10 @@
 \ifthenelse{\boolean{xetex}\OR\boolean{luatex}}%
   {\RequirePackage{fontspec}[2013/05/20]
     \ifthenelse{\boolean{xetex}}%
-      {\setmainfont[Numbers=OldStyle,SmallCapsFeatures={Letters=SmallCaps,LetterSpace=5}]{XCharter}\relax}%
-      {\setmainfont[Numbers=OldStyle]{XCharter}\relax}
+      {\setmainfont[SmallCapsFeatures={Letters=SmallCaps,LetterSpace=5}]{XCharter}\relax}%
+      {\setmainfont[]{XCharter}\relax}
     \def\P@fontscale{MatchLowercase}}%
-  {\RequirePackage[osfI,sups]{XCharter}
+  {\RequirePackage[sups]{XCharter}
     \def\P@fontscale{.92}}
 \RequirePackage[scaled=\P@fontscale,semibold]{FiraSans}
 \ifdefstring{\P@codefont}{sf}%
@@ -432,7 +432,7 @@
 
 \ifthenelse{\boolean{xetex}\or\boolean{luatex}}%
   {\newfontfamily\firaoldstylemono
-      [ Numbers = {Monospaced,OldStyle},
+      [ Numbers = {Monospaced},
         UprightFont    = *-Book ,
         ItalicFont     = *-BookItalic ,
         BoldFont    = *-Bold ,
@@ -489,7 +489,7 @@
     url=true,%
     abbreviate=false,%
     maxnames=20,
-    urldate=iso8601}
+    urldate=iso}
   \PreventPackageFromLoading[\message{%
     ^^J^^JERROR: You tried to load  the cite package that is not compatible
     with biblatex.^^J^^J%
@@ -930,6 +930,5 @@
 
 \tolerance=100
 \emergencystretch=2pt
-
 \endinput
 % EOF

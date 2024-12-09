@@ -1,0 +1,409 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{From Python to Prolog (Listings in Appendix \ref{appsec:pylog})} \label{sec:pylog}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+This section offers a reasonably detailed overview of Pylog and how it relates to Prolog. Our strategy is to show how a standard Python program can be transformed, step-by-step, into a structurally similar Prolog program. 
+
+As an example problem, we use the computation of a transversal. Given a sequence of sets (in our case lists without repetition), a transversal is a non-repeating sequence of elements with the property that the \textit{n\textsuperscript{th}} element of the traversal belongs to the \textit{n\textsuperscript{th}} set in the sequence.  For example, the sets\footnote{From here on, we refer informally to the lists in our example as \textit{sets}.} [[1, 2, 3], [2, 4], [1]] has three transversals: [2, 4, 1], [3, 2, 1], and [3, 4, 1]. We use the transversal problem because it lends itself to depth-first search, the default Prolog control structure.\footnote{We use traditional, i.e., naive, depth-first search. Most modern Prologs include a constraint processing package such as CLP(FD)\cite{Triska2016}, which makes search much more efficient.
+
+% Instead of scanning the sets in the order given, one can select the next set to scan based on how constrained the sets are. Given [[1, 2, 3], [2, 4], [1]], the third set would be scanned first, with 1 selected as its representative---thereby precluding the selection of 1 for the first set.
+
+% Another efficiency measure involves propagating constraints. Suppose our example sets are scanned from left to right. If 1 is selected from the first set, that choice would be propagated forward, eliminating 1 from the final set. Since the final set would then have no choices left, one can conclude that selecting 1 from the first set does not lead to a solution. 
+
+Application of such constraint rules eliminates much of the backtracking inherent in naive depth-first search. Powerful as they are, we do not use such techniques in this paper.}
+
+We will discuss five functions for finding transversals---the first four in Python, the final one in standard Prolog. As we discuss these programs we will introduce various Pylog features. Here is a road-map for the programs to be discussed and the Pylog features they illustrate. (To simplify formatting, we use \textit{tvsl} in place of \textit{transversal})
+
+\begin{enumerate}
+\item \textit{tvsl\_dfs\_first} is a standard Python program that performs a depth-first search. It returns the first transversal it finds. It contains no Pylog features, but it illustrates the overall structure the others follow. 
+
+\item \textit{tvsl\_dfs\_all}. In contrast to \textit{tvsl\_dfs\_first}, \textit{tvsl\_dfs\_all} finds and returns \textit{all} transversals. A very common strategy, and the one \textit{tvsl\_dfs\_all} uses, is to gather all transversals into a collection as they are found and return that collection at the end.
+
+\item \textit{tvsl\_yield} also finds and returns all transversals, but it returns them one at a time as requested, as in Prolog. \textit{tvsl\_yield} does this through the use of the Python generator structure, i.e., the \textbf{\textbf{yield}} statement. This moves us an important step toward a Prolog-like control structure.
+
+\item \textit{tvsl\_yield\_lv} introduces logic variables.  
+
+\item \textit{tvsl\_prolog} is a straight Prolog program. It is operationally identical to \textit{tvsl\_yield\_lv}, but of course syntactically very different. 
+\end{enumerate}
+
+The first three Python programs have similar signatures. 
+
+\begin{python}
+def tvsl_python_1_2_3(sets: List[List[int]], partial_transversal: Tuple) -> <some return type>: 
+\end{python}
+(The return types differ from one program to an other.)
+
+Both the fourth Python program and the Prolog program have a third parameter. Their return type, if any, is not meaningful. In these programs, transversals, when found, are returned through the third parameter---as one does in Prolog.
+
+% \begin{python}
+% def tvsl_python_4(sets: List[List[int]], partial_transversal: Tuple, Complete_Transversal: Var)
+% \end{python}
+
+% \begin{python}
+% tvsl_prolog(+Sets, +Partial_Transversal, -Complete_Transversal)
+% \end{python}
+
+The signatures all have the following in common. 
+\begin{enumerate}
+\item The first argument lists the sets for which a transversal is desired, initially the full list of sets. The programs recursively steps through the list, selecting an element from each set. At each recursive call, the first argument lists the remaining sets. 
+
+\item The second argument is a partial transversal consisting of elements selected from sets that have already been scanned. Initially, this argument is the empty tuple.\footnote{The second parameter is of type \textit{tuple} so that we can define an empty tuple as a default.}
+
+\item The third parameter, if there is one, is the returned transversal.
+    \begin{enumerate}
+    \item The first three programs have no third parameter. They return their results via \textbf{return} or \textbf{yield}.
+    
+    \item The final Python function and the Prolog predicate both have a third parameter. Neither uses \textbf{return} or \textbf{yield} to return values. In both, the third argument, initially an uninstantiated logic variable, is unified with a transversal if found.
+    \end{enumerate}
+\end{enumerate}
+
+We now turn to the details of the programs. For each program, we introduce the relevant Python/Pylog constructs and then discuss how they are used in that program.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{tvsl\_dfs\_first (Listings in Appendix \ref{appsubsec:tvsl_dfs_first})} \label{subsec:tvsl_dfs_first}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\textit{tvsl\_dfs\_first} uses standard depth-first search to find a single transversal. As Listing \ref{lis:dfsfirst} shows, when we reach the end of the list of sets (line 3), we are done. At that point we return  \textit{partial\_transversal}, which is then known to be a complete transversal. 
+
+The return type is \textit{Optional[Tuple]},\footnote{There seems to be no way to specify a Tuple of arbitrary length, with \textit{int} elements} i.e., either a tuple of \textit{int}s, or \textbf{None} if no transversal is found. The latter situation occurs when, after considering all elements of the current set (\textit{sets[0]}) (line 6), we have not found a complete transversal.  
+
+% \begin{minipage}{\linewidth} \largev   \hrulefill
+% \begin{python}[numbers=left]
+% @Trace
+% def tvsl_dfs_first(sets: List[List[int]], partial_transversal: Tuple = ()) -> Optional[Tuple]:
+%   if not sets:
+%     return partial_transversal
+%   else:
+%     for element in sets[0]:
+%       if element not in partial_transversal:
+%         complete_transversal = tvsl_dfs_first(sets[1:], partial_transversal + (element, ))
+%         if complete_transversal is not None:
+%           return complete_transversal 
+%     return None
+% \end{python}
+% \begin{lstlisting} [caption={\textit{tvsl\_dfs\_first}}, label={lis:dfsfirst}]
+% \end{lstlisting}
+% \end{minipage}
+
+It may be instructive to run \textit{transversal\_dfs\_first}
+\begin{quote}
+\begin{quote}
+\begin{python}
+sets = [[1, 2, 3], [2, 4], [1]]
+transversal_dfs_first(sets)
+\end{python}
+\end{quote}
+\end{quote}
+and look at the log (Listing \ref{lis:dfs_first_trace}) created by the \textit{Trace} decorator.\footnote{Code for the Trace decorator is included in Section \ref{app:Trace} in the Appendix.} 
+
+The log (Listing \ref{lis:dfs_first_trace}) shows the value of the parameters at the start of each function execution. When \textit{sets} is the empty list (line 3), we have found a transversal---which the \textit{Trace} function indicates with \texttt{ <=}. On the other hand, when the function reaches a dead-end, it "backtracks" to the next element in the current set and tries again. 
+
+% \begin{minipage}{\linewidth}  \largev   \hrulefill
+% \begin{python}[numbers=left]
+% sets: [[1, 2, 3], [2, 4], [1]]
+%   sets: [[2, 4], [1]], partial_transversal: (1,)
+%     sets: [[1]], partial_transversal: (1, 2)
+%     sets: [[1]], partial_transversal: (1, 4)
+%   sets: [[2, 4], [1]], partial_transversal: (2,)
+%     sets: [[1]], partial_transversal: (2, 4)
+%       sets: [], partial_transversal: (2, 4, 1) <=
+% \end{python}
+% \begin{lstlisting} [caption={\textit{transversal\_dfs\_first trace}},  label={lis:dfs_first_trace}]
+% \end{lstlisting}
+% \end{minipage}
+
+The first three lines of the log show that we have selected \textit{(1, 2)} as the \textit{partial\_transversal} and must now select an element of \textit{[1]}, the remaining set. Since \textit{1} is already in the \textit{partial\_transversal}, it can't be selected to represent the final set. So we (blindly, as is the case with naive depth-first search) backtrack (line 6 in the code) to the selection from the second set. We had initially selected \textit{2}. Line 4 of the log shows that we have now selected \textit{4}. Of course that doesn't help. 
+
+Having exhausted all elements of the second set, we backtrack all the way to our selection from the first set (again line 6 in the code). Line 5 of the log shows that we have now selected \textit{2} from the first set and are about to make a selection from the second set. We cannot select \textit{2} from the second set since it is already in the \textit{partial\_transversal}. Instead, we select \textit{4} from the second set. We are then able to select \textit{1} from the final set, which, as shown on line 7, completes the transversal.
+
+Even though this is a simple depth-first search, it incorporates (what appears to be) backtracking. What implements the backtracking? In fact, there is no (explicit) backtracking. The nested \textbf{for}-loops produce a backtracking effect.  Prolog, uses the term \textit{choicepoint} for places in the program at which (a) multiple choices are possible and (b) one wants to try them all, if necessary. Pylog implements choicepoints by means of such nested \textbf{for}-loops and related mechanisms. 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{\textbf{for}-loops as choice points and as computational aggregators (Listings in Appendix \ref{appsubsec:forloops})} \label{subsec:forloops}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Although we are using a standard Python \textbf{for}-loop, it's worth noticing that in the context of depth-first search, a \textbf{for}-loop does, in fact, implement a choicepoint. A choicepoint is a place in the program at which one selects one of a number of options and then moves forward with that selection. If the program reaches a dead-end, it "backtracks" to the choicepoint and selects another option. That's exactly what the \textbf{for}-loop on line 6 of the program does: it generates options until either we find one for which the remainder of the program succeeds, or, if the options available at that choicepoint are exhausted, the program backtracks to an earlier choicepoint.
+
+Is there a difference between this way of using \textbf{for}-loops and other ways of using them? One difference is that with traditional \textbf{for}-loops, e.g., one that would be used in a program to find, say, the largest element of a list (without using a built-in or library function like \textit{max} or \textit{reduce}), each time the \textbf{for}-loop body executes, it does so in a context produced by previous executions of the \textbf{for}-loop body. 
+
+% Consider the simple program \textit{find\_largest}, (Listing \ref{lis:find_largest}), which finds the largest element of an input list.
+
+% \begin{minipage}{\linewidth}  \largev   \hrulefill
+% \begin{python}[numbers=left]
+% def find_largest(lst):
+%     largest = lst[0]
+%     for element in lst[1:]:
+%         largest = max(largest, element)
+%     return largest
+
+% a_list = [3, 5, 2, 7, 4]
+% print(f'Largest of {a_list} is {find_largest(a_list)}.')
+% \end{python}
+% \begin{lstlisting} [caption={find largest},  label={lis:findlargest}]
+% \end{lstlisting}
+% \end{minipage}
+
+% The preceding program produces the following output.
+% \begin{quote}
+% \begin{verbatim}
+% Largest of [3, 5, 2, 7, 4] is 7.
+% \end{verbatim}
+% \end{quote}
+
+Consider the simple program \textit{find\_largest}, (Listing \ref{lis:find_largest}), which finds the largest element of a list. The value of \textit{largest} may differ from one execution of the \textbf{for}-loop body to the next. No similar variables appear in the \textbf{for}-loop body of \textit{tvsl\_dfs\_first}. %\footnote{The value of the \textit{tvsl\_dfs\_first} parameters will differ from one execution of the \textbf{for}-loop to another, but that's because each invocation of \textit{tvsl\_dfs\_first} is solving a somewhat different problem.} 
+
+The \textbf{for}-loop in \textit{find\_largest} performs what one might call computational aggregation---results aggregate from one execution of the \textbf{for}-loop body to the next. In contrast, the \textbf{for}-loop in \textit{tvsl\_dfs\_first} leaves no traces; there is no aggregation from one execution of the body to the next.
+
+In addition, \textbf{for}-loops that function as a choicepoint define a context within which the selection made by the \textbf{for}-loop holds. Of course, the variables set by any \textbf{for}-loop are generally limited to the body of the \textbf{for}-loop. But \textbf{for}-loops that serve as choicepoints function more explicitly as contexts. Even when a choicepoint-type \textbf{for}-loop has only one option, it limits the scope of that option to the \textbf{for}-loop body. We will see examples in Section \ref{subsec:var} Listings \ref{lis:unifylogicvars1} and \ref{lis:unifylogicvars2} when we discuss the \textit{unify} function.
+
+Virtually all the \textbf{for}-loops in this paper function as choicepoints rather than as computational aggregators. 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{tvsl\_dfs\_all (Listings in Appendix \ref{appsubsec:tvsl_dfs_all})} \label{subsec:tvsl_dfs_all}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% \begin{minipage}{\linewidth} \largev   \hrulefill
+% \begin{python}[numbers=left]
+% @Trace
+% def tvsl_dfs_all(sets: List[List[int]], partial_transversal: Tuple = ()) -> List[Tuple]:
+%   if not sets:
+%     return [partial_transversal]
+%   else:
+%     all_transversals = []
+%     for element in sets[0]:
+%       if element not in partial_transversal:
+%         all_transversals += tvsl_dfs_all(sets[1:], partial_transversal + (element, ))
+%     return all_transversals
+% \end{python}
+% \begin{lstlisting} [caption={transversal\_dfs\_all},  label={lis:dfsall}]
+% \end{lstlisting}
+% \end{minipage}
+
+% \smallv
+
+\textit{tvsl\_dfs\_all} (Listing \ref{lis:dfsall}) finds and returns \textit{all} transversals. It has the same structure as \textit{tvsl\_dfs\_first} except that instead of returning a single transversal, transversals are added to \textit{all\_transversals} (line 9), which is returned when the program terminates. 
+
+The following code segment produces the expected output.  (Listing \ref{lis:dfsalltrace} shows a log.)
+
+\begin{minipage}{\linewidth} \largev  
+\begin{quote}
+\begin{python}
+sets = [[1, 2, 3], [2, 4], [1]]
+all_transversals = tvsl_dfs_all(sets)
+print('\nAll transversals:', all_transversals)
+\end{python}
+\end{quote}
+\end{minipage}
+
+% \begin{minipage}{\linewidth}  \largev  \hrulefill  
+% \begin{python}
+% sets: [[1, 2, 3], [2, 4], [1]]
+%   sets: [[2, 4], [1]], partial_transversal: (1,)
+%     sets: [[1]], partial_transversal: (1, 2)
+%     sets: [[1]], partial_transversal: (1, 4)
+%   sets: [[2, 4], [1]], partial_transversal: (2,)
+%     sets: [[1]], partial_transversal: (2, 4)
+%       sets: [], partial_transversal: (2, 4, 1) <=
+%   sets: [[2, 4], [1]], partial_transversal: (3,)
+%     sets: [[1]], partial_transversal: (3, 2)
+%       sets: [], partial_transversal: (3, 2, 1) <=
+%     sets: [[1]], partial_transversal: (3, 4)
+%       sets: [], partial_transversal: (3, 4, 1) <=
+% \end{python}
+% \begin{lstlisting} [caption={\textit{transversal\_dfs\_all trace}},  label={lis:dfsalltrace}]
+% \end{lstlisting}
+% \end{minipage}
+
+If no transversals are found, \textit{tvsl\_dfs\_all} returns an empty list. %; \textit{tvsl\_dfs\_first} returns \textbf{None}.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{tvsl\_yield (Listings in Appendix \ref{appsubsec:tvsl_yield})} \label{subsec:tvsl_yield}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% \begin{minipage}{\linewidth} \largev   \hrulefill
+% \begin{python}[numbers=left]
+% @Trace
+% def tvsl_yield(sets: List[List[int]], partial_transversal: Tuple = ()) -> Generator[Tuple, None, None]:
+%   if not sets:
+%     yield partial_transversal
+%   else:
+%     for element in sets[0]:
+%       if element not in partial_transversal:
+%         yield from tvsl_yield(sets[1:], partial_transversal + (element, ))
+% \end{python}
+% \begin{lstlisting} [caption={transversal\_dfs\_yield},  label={lis:dfsyield}]
+% \end{lstlisting}
+% \end{minipage}
+
+
+\textit{tvsl\_yield} (Listing \ref{lis:dfsyield}), although quite similar to \textit{tvsl\_dfs\_first}, takes a significant step toward mimicking Prolog. Whereas \textit{tvsl\_dfs\_first} \textbf{return}s the first transversal it finds, \textit{tvsl\_yield} \textbf{yield}s \textit{all} the transversals it finds---but one at a time.  
+
+Instead of looking for a single transversal as on lines 8 - 10 of \textit{tvsl\_dfs\_first} % with:
+% \begin{quote}
+% \begin{quote}
+% \begin{python}
+% complete_transversal = tvsl_dfs_first(sets[1:], partial_transversal + (element, ))
+% \end{python}
+% \end{quote}
+% \end{quote}
+and then \textbf{return}ing those that are not \textbf{None}, \textit{tvsl\_yield} uses \textbf{yield from} (line 8) to search for and \textbf{yield} \textit{all} transversals---but only on request.
+
+% \begin{quote}
+% \begin{quote}
+% \begin{python}
+% yield from tvsl_yield(sets[1:], partial_transversal + (element, ))
+% \end{python}
+% \end{quote}
+% \end{quote}
+
+With \textit{tvsl\_yield} one can ask for all transversals as follows. 
+
+\begin{minipage}{\linewidth} \largev 
+\begin{python}
+sets = [[1, 2, 3], [2, 4], [1]]
+for Transversal in tvsl_yield(sets):
+    print(f'Transversal: {Transversal}')
+\end{python}
+\end{minipage}
+
+% This will produce:
+
+% \begin{minipage}{\linewidth} \largev
+% \begin{python}
+% Transversal: (2, 4, 1)
+% Transversal: (3, 2, 1)
+% Transversal: (3, 4, 1)
+% \end{python}
+% \end{minipage}
+
+A full trace is shown in Listing \ref{lis:tvrsl_yield_trace}. This is discussed in more detail in Section \ref{sec:control_functions}.
+
+% We did something similar with \textit{tvsl\_dfs\_all}, which returned a list of all transversals. The \textbf{yield} mechanism is somewhere between \textit{tvsl\_dfs\_first} and \textit{tvsl\_dfs\_all}. \textbf{yield} returns the value given to it by \textit{tvsl\_yield}. But if \textit{tvsl\_yield} is capable of returning additional results, \textbf{yield} requests those (one at a time) each time the engine backtracks into it. In that sense \textit{tvsl\_yield} is something like a lazy version of \textit{tvsl\_dfs\_all}. It produces all transversals, but only upon request. 
+
+% We discuss Python's \textbf{yield} and \textbf{yield from} in more detail in Section \ref{sec:control}. The mechanism it provides allows us to mimic Prolog's choicepoints.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{tvsl\_yield\_lv (Listings in Appendix \ref{appsubsec:tvsl_yield_lv})} \label{subsec:tvsl_yield_lv}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% \begin{minipage}{\linewidth} \largev   \hrulefill
+% \begin{python}[numbers=left]
+% @Trace
+% def tvsl_yield_lv(Sets: List[PyList], Partial_Transversal: PyTuple, Complete_Tvsl: Var):
+%   if not Sets:
+%     yield from unify(Partial_Transversal, Complete_Tvsl)
+%   else:
+%     Element = Var()
+%     for _ in member(Element, Sets[0]):
+%       for _ in fails(member)(Element, Partial_Transversal):
+%         yield from tvsl_yield_lv(Sets[1:], Partial_Transversal + PyList([Element]), Complete_Tvsl)
+% \end{python}
+% \begin{lstlisting} [caption={tvsl\_yield\_lv},  label={lis:yieldlv}]
+% \end{lstlisting}
+% \end{minipage}
+
+% \smallv
+
+\textit{tvsl\_yield\_lv} (Listing \ref{lis:yieldlv}) moves toward Prolog along a second dimension---the use of logic variables.
+
+One of Prolog's defining features is its logic variables. A logic variable is similar to a variable in mathematics. It may or may not have a value, but once it gets a value, its value never changes---i.e., logic variables are immutable.
+
+The primary operation on logic variables is known as \textit{unification}. When a logic variable is \textit{unified} with what is known as a \textit{ground term}, e.g., a number, a string, etc., it acquires that term as its value. For example, if \textit{X} is a logic variable,\footnote{The Python convention is to use only lower case letters in identifiers other than class names. Prolog requires that the first letter of a logic variable be upper case. In \textit{tvsl\_yield\_lv} we use upper case letters to begin identifiers that refer to logic variables.} then after \textit{unify(3, X)}, \textit{X} has the value \textit{3}. 
+
+One can run \textit{tvsl\_yield\_lv} as follows. 
+
+\begin{minipage}{\linewidth} \largev 
+\begin{python}
+# Since we are using Pylog's logic variables, the input must be in that form.
+sets = [PyList([1, 2, 3]), PyList([2, 4]), PyList([1])]
+# Var() creates an uninstantiated logic variable
+Complete_Transversal = Var()
+for _ in tvsl_yield_lv(sets, PyTuple(()), Complete_Transversal):
+    print(f'Transversal: {Complete_Transversal}\n')
+\end{python}
+\end{minipage}
+
+The output, Trace included, will be as shown in Listing \ref{lis:tvsl_yield_lv_output}.
+
+% \begin{minipage}{\linewidth} \largev 
+% \begin{python}
+% Sets: [[1, 2, 3], [2, 4], [1]], Partial_Transversal: (), Complete_Transversal: _10
+%   Sets: [[2, 4], [1]], Partial_Transversal: (1, ), Complete_Transversal: _10
+%     Sets: [[1]], Partial_Transversal: (1, 2), Complete_Transversal: _10
+%     Sets: [[1]], Partial_Transversal: (1, 4), Complete_Transversal: _10
+%   Sets: [[2, 4], [1]], Partial_Transversal: (2, ), Complete_Transversal: _10
+%     Sets: [[1]], Partial_Transversal: (2, 4), Complete_Transversal: _10
+%       Sets: [], Partial_Transversal: (2, 4, 1), Complete_Transversal: _10 <=
+% Transversal: (2, 4, 1)
+
+%   Sets: [[2, 4], [1]], Partial_Transversal: (3, ), Complete_Transversal: _10
+%     Sets: [[1]], Partial_Transversal: (3, 2), Complete_Transversal: _10
+%       Sets: [], Partial_Transversal: (3, 2, 1), Complete_Transversal: _10 <=
+% Transversal: (3, 2, 1)
+
+%     Sets: [[1]], Partial_Transversal: (3, 4), Complete_Transversal: _10
+%       Sets: [], Partial_Transversal: (3, 4, 1), Complete_Transversal: _10 <=
+% Transversal: (3, 4, 1)
+% \end{python}
+% \end{minipage}
+
+A significant difference between \textit{tvsl\_yield} and \textit{tvsl\_yield\_lv} is that in the \textbf{for}-loop that runs \textit{tvsl\_yield}, the result is found in the loop variable, \textit{Transversal} in this case. In the \textbf{for}-loop that runs \textit{tvsl\_yield\_lv}, the result is found in the third parameter of \textit{tvsl\_yield\_lv}. When \textit{tvsl\_yield\_lv} is first called, \textit{Complete\_Transversal} is an uninstantiated logic variable. Each time \textit{tvsl\_yield\_lv} produces a result, \textit{Complete\_Transversal} will have been unified with that result.
+
+Section \ref{subsec:more_tvsl_yield_lv} shows how \textit{tvsl\_yield\_lv} maps to \textit{tvsl\_prolog}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{tvsl\_prolog (Listings in Appendix \ref{appsubsec:tvsl_prolog})} \label{subsec:tvsl_prolog}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+The final program, \textit{tvsl\_prolog} (Listing \ref{lis:transversalprolog1}), is straight Prolog. \textit{tvsl\_prolog} and \textit{tvsl\_yield\_lv} are the same program expressed in different languages. One can run \textit{tvsl\_prolog} on, say, \href{https://swish.swi-prolog.org/}{\underline{SWI Prolog online}} and get the output as shown in Listing \ref{lis:transversal_prolog_trace}---although formatted somewhat differently.
+
+% \begin{minipage}{\linewidth} \largev \hrulefill
+% \begin{python}[numbers=left]
+% tvsl_prolog(Sets, Partial_Transversal, _Complete_Transversal) :-
+%     writeln('Sets': Sets;'  Partial_Transversal': Partial_Transversal), 
+%     fail.
+
+% tvsl_prolog([], Complete_Transversal, Complete_Transversal) :-
+%     format(' => '),
+%     writeln(Complete_Transversal).
+
+% tvsl_prolog([S|Ss], Partial_Transversal, Complete_Transversal_X) :-
+%     member(X, S),
+%     \+ member(X, Partial_Transversal),
+%     append(Partial_Transversal, [X], Partial_Transversal_X),
+%     tvsl_prolog(Ss, Partial_Transversal_X, Complete_Transversal_X).
+
+% \end{python}
+% \begin{lstlisting} [caption={transversal\_prolog},  label={lis:transversalprolog1}]
+% \end{lstlisting}
+% \end{minipage}
+
+% \begin{minipage}{\linewidth} \largev \hrulefill
+% \begin{python}
+% ?- tvsl_prolog([[1, 2, 3], [2, 4], [1]], [], Complete_Transversal).
+
+% Sets:[[1, 2, 3], [2, 4], [1]]; Partial_Transversal:[]
+% Sets:[[2, 4], [1]]; Partial_Transversal:[1]
+% Sets:[[1]]; Partial_Transversal:[1, 2]
+% Sets:[[1]]; Partial_Transversal:[1, 4]
+% Sets:[[2, 4], [1]]; Partial_Transversal:[2]
+% Sets:[[1]]; Partial_Transversal:[2, 4]
+% Sets:[]; Partial_Transversal:[2, 4, 1]
+%  => [2, 4, 1]
+%  Complete_Transversal = [2, 4, 1]
+
+% Sets:[[2, 4], [1]]; Partial_Transversal:[3]
+% Sets:[[1]]; Partial_Transversal:[3, 2]
+% Sets:[]; Partial_Transversal:[3, 2, 1]
+%  => [3, 2, 1]
+%  Complete_Transversal = [3, 2, 1]
+
+% Sets:[[1]]; Partial_Transversal:[3, 4]
+% Sets:[]; Partial_Transversal:[3, 4, 1]
+%  => [3, 4, 1]
+%  Complete_Transversal = [3, 4, 1]
+% \end{python}
+% \begin{lstlisting} [caption={transversal\_prolog trace},  label={lis:transversalprolog2}]
+% \end{lstlisting}
+% \end{minipage}

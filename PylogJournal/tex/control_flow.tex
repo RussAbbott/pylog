@@ -1,0 +1,532 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Control functions (Listings in Appendix \ref{appsec:control_functions})} \label{sec:control_functions}  %\label{sec:control}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+This section discusses Prolog's control flow and explains how Pylog implements it. It also presents a number of Pylog control-flow functions.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Control flow in Prolog (Listings in Appendix \ref{appsubsec:control_flow_prolog})} \label{subsec:control_flow_prolog}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Prolog, or at least so-called "pure" Prolog, is a satisfiability theorem prover turned into a programming language. One supplies a Prolog execution engine with (a) a "query" or "goal" term along with (b) a database of terms and clauses and asks whether values for variables in the query/goal term can be found that are consistent with the database. The engine conducts a depth-first search looking for such values. 
+
+Once released as a programming language, programmers used Prolog in a wide variety of applications, not necessarily limited to establishing satisfiability. 
+
+An important feature of Prolog is that it distinguishes far more sharply than most programming languages between data flow and control flow. 
+\begin{enumerate}
+    \item By \textit{control flow} we mean the mechanisms that determine the order in which program elements are executed or evaluated. This section discusses Pylog control flow.
+
+    \item By \textit{dataflow} we mean the mechanisms that move data around within a program. Section \ref{sec:logic_variables} discusses how data flows through a Prolog program via logic variables and how Pylog implements logic variables.
+\end{enumerate}
+
+The fundamental control flow control mechanisms in most programming languages involve (a) sequential execution, i.e., one statement or expression following another in the order in which they appear in the source code, (b) conditional execution, e.g., \textbf{if} and related statements or expressions, (c) repeated execution, e.g., \textbf{while} statements or similar constructs, and (d) the execution/evaluation of sub-portions of a program such as functions and procedures via method calls and returns. 
+
+Even declarative programming languages, such a Prolog, include explicit or implicit means to control the order of execution. That holds even when the language includes lazy evaluation, in which an expression is evaluated only when its value is needed. 
+
+Whether or not the language designers intended this to happen, programmers can generally learn how the execution/evaluation engine of a programming language works and write code to take advantage of that knowledge. This is not meant as a criticism. It's a simple consequence of the fact that computers---at least traditional, single-core computers---do one thing at a time, and programmers can design their code to exploit that ordering. 
+
+Prolog, especially the basic Prolog this paper is considering, offers a straight-forward control-flow framework: lazy, backtracking, depth-first search. Listing \ref{lis:prologInterpreter} (See Bartak \cite{Bartak1998}) shows a simple Prolog interpreter written in Prolog. The code is so simple because unification and backtracking can be taken for granted!
+
+% \begin{minipage}{\linewidth}  \largev \hrulefill
+% \begin{python}[numbers=left]
+% solve([]).
+% solve([Term|Terms]):-
+%   clause(Term, Body), 
+%   append(Body, Terms, New_Terms), 
+%   solve(New_Terms).
+% \end{python}
+% \begin{lstlisting} [caption={A prolog interpreter in prolog},  label={lis:prologInterpreter}]
+% \end{lstlisting}
+% \end{minipage}
+
+The execution engine, here represented by the \textit{solve} predicate, starts with a list containing the query/goal term, typically with one or more uninstantiated variables. It then looks up and unifies, if possible, that term with a compatible term in the database (line 3). If unification is successful, the possibly empty body of the clause is appended to the list of unexamined terms (line 4), and the engine continues to work its way through that list. Should the list ever become empty (line 1), \textit{solve} terminates successfully. The typically newly instantiated variables in the query contain the information returned by the program's execution.
+
+If unification with a term in the database (line 3) is not possible, the program is said to have \textit{fail}ed (for the current execution path). The engine then backs up to the most recent point where it had made a choice. This typically occurs at line 3 where we are looking for a clause in the database with which to unify a term. If there are multiple such clauses, another one is selected. If that term leads to a dead end, \textit{solve} tries another of the unifiable terms.
+
+In short, terms either \textit{succeed} in unifying with a database term,\footnote{Operations such as arithmetic, may also fail and result in backtracking.} or they \textit{fail}, in which case the engine backtracks to the most recent choicepoint. This is standard depth-first search---as in \textit{trvsl\_dfs\_first}. In addition, when the engine makes a selection at a choicepoint, it retains the ability to produce other possible selections---as in \textit{tvsl\_yield}. The engine may be \textit{lazy} in that it generates possible selections as needed. 
+
+Even when \textit{solve} empties its list of terms, it retains the ability to backtrack and explore other paths. This capability enables Prolog to generate multiple answers to a query (but one at a time), just as \textit{tvsl\_yield} is able to generate multiple transversals, but again, one at a time when requested.
+
+Prolog often seems strange in that lazy backtracking search is the one and only mechanism Prolog (at least pure prolog) offers for controlling program  flow. Although backtracking depth-first search itself is familiar to most programmers, lazy backtracking search may be less familiar. When writing Prolog code, one must get used to a world in which program flow is defined by lazy backtracking search.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Prolog control flow in Pylog (Listings in Appendix \ref{appsubsec:control_flow_pylog})} \label{subsec:control_flow_pylog}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Prolog's lazy, backtracking, depth-first search is built on a mechanism that keeps track of unused choicepoint elements \textit{even after a successful element has been found}. Let's compare the relevant lines of \textit{tvsl\_dfs\_first} (Listing \ref{lis:dfsfirstelse}) and \textit{tvsl\_yield} (Listing \ref{lis:yieldelse}). We are interested in the \textbf{else} arms of these programs.
+
+% \begin{minipage}{\linewidth} \largev   \hrulefill
+% \begin{python}[numbers=left]
+%     for element in sets[0]:
+%       if element not in partial_transversal:
+%         complete_transversal = tvsl_dfs_first(sets[1:], partial_transversal + (element, ))
+%         if complete_transversal is not None:
+%           return complete_transversal 
+%     return None
+% \end{python}
+% \begin{lstlisting} [caption={The \textbf{else} branch of \textittt{tvsl\_dfs\_first}}, label={lis:dfsfirstelse}]
+% \end{lstlisting}
+% \end{minipage}
+
+
+% \begin{minipage}{\linewidth} \largev   \hrulefill
+% \begin{python}[numbers=left]
+%     for element in sets[0]:
+%       if element not in partial_transversal:
+%         yield from tvsl_yield(sets[1:], partial_transversal + (element, ))
+% \end{python}
+% \begin{lstlisting} [caption={The \textbf{else} branch of \textittt{tvsl\_yield}}, label={lis:yieldelse}]
+% \end{lstlisting}
+% \end{minipage}
+
+In both cases, the choicepoint elements are the members of \textit{sets[0]}. (Recall that \textit{sets} is a list of sets; \textit{sets[0]} is the first set in that list. The choicepoint elements are the members of \textit{sets[0]}.) 
+
+The first two lines of the two code segments are identical: define a \textbf{for}-loop over \textit{sets[0]}; establish that the selected element is not already in the partial transversal.
+
+The third line adds that element to the partial transversal and asks the transversal program (\textit{tvsl\_dfs\_first} or \textit{tvsl\_yield}) to continue looking for the rest of the transversal. 
+
+Here's where the two programs diverge.
+\begin{itemize}
+    \item In \textit{tvsl\_dfs\_first}, if a complete transversal is found, i.e., if something other than \textbf{None} is returned, that result is returned to the caller. The loop over the choicepoints terminates when the program exits the function via \textbf{return} on line 5.
+    
+    \item In \textit{tvsl\_yield}, if a complete transversal is found, i.e., if \textbf{yield from} returns a result, that result is \textbf{yield}ed back to the caller. But \textit{tvsl\_yield} does \textit{not} exit the loop over the choicepoints. The visible structure of the code suggests that perhaps the loop might somehow continue, i.e., that \textbf{yield} might not terminate the loop and exit the function the way \textbf{return} does. How can one return a value but allow for the possibility that the loop might resume? That's the magic of Python generators, the subject of the next section. 
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{A review of Python generators (Listings in Appendix \ref{appsubsec:generators})} \label{subsec:generators}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+This paper is not about Python generators. We assume readers are already familiar with them. Even so, because they are so central to Pylog, we offer a brief review.
+
+\largev
+Any Python function that contains \textbf{yield} or \textbf{yield from} is considered a generator. This is a black-and-white decision made by the Python compiler. Nothing is required to create a generator other than to include \textbf{yield} or \textbf{yield from} in the code.
+
+So the question is: how do generators work operationally?
+
+Using a generator requires two steps.
+\begin{enumerate}
+    \item Initialize the generator, essentially by calling it as a function. Initialization does \textit{not} run the generator. Instead, the generator function returns a generator object. That generator object can be activated (or reactivated) as in the next step.
+    
+    \item Activate (or reactivate) a generator object by calling \textit{next} with the generator object as a parameter. When a generator is activated by \textit{next}, it runs until it reaches a \textbf{yield} or \textbf{yield from} statement. Like \textbf{return}, a \textbf{yield} statement may optionally include a value to be returned to the \textit{next}-caller. Whether or not a value is sent back to the \textit{next}-caller, a generator that encounters a \textbf{yield} stops running (much like a traditional function does when it encounters \textbf{return}). 
+    
+    \smallv
+    Generators differ from traditional functions in that when a generator encounters \textbf{yield} \textit{it retains its state}. On a subsequent \textit{next} call, the generator resumes execution at the line after the \textbf{yield} statement.
+    
+    \smallv
+    In other words, unlike functions, which may be understood to be associated with a stack frame---and which may be understood to have their stack frame discarded when the function encounters \textbf{return}---generator frames are maintained independently of the stack of the program that executes the \textit{next} call.
+    
+    \smallv
+    This allows generators to be (re-)activated repeatedly via multiple \textit{next} calls.
+\end{enumerate}
+        
+    
+% \begin{minipage}{\linewidth}  \largev  \hrulefill  
+% \begin{python}
+% def find_number(search_number):
+%     i = 0
+%     while True:
+%         i += 1
+%         if i == search_number:
+%             print("\nFound the number:", search_number)
+%             return
+%         else:
+%             yield i
+
+% search_number = 5
+% find_number_object = find_number(search_number)
+% while True:
+%     k = next(find_number_object)
+%     print(f'{k} is not {search_number}')
+% \end{python}
+% \begin{lstlisting} [caption={\textittt{Generator example}},  label={lis:generatorExample1}]
+% \end{lstlisting}
+% \end{minipage}
+
+Consider the simple example shown in Listing \ref{lis:generatorExample1}. When executed, the result will be as shown in Listing \ref{lis:generatorExample2}.
+
+% \begin{minipage}{\linewidth}  \largev  \hrulefill  
+% %\begin{python}
+% \begin{verbatim}
+% 1 is not 5
+% 2 is not 5
+% 3 is not 5
+% 4 is not 5
+
+% Found the number: 5
+
+% Traceback (most recent call last):
+%   <line number where error occurred> 
+%     k = next(find_number_object)
+% StopIteration
+
+% Process finished with exit code 1
+% \end{verbatim}
+% %\end{python}
+% \begin{lstlisting} [caption={\textittt{Generator example}},  label={lis:generatorExample2}]
+% \end{lstlisting}
+% \end{minipage}
+
+As \textit{find\_number} runs through 1 .. 4 it \textbf{yield}s them to the \textit{next}-caller at the top level, which prints that they are not the search number. But note what happens when \textit{find\_number} finds the search number. It executes \textbf{return} instead of \textbf{yield}. This produces a \textit{StopIteration} exception---because as a generator, \textit{find\_number} is expected to \textbf{yield}, not \textbf{return}. If the \textit{next}-caller does not handle that exception, as in this example, the exception propagates to the top level, and the program terminates with an error code. 
+
+Python's \textbf{for}-loop catches \textit{StopIteration} exceptions and simply terminates. If we replaced the \textbf{while}-loop in Listing \ref{lis:generatorExample1} with 
+\begin{python}
+for k in find_number(search_number):
+    print(f'{k} is not 5')
+\end{python}
+the output would be identical except that instead of terminating with a \textit{StopIteration} exception, we would terminate normally.
+
+Notice also that the \textbf{for}-loop generates the generator object. The step that produces \textit{find\_number\_object} (originally line 12) occurs when the  \textbf{for}-loop begins execution.
+
+\smallv
+\textbf{yield from} also catches \textit{StopIteration} exceptions. Consider adding an intermediate function that uses \textbf{yield from} as in Listing \ref{lis:yieldfromExample}.\footnote{An intermediate function is required because \textbf{yield} and \textbf{yield from} may be used only within a function. We can't just put \textbf{yield from} inside the top-level \textbf{for}-loop.}\footnote{This example was adapted from \href{https://www.python-course.eu/python3_generators.php}{\underline{this generator tutorial}}.} The result is similar to the previous---but with no uncaught exceptions. See Listing\ref{lis:yieldFromExampleOutput}. 
+
+% \begin{minipage}{\linewidth}  \largev  \hrulefill  
+% \begin{python}
+% def use_yield_from():
+%     yield from find_number_object
+%     print('find_number failed, but "yield from" caught the Stop Iteration exception.')
+%     return
+
+% for k in use_yield_from():
+%     print(f'{k} is not 5')
+% \end{python}
+% \begin{lstlisting} [caption={\textittt{yield from example}},  label={lis:yieldfromExample}]
+% \end{lstlisting}
+% \end{minipage}
+% The result is similar to the previous---with no uncaught exceptions. See Listing\ref{lis:yieldFromExampleOutput}. 
+
+% \begin{minipage}{\linewidth}  \largev  \hrulefill  
+% \begin{verbatim}
+% 1 is not 5
+% 2 is not 5
+% 3 is not 5
+% 4 is not 5
+% Found the number: 5
+% find_number failed, but "yield from" caught the Stop Iteration exception.
+
+% Process finished with exit code 0
+% \end{verbatim}
+% \begin{lstlisting} [caption={\textittt{yield from example output}},  label={lis:yieldFromExampleOutput}]
+% \end{lstlisting}
+% \end{minipage}
+
+Note that when \textit{find\_number} fails in Listing \ref{lis:yieldfromExample}, i.e., when  \textit{find\_number} does not perform a \textbf{yield}, the \textbf{yield from} line in \textit{use\_yield\_from} does not perform a yield. Instead it goes on to its next line and prints the \textit{find\_number failed} message. It then terminates without performing a \textbf{yield}, producing a \textit{StopInteration} exception. The top-level \textbf{for}-loop catches that exception and terminates normally. 
+
+In short, because Python generators maintain state after performing a \textit{yield}, they can be used to model Prolog backtracking.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{\textbf{yield} : \textit{succeed} :: \textit{return} : \textit{fail} (Listings in Appendix \ref{appsubsec:yield_succeed})} \label{subsec:yield_succeed}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Generators perform an additional service. Recall that Prolog predicates either \textit{succeed} or \textit{fail}. In particular when a Prolog predicate fails, it does not return a negative result---recall how \textit{tvsl\_dfs\_first} returned \textbf{None} when it failed to complete a transversal. Instead, a failed predicate simply terminates the current execution path. The Prolog engine then backtracks to the most recent choicepoint.
+
+Similarly, if a generator terminates, i.e., \textbf{return}s, before encountering a \textbf{yield}, it generates a \textit{StopIteration} exception. The \textit{next}-caller typically interprets that to indicate the equivalent of failure. In this way Prolog's succeed and fail map onto generator \textbf{yield} and \textbf{return}. This makes it fairly straightforward to write generators that mimic Prolog predicates.
+
+\begin{itemize}
+    \item A Pylog generator \textit{succeeds} when it performs a \textbf{yield}. 
+    \item A Pylog generator \textit{fails} when it \textbf{return}s without performing a \textbf{yield}. 
+\end{itemize}
+
+Generators provide a second parallel construct. Multiple-clause Prolog predicates map onto a Pylog function with multiple \textbf{yield}s in a single control path. The generic prolog structure as shown in Listing \ref{lis:prologmultipleclauses} can be implemented as shown in Listing \ref{lis:pylogmultipleyields}.
+
+% \begin{minipage}{\linewidth}  \largev  \hrulefill  
+% \begin{python}
+% head :- body_1.
+% head :- body_2.
+% \end{python}
+% \begin{lstlisting} [caption={Prolog multiple clauses},  label={lis:prologmultipleclauses}]
+% \end{lstlisting}
+% \end{minipage}
+
+% can be implemented as shown in Listing \ref{}.
+
+% \begin{minipage}{\linewidth}  \largev  \hrulefill  
+% \begin{python}
+% def head():
+%     <some code>
+%     yield
+    
+%     <other code>
+%     yield
+% \end{python}
+% \begin{lstlisting} [caption={Pylog multiple sequential yields},  label={lis:pylogmultipleyields}]
+% \end{lstlisting}
+% \end{minipage}
+
+Prolog's \textbf{cut} ('!') (Listing \ref{lis:prologmultipleclauseswithcut}) corresponds to a Python \textbf{if}-\textbf{else} structure (Listing \ref{lis:pylogmultipleclauseswithifelse}). The two \textbf{yield}s are in separate arms of an \textbf{if}-\textbf{else} construct.
+
+% \begin{minipage}{\linewidth}  \largev  \hrulefill  
+% \begin{python}
+% head :- !, body_1.
+% head :- body_2.
+% \end{python}
+% \begin{lstlisting} [caption={Prolog multiple clauses with a cut},  label={lis:prologmultipleclauseswithcut}]
+% \end{lstlisting}
+% \end{minipage}
+
+% can be implemented as follows. The two \textbf{yield}s are in separate arms of an \textbf{if}-\textbf{else} construct.
+
+% \begin{minipage}{\linewidth}  \largev  \hrulefill  
+% \begin{python}
+% def head():
+%     if <condition>:
+%       <some code>
+%       yield
+%     else
+%       <other code>
+%       yield
+% \end{python}
+% \begin{lstlisting} [caption={Multiple Pylog \textbf{yield}s in separate \textbf{if}-\textbf{else} arms},  label={lis:pylogmultipleclauseswithifelse}]
+% \end{lstlisting}
+% \end{minipage}
+
+The control-flow functions discussed in Section \ref{subsec:controlfunctions} along with the \textit{append} function discussed in Section \ref{subsec:append} offer numerous examples.
+
+\largev
+Python's generator system has many more features than those covered above. But these are the ones on which Pylog depends. 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Control functions (Listings in Appendix \ref{appsubsec:controlfunctions})} \label{subsec:controlfunctions}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Pylog offers the following control functions. (It's striking the extent to which generators make implementation straight-forward.)
+
+\begin{itemize}
+    \item \textit{fails} (Listing \ref{lis:fails}). A function that may be applied to a function. The resulting function succeeds if and only if the original fails.
+    
+    \item \textit{forall} (Listing \ref{lis:forall}). Succeeds if all the generators in its argument list succeed.
+    
+    \item \textit{forany} (Listing \ref{lis:forany}). Succeeds if any of the generators in its argument list succeed. On backtracking, tries them all.
+    
+    \item \textit{trace} (Listing \ref{lis:trace}). May be included in a list of generators (as in \textit{forall} and \textit{forany}) to log progress. The second argument determines whether \textit{trace} succeeds or fails. The third argument turns printing on or off. When included in a list of \textit{forall} generators, \texttt{succeed} should be set to \textbf{True} so that it doesn't prevent \textit{forany} from succeeding. When included in a list of \textit{forany} generators, \texttt{succeed} should be set to \textbf{False} so that \textit{forany} won't take \textit{trace} as an extraneous success.
+    
+    \item \textit{would\_succeed} (Listing \ref{lis:wouldsucceed}). Like Prolog's double negative, $\backslash\!\!+ \backslash+$. \textit{would\_succeed} is applied to a function. The resulting function succeeds/fails if and only if the original function succeeds/fails. If the original function succeeds, this also succeeds but without binding any variables. 
+    
+    \item \textit{Bool\_Yield\_Wrapper}. A class whose instances are generators that can be used in \textbf{while}-loops. \textit{Bool\_Yield\_Wrapper} instances may be created via a \textit{bool\_yield\_wrapper} decorator. The decorator returns a function that instantiates \textit{Bool\_Yield\_Wrapper} with the decorated function along with its desired arguments. The decorator is shown in Listing \ref{lis:boolYieldWrapper}.
+
+% Here's the decorator. The class itself is too long to include in this paper. Along with the rest of the code, it's available on \href{https://github.com/RussAbbott/pylog}{\underline{this GitHub repository}}.
+
+% \begin{minipage}{\linewidth}  \largev \hrulefill
+% \begin{python}[numbers=left]
+% def bool_yield_wrapper(gen):
+%   """
+%   A decorator. Produces a function that generates a Bool_Yield_Wrapper object. 
+%   """
+%   def wrapped_func(*args, **kwargs):
+%     return Bool_Yield_Wrapper(gen(*args, **kwargs))
+
+%   return wrapped_func
+% \end{python}
+% \begin{lstlisting} [caption={bool\_yield\_wrapper},  label={lis:boolYieldWrapper}]
+% \end{lstlisting}
+% \end{minipage}
+
+\smallv
+The example in Listing \ref{lis:boolYieldWrapperExample} uses \textit{bool\_yield\_wrapper} twice, once as a decorator and once as a function that can be applied directly to other functions. The example also uses the \textit{unify} function (see Section \ref{subsec:unify} below). 
+
+% \begin{minipage}{\linewidth}  \largev \hrulefill
+% \begin{python}[numbers=left]
+%   @bool_yield_wrapper
+%   def squares(n: int, X2: Var) -> Bool_Yield_Wrapper:
+%     for i in range(n):
+%       unify_gen = bool_yield_wrapper(unify)(X2, i**2)
+%       while unify_gen.has_more():
+%         yield
+
+%   Square = Var()
+%   squares_gen = squares(5, Square)
+%   while squares_gen.has_more():
+%     print(Square)
+% \end{python}
+% \begin{lstlisting} [caption={bool\_yield\_wrapper example},  label={lis:boolYieldWrapperExample}]
+% \end{lstlisting}
+% \end{minipage}
+
+
+
+% \begin{minipage}{\linewidth}  \largev \hrulefill
+% \begin{python}[numbers=left]
+% def fails(f):
+%   """
+%   Applied to a function so that the resulting function succeeds if and only if the original fails.
+%   Note that fails is applied to the function itself, not to a function call.
+%   Similar to a decorator but applied explicitly when used.
+%   """
+%   def fails_wrapper(*args, **kwargs):
+%     for _ in f(*args, **kwargs):
+%       # Fail, i.e., don't yield, if f succeeds
+%       return  
+%     # Succeed if f fails.
+%     yield     
+
+%   return fails_wrapper
+% \end{python}
+% \begin{lstlisting} [caption={fails},  label={lis:fails}]
+% \end{lstlisting}
+% \end{minipage}
+
+% \begin{minipage}{\linewidth}  \largev \hrulefill
+% \begin{python}[numbers=left]
+% def forall(gens):
+%   """
+%   Succeeds if all generators in the gens list succeed. The elements in the gens list
+%   are embedded in lambda functions to avoid premature evaluation.
+%   """
+%   if not gens:
+%     # They have all succeeded.
+%     yield
+%   else:
+%     # Get gens[0] and evaluate the lambda expression to get a fresh iterator.
+%     # The parentheses after gens[0] evaluates the lambda expression.
+%     # If it succeeds, run the rest of the generators in the list.
+%     for _ in gens[0]( ):
+%       yield from forall(gens[1:])
+% \end{python}
+% \begin{lstlisting} [caption={forall},  label={lis:forall}]
+% \end{lstlisting}
+% \end{minipage}
+
+% \begin{minipage}{\linewidth}  \largev \hrulefill
+% \begin{python}[numbers=left]
+% def forany(gens):
+%   """
+%   Succeeds if any of the generators in the gens list succeed. On backtracking, tries them all. 
+%   The gens elements must be embedded in lambda functions.
+%   """
+%   for gen in gens:
+%     yield from gen( )
+
+% \end{python}
+% \begin{lstlisting} [caption={forany},  label={lis:forany}]
+% \end{lstlisting}
+% \end{minipage}
+
+% \begin{minipage}{\linewidth}  \largev \hrulefill
+% \begin{python}[numbers=left]
+% def trace(x, succeed=True, show_trace=True):
+%   """
+%   Can be included in a list of generators (as in forall and forany) to see where we are.
+%   The second argument determines whether trace succeeds or fails. The third turns printing on or off.
+%   When included in a list of forall generators, succeed should be set to True so that
+%   it doesn't prevent forall from succeeding.
+%   When included in a list of forany generators, succeed should be set to False so that forany
+%   will go on the the next generator and won't take trace as an extraneous successes.
+%   """
+%   if show_trace:
+%     print(x)
+%   if succeed:
+%     yield
+
+% \end{python}
+% \begin{lstlisting} [caption={trace},  label={lis:trace}]
+% \end{lstlisting}
+% \end{minipage}
+
+
+% \begin{minipage}{\linewidth}  \largev \hrulefill
+% \begin{python}[numbers=left]
+% def would_succeed(f):
+%   """
+%   Applied to a function so that the resulting function succeeds/fails if and only if the original
+%   function succeeds/fails. If the original function succeeds, this also succeeds but without 
+%   binding any variables. Similar to a decorator but applied explicitly when used.
+%   """
+%   def would_succeed_wrapper(*args, **kwargs):
+%     succeeded = False
+%     for _ in f(*args, **kwargs):
+%       succeeded = True
+%       # Do not yield in the context of f succeeding.
+      
+%     # Exit the for-loop so that unification will be undone.
+%     if succeeded:
+%       # Succeed if f succeeded.
+%       yield  
+%     # The else clause is redundant. It is included here for clarity.
+%     # else:
+%     #   Fail if f failed.
+%     #   pass   
+
+%   return would_succeed_wrapper
+
+% \end{python}
+% \begin{lstlisting} [caption={would\_succeed},  label={lis:wouldsucceed}]
+% \end{lstlisting}
+% \end{minipage}
+
+% \largev
+% Finally, there is a more complexly implemented control structure, which is defined as an instance of the \textittt{Bool\_Yield\_Wrapper} class. Instances of the class are generators that can be used in \textbftt{while} loops.
+
+% \textittt{Bool\_Yield\_Wrapper} instances may be created via a \textittt{bool\_yield\_wrapper} decorator. The decorator returns a function that instantiates \textittt{Bool\_Yield\_Wrapper} with the decorated function along with its desired arguments. 
+
+% Here's the decorator. The class itself is too long to include in this paper. Along with the rest of the code, it's available on \href{https://github.com/RussAbbott/pylog}{\underline{this GitHub repository}}.
+
+% \begin{minipage}{\linewidth}  \largev \hrulefill
+% \begin{python}[numbers=left]
+% def bool_yield_wrapper(gen):
+%   """
+%   A decorator. Produces a function that generates a Bool_Yield_Wrapper object. 
+%   """
+%   def wrapped_func(*args, **kwargs):
+%     return Bool_Yield_Wrapper(gen(*args, **kwargs))
+
+%   return wrapped_func
+% \end{python}
+% \begin{lstlisting} [caption={bool\_yield\_wrapper},  label={lis:boolYieldWrapper}]
+% \end{lstlisting}
+% \end{minipage}
+
+% The following example uses \textit{bool\_yield\_wrapper} twice, once as a decorator and once as a function that can be applied directly to other functions. The example also uses the \textit{unify} function (see Section \ref{subsec:unify} below). 
+
+% \begin{minipage}{\linewidth}  \largev \hrulefill
+% \begin{python}[numbers=left]
+%   @bool_yield_wrapper
+%   def squares(n: int, X2: Var) -> Bool_Yield_Wrapper:
+%     for i in range(n):
+%       unify_gen = bool_yield_wrapper(unify)(X2, i**2)
+%       while unify_gen.has_more():
+%         yield
+
+%   Square = Var()
+%   squares_gen = squares(5, Square)
+%   while squares_gen.has_more():
+%     print(Square)
+% \end{python}
+% \begin{lstlisting} [caption={bool\_yield\_wrapper example},  label={lis:boolYieldWrapperExample}]
+% \end{lstlisting}
+% \end{minipage}
+
+\smallv
+The output, as expected, is the first five squares.
+
+% \begin{minipage}{\linewidth}  \largev \hrulefill
+% \begin{python}
+% 0
+% 1
+% 4
+% 9
+% 16
+% \end{python}
+% \begin{lstlisting} [caption={bool\_yield\_wrapper example output},  label={lis:boolYieldWrapperExampleOutput}]
+% \end{lstlisting}
+% \end{minipage}
+
+\smallv
+Note that the \textbf{while}-loop on line 6 succeeds exactly once---because \textit{unify} succeeds exactly once. The \textbf{while}-loop on line 10 succeeds 5 times.
+
+\smallv
+An advantage of this approach is that it avoids the \textbf{for} loop. Notwithstanding our earlier discussion, \textbf{for}-loops don't feel like the right structure for backtracking. 
+
+\smallv
+A disadvantage is its wordiness. Extra lines of code (lines 4 and 9) to are needed to create the generator. One itches to get rid of them, but we were unable to do so. 
+
+\smallv
+Note that 
+\begin{python}
+    while squares(5, Square).has_more():
+\end{python}
+
+does not work. The \textbf{while}-loop uses the entire expression as its condition, thereby creating a new generator each time around the loop. 
+
+\smallv
+Caching the generator has the difficulty that one may want the same generator, with the same arguments, in multiple places. In practice, we found ourselves using the \textbf{for} construct most of the time.
+
+\end{itemize}

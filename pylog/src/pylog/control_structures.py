@@ -1,7 +1,8 @@
 # from inspect import getmembers
+from inspect import isgeneratorfunction, signature
 from typing import Generator
 
-from .logic_variables import euc, PyValue, unify, unify_pairs, Var
+from .logic_variables import PyValue, Var, euc, unify, unify_pairs
 
 
 class Bool_Yield_Wrapper:
@@ -159,6 +160,47 @@ def forany(gens):
     yield from gen( )
 
 
+class Trace:
+  trace = True
+
+  def __init__(self, f):
+    self.param_names = [param.name for param in signature(f).parameters.values()]
+    self.f = f
+    self.depth = 0
+
+  def __call__(self, *args):
+    if Trace.trace:
+      print(self.trace_line(args))
+    self.depth += 1
+    if isgeneratorfunction(self.f):
+      return self.yield_from(*args)
+    else:
+      f_return = self.f(*args)
+      self.depth -= 1
+      return f_return
+
+  def yield_from(self, *args):
+    yield from self.f(*args)
+    self.depth -= 1
+
+  @staticmethod
+  def to_str(xs):
+    if type(xs) in [list, tuple]:
+      (left, right) = ('[', ']') if isinstance(xs, list) else ('(', ')')
+      xs_string = f'{left}{", ".join(Trace.to_str(x) for x in xs)}{right}'
+    else:
+      xs_string = str(xs)
+    return xs_string
+
+  def trace_line(self, args):
+    prefix = "  " * self.depth
+    params = ", ".join([f'{param_name}: {Trace.to_str(arg)}'
+                        for (param_name, arg) in zip(self.param_names, args)])
+    # Special case for the transversal functions
+    termination = ' <=' if not args[0] else ''
+    return prefix + params + termination
+
+
 def trace(x, succeed=True, show_trace=True):
   """
   Can be included in a list of generators (as in forall and forany) to see where we are.
@@ -257,18 +299,41 @@ if __name__ == '__main__':
                                ]):
           yield
 
+
   evens_4 = []
   # Create the generator in a separate step.
   is_even_gen_4 = is_even_2_decorated(11, Result)
-  while is_even_gen_4.has_more( ):
+  while is_even_gen_4.has_more():
     evens_4.append(Result.get_py_value())
-  print(f'4. evens_4: {evens_4}')    # => 4. evens_4: [0, 2, 4, 6, 8, 10]
+  print(f'4. evens_4: {evens_4}')  # => 4. evens_4: [0, 2, 4, 6, 8, 10]
 
   evens_5 = []
   # Create the generator in a 'with' statement.
   with is_even_2_decorated(13, Result) as is_even_gen_5:
-    while is_even_gen_5.has_more( ):
+    while is_even_gen_5.has_more():
       evens_5.append(Result.get_py_value())
-  print(f'5. evens_5: {evens_5}')    # => 5. evens_5: [0, 2, 4, 6, 8, 10, 12]
+  print(f'5. evens_5: {evens_5}')  # => 5. evens_5: [0, 2, 4, 6, 8, 10, 12]
 
-  print('\nEnd of test')
+  @bool_yield_wrapper
+  def squares(n: int, X2: Var) -> Bool_Yield_Wrapper:
+    for i in range(n):
+      unify_gen = bool_yield_wrapper(unify)(X2, i**2)
+      while unify_gen.has_more():
+        yield
+
+  Square = Var()
+  squares_gen = squares(5, Square)
+  while squares_gen.has_more():
+    print(Square)
+  # evens_x = []
+  # # Create the generator on the fly.
+  # # Doesn't work because is_even_2_decorated(15, Result) is called on each iteration,
+  # # effectively starting from the beginning each time.
+  # is_even_x_gen = is_even_x(15, Result)
+  # i = 0
+  # while is_even_x_gen.has_more():
+  #   i += 1
+  #   evens_x.append(Result.get_py_value())
+  # print(f'x. evens_x: {evens_x}')    # => 6. evens_6: [0, 2, 4, 6, 8, 10, 12]
+
+# print('\nEnd of test')

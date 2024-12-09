@@ -1,0 +1,47 @@
+\section{The Trace decorator}\label{app:Trace}
+
+The \textit{Trace} decorator is defined as a class rather than a function. \textit{Trace} logs parameter values for both regular functions and generators, but \textit{Trace} does not handle keyword parameters.
+
+\begin{minipage}{\linewidth}  \hrulefill
+\begin{python}[numbers=left]
+from inspect import isgeneratorfunction, signature
+
+class Trace:
+
+    def __init__(self, f):
+        self.param_names = [param.name for param in signature(f).parameters.values()]
+        self.f = f
+        self.depth = 0
+
+    def __call__(self, *args):
+        print(self.trace_line(args))
+        self.depth += 1
+        if isgeneratorfunction(self.f):
+            return self.yield_from(*args)
+        else:
+            f_return = self.f(*args)
+            self.depth -= 1
+            return f_return
+
+    def yield_from(self, *args):
+        yield from self.f(*args)
+        self.depth -= 1
+
+    @staticmethod
+    def to_str(xs):
+        xs_string = f'[{", ".join(Trace.to_str(x) for x in xs)}]' if isinstance(xs, list) else str(xs)
+        return xs_string
+
+    def trace_line(self, args):
+        # The quoted string on the next line is two spaces.
+        prefix = "  " * self.depth
+        params = ", ".join([f'{param_name}: {Trace.to_str(arg)}'
+                            for (param_name, arg) in zip(self.param_names, args)])
+        # Special case for the transversal functions
+        termination = ' <=' if not args[0] else ''
+        return prefix + params + termination
+\end{python}
+
+\begin{lstlisting} [caption={The Trace decorator},  label={lis:Trace}]
+\end{lstlisting}
+\end{minipage}

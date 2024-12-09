@@ -1,11 +1,11 @@
 % -*- coding: utf-8; -*-
 % vim: set fileencoding=utf-8 :
 \documentclass[english,submission]{programming}
-\usepackage{mdframed, framed}
-\usepackage[backend=biber]{biblatex}
+\usepackage{pythonhl}
+\usepackage{mdframed, framed, rotating}
+\usepackage[style=numeric,backend=biber,seconds=true]{biblatex}
 \addbibresource{example.bib}
 \addbibresource{pylog.bib}
-\usepackage{pythonhl}
 
 
 \lstdefinelanguage[programming]{TeX}[AlLaTeX]{TeX}{%
@@ -41,12 +41,20 @@
 \newcommand{\textbftt}[1]{\textbf{\texttt{#1}}}
 \newcommand{\textittt}[1]{\textit{\texttt{#1}}}
 
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=blue,
+}
+
 
 \begin{document}
 
-\title{Pylog$\colon$ Prolog in Python}
-%\subtitle{Preparing Articles for Programming}% optional
-%\titlerunning{Preparing Articles for Programming} %optional, in case that the title is too long; the running title should fit into the top page column
+\title{Pylog: Prolog in Python}
+\subtitle{yield : succeed :: return : fail} % optional
+% \titlerunning{Pylog: Prolog in Python} % optional, in case that the title is too long; the running title should fit into the top page column
 
 \author[a]{Russ Abbott}
 \authorinfo{is the author of this paper. Contact him at \email{rabbott@calstatela.edu}.}
@@ -54,11 +62,10 @@
 
 \author[a]{Jungsoo Lim}
 \authorinfo{is a co-author of this paper. Contact her at \email{jlim34@calstatela.edu}.}
-% \affiliation[a]{California State University, Los Angeles, USA}
 
 \author[b]{Jay Patel}
 \authorinfo{is a co-author of this paper. Contact him at \email{imjaypatel12@gmail.com}.}
-\affiliation[b]{Visa, San Francisco, USA}
+\affiliation[b]{Visa, Foster City, USA}
 
 \keywords{backtracking, logic programming, logic variables, programming paradigms, Prolog, Pylog, Python, unification} 
 % please provide 1--5 keywords
@@ -73,7 +80,7 @@
   %% State one or more areas, separated by a comma. (see 2.2)
   %% Please see list of areas in http://programming-journal.org/cfp/
   %% The list is open-ended, so use other areas if yours is/are not listed.
-  area={Social Coding, General-purpose programming},
+  area={Multiparadigm languages, General-purpose programming},
   %% You may choose the license for your paper (see 3.)
   %% License options include: cc-by (default), cc-by-nc
   %% license=cc-by,
@@ -86,26 +93,44 @@
 %% From HERE
 \begin{CCSXML}
 <ccs2012>
-<concept>
-<concept_id>10011007.10010940</concept_id>
-<concept_desc>Software and its engineering~Software organization and properties</concept_desc>
-<concept_significance>500</concept_significance>
-</concept>
-</ccs2012>
-\end{CCSXML}
-
-\ccsdesc[500]{Software and its engineering~Software organization and properties}
+   <concept>
+       <concept_id>10011007.10011006.10011008.10011009.10011021</concept_id>
+       <concept_desc>Software and its engineering~Multiparadigm languages</concept_desc>
+       <concept_significance>500</concept_significance>
+    </concept>
+ </ccs2012>
+\end{CCSXML}   
+% \ccsdesc[500]{Software and its engineering~Multiparadigm languages}
+% \ccsdesc[500]{Software and its engineering~Software organization and properties}
 % To HERE
 %%%%%%%%%%%%%%%%%%%%%%%
+% Formerly
+% \begin{CCSXML}
+% <ccs2012>
+% <concept>
+% <concept_id>10011007.10010940</concept_id>
+% <concept_desc>Software and its engineering~Software organization and properties</concept_desc>
+% <concept_significance>500</concept_significance>
+% </concept>
+% </ccs2012>
+% \end{CCSXML}
+
+
+
 
 \maketitle
 \input{tex/abstract.tex}
 \input{tex/introduction.tex}
-\input{tex/body.tex}
-% \input{tex/listings.tex}
+\input{tex/transversals.tex}
+\input{tex/control_flow.tex}
 \input{tex/logic_variables.tex}
-\input{tex/unification.tex}
 \input{tex/zebra_problem.tex}
 \input{tex/conclusion.tex}
+% \newpage
+\printbibliography 
+% \newpage
+\input{tex/appendix_a.tex}
+% \newpage
+\input{tex/appendix_b.tex}
 \end{document}
 

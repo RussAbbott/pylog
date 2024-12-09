@@ -1,24 +1,69 @@
 \begin{abstract}
-% Pylog inhabits three programming contexts. 
-% \begin{enumerate}
-  % \begin{itemize}
-      % \item 
-      Pylog explores the integration of two distinct programming language paradigms: (i) the modern, general purpose programming paradigm which, in its Python implementation, has been broadened to include procedural, object-oriented, and functional programming and (ii) the logic programming paradigm, most notably including logic variables (with unification) and depth-first, backtracking search. 
-      
-      Pylog illustrates how the core logic programming features can be implemented in and integrated into Python. 
-      
-      % In addition, a Python template for the standard Prolog control mechanism is presented.
-      
-      % \item 
-      Simultaneously, Pylog demonstrates the breadth and broad applicability of Python, one of the most widely used programming languages. 
-      
-      % \item 
-      Pylog exemplifies programming at its best, using Python features in innovative yet clear ways to integrate features of a non-Python programming paradigm into its range of capabilities. The overall result is software worth reading.
-      
-      % \item 
-      This paper fits into \textit{The Programming Journal's} Art-of-Programming category: general-purpose programming.
-      
-      The Python code is available at: \textittt{https://github.com/RussAbbott/pylog}.
-     % \end{itemize}
-    % \end{enumerate}
+
+\smallv
+\noindent
+% \begin{quote}
+\textbf{Context: What is the broad context of the work? What is the importance of the general research area?}
+
+Pylog inhabits three programming contexts.
+\begin{itemize}
+    \item Pylog explores the integration of two distinct programming language paradigms: (i) the modern general purpose programming paradigm, including features of procedural programming, object-oriented programming, functional programming, and meta-programming, here represented by Python, and (ii) logic programming, whose primary features are logic variables (and unification) and built-in depth-first backtracking search, here represented by Prolog. These logic programming feature are generally missing from modern general purpose languages. Pylog illustrates how these two features can be implemented in and integrated into Python.
+
+    \item Pylog demonstrates the breadth and broad applicability of Python. Although Python is one of the most widely used programming language for teaching introductory programming, it has also become very widely used for sophisticated programming tasks. One of the reasons for its popularity is the range of capabilities it offers—most of which are not used in elementary programming classes. Pylog makes effective use of many of those capabilities.
+
+    \item Pylog exemplifies programming at its best. Pylog is first-of-all a programming exercise: How can the primary features of logic programming be integrated with Python? Secondly, Pylog uses features of Python in ways that are both intended and innovative. These include distinguishing between two uses of Python’s for-loop structure—as choicepoints and as aggregating constructs. The overall result is software worth reading. 
+\end{itemize}
+% \end{quote}
+
+\smallv
+\noindent
+% \begin{quote}
+\textbf{Inquiry: What problem or question does the paper address? How has this problem or question been addressed by others (if at all)?}
+
+The primary issue addressed is how logic variables and backtracking can be integrated cleanly into a Python framework. Although significant work has been done in this area, much of it well done, most has been incomplete. Pylog is the first complete system (as far as we know) to achieve the goal of full integration. Also, as far as we know, this paper offers the first thorough explanation for how such integration can be accomplished.
+% \end{quote}
+
+\smallv
+\noindent
+% \begin{quote}
+\textbf{Approach: What was done that unveiled new knowledge?}
+
+Pylog demonstrates how logic variables and backtracking can be interwoven with standard Python data structures and control structures.
+% \end{quote}
+
+\smallv
+\noindent
+% \begin{quote}
+\textbf{Knowledge: What new facts were uncovered? If the research was not results oriented, what new capabilities are enabled by the work?}
+
+Pylog is available as a library for use in Python software. Pylog’s implementation techniques and insights may be used in Python programs not limited to logic programming.
+% \end{quote}
+
+\smallv
+\noindent
+% \begin{quote}
+\textbf{Grounding: What argument, feasibility proof, artifacts, or results and evaluation support this work?}
+
+By its existence Pylog demonstrates that logic variables and backtracking can be integrated into Python.
+% \end{quote}
+
+\smallv
+\noindent
+% \begin{quote}
+\textbf{Importance: Why does this work matter?}
+
+Python is known to be compatible with functional programming and other paradigms. This work shows that it is also compatible with logic programming. This work demonstrates the power and elegance of well-designed software.
+% \end{quote}
+
+\smallv
+\noindent
+% \begin{quote}
+The Pylog code is available at \href{https://github.com/RussAbbott/pylog}{\underline{this GitHub repository}}.
+% \end{quote}
+
+\largev
+ACM CCS 2012
+\begin{itemize}
+    \item Software and its engineering $\sim$ Multiparadigm languages;
+\end{itemize}
 \end{abstract}

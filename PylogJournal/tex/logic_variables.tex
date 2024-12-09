@@ -1,9 +1,13 @@
-\section{Logic variables}\label{subsec:logic_variables}
-The following diagram shows Pylog's primary logic variable classes. This section discusses \textittt{PyValue}, \textittt{Var}, \textittt{Structure}, and the three types of lists.  (\textittt{Term} is an abstract class.)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Logic variables (Listings in Appendix \ref{appsec:logic_variables})} \label{sec:logic_variables}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Figure \ref{fig:class_tree} shows Pylog's primary logic variable classes. This section discusses \textit{PyValue}, \textit{Var}, \textit{Structure}, and the three types of sequences.  (\textit{Term} is an abstract class.)
 
 % \section{Diagram Test}
 \begin{figure}
-    \centering
+\centering
  \setlength{\unitlength}{0.12cm}
 \begin{picture}(75,75)
     \put(29, 70){$\footnotesize{Term}$}
@@ -33,158 +37,343 @@ The following diagram shows Pylog's primary logic variable classes. This section
     \put(80, 25){\line(0,-1){5}}
 \end{picture}
 \sinv\sinv\sinv\sinv\sinv\sinv\sinv\sinv\sinv
-\caption{This diagram shows a more complete list.}
-% \label{fig:class_tree}
+\caption{This diagram shows a more complete list of Pylog classes.}
+\label{fig:class_tree}
 \end{figure}
 
-% Pylog includes the following logic variables classes.\footnote{This diagram shows a more complete list.
-% \begin{displaymath}
-% \xymatrixcolsep{1pc}
-%     \xymatrix{& & Term \ar[dl] \ar[d] \ar[drr]  \\
-%     & PyValue \ar[d] & Var & & Structure \ar[d] \\
-%     & \overline{(numbers, strings, ...)} & & & SuperSequence \ar[dl] \ar[dr] \\
-%      &  &  &  PySequence \ar[dl] \ar[dr] & & LinkedList \\
-%      & & PyList & & PyTuple}
-% \end{displaymath}
-% }
 
-\begin{itemize}
+% \begin{itemize}
 
-\item\textbftt{PyValue}. A \textittt{PyValue} provides a bridge between logic variables and Python values. A \textittt{PyValue} may hold any immutable Python value, e.g., a number, a string, or a tuple. Tuples are allowed as \textbftt{PyValue} values only if their components are also immutable. In the example of the preceding section, the logic variable \textittt{E} with value \textittt{'abc'} was actually \textittt{PyValue('abc')} behind the scenes.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{PyValue (Listings in Appendix \ref{appsubsec:pyvalue})} \label{subsec:pyvalue}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+A \textit{PyValue} provides a bridge between logic variables and Python values. A \textit{PyValue} may hold any immutable Python value, e.g., a number, a string, or a tuple. Tuples are allowed as \textit{PyValue} values only if their components are also immutable. % In the example of the preceding section, the logic variable \textit{E} with value \textit{'abc'} was actually \textit{PyValue('abc')} behind the scenes.
 \smallv
 
-\item\textbftt{Var}. A \textittt{Var} functions as a traditional logic variable: it supports unification. 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Var (Listings in Appendix \ref{appsubsec:var})} \label{subsec:var}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-Unification is surprisingly easy. Each \textittt{Var} object includes a \textittt{next} field, which is initially \textbftt{None}. When two \textittt{Var}s are unified, the \textittt{next} field of one is set to point to the other object. (It makes no difference, which points to which.) A chain of linked  \textittt{Var}s unify all the \textittt{Var}s in the chain. Consider the earlier example.
+A \textit{Var} functions as a traditional logic variable: it supports unification. 
 
-\begin{python}
-(A, B, C, D, E) = (*n_Vars(4), 'abc')
-for _ in unify_pairs([(A, B), (D, C), (A, C), (E, D)]):
-\end{python}
+Unification is surprisingly easy to implement. Each \textit{Var} object includes a \textit{next} field, which is initially \textbf{None}. When two \textit{Var}s are unified, the \textit{next} field of one is set to point to the other. (It makes no difference, which points to which.) A chain of linked  \textit{Var}s unify all the \textit{Var}s in the chain. 
 
-The first two unifications produce the following. (The arrows may be reversed.)
+% Consider the example in Listing \ref{lis:unifylogicvars1}.
+
+% \begin{minipage}{\linewidth} \largev   \hrulefill
+% \begin{python}[numbers=left]
+% def print_ABCDE(A, B, C, D, E):
+%     print(f'A: {A}, B: {B}, C: {C}, D: {D}, E: {E}')
+
+% (A, B, C, D, E) = (Var(), Var(), Var(), Var(), 'abc')
+% print_ABCDE(A, B, C, D, E) 
+% for _ in unify(A, B):
+%   print_ABCDE(A, B, C, D, E) 
+%   for _ in unify(D, C):
+%     print_ABCDE(A, B, C, D, E) 
+%     for _ in unify(A, C):
+%       print_ABCDE(A, B, C, D, E) 
+%       for _ in unify(E, D):
+%         print_ABCDE(A, B, C, D, E) 
+%       print_ABCDE(A, B, C, D, E) 
+%     print_ABCDE(A, B, C, D, E) 
+%   print_ABCDE(A, B, C, D, E) 
+% print_ABCDE(A, B, C, D, E) 
+% \end{python}
+% \begin{lstlisting} [caption={Unifying logic variables},  label={lis:unifylogicvars1}]
+% \end{lstlisting}
+% \end{minipage}
+
+% As we discussed earlier (Section \ref{subsec:forloops}), \textbf{for}-loops can serve as combination choicepoints and scope definitions. We elaborate that discussion here.
+
+Consider Listing \ref{lis:unifylogicvars1}. It's important not to be confused by \textbf{for}-loops. Even though the nested \textbf{for}-loops look like nested iteration, that's not the case. \textit{There is no iteration!} In this example, the \textbf{for}-loops serve solely as choicepoints and scope definitions. 
+
+ Since  \textit{unify} succeeds at most once, each \textbf{for}-loop offers only a single choice. There is never any backtracking. The only function of the \textbf{for}-loops is (a) to call the various \textit{unify} operations and (b) to define the scope over which they hold.  
+ 
+ The output (Listing \ref{lis:unifylogicvars2}) should make this clear. 
+
+% \begin{minipage}{\linewidth} \largev   \hrulefill
+% \begin{python}[numbers=left]
+% A: _195, B: _196, C: _197, D: _198, E: abc
+% A: _196, B: _196, C: _197, D: _198, E: abc
+% A: _196, B: _196, C: _197, D: _197, E: abc
+% A: _197, B: _197, C: _197, D: _197, E: abc
+% A: abc, B: abc, C: abc, D: abc, E: abc
+% A: _197, B: _197, C: _197, D: _197, E: abc
+% A: _196, B: _196, C: _197, D: _197, E: abc
+% A: _196, B: _196, C: _197, D: _198, E: abc
+% A: _195, B: _196, C: _197, D: _198, E: abc
+% \end{python}
+% \begin{lstlisting} [caption={Unifying logic variables},  label={lis:unifylogicvars2}]
+% \end{lstlisting}
+% \end{minipage}
+
+Numbers with leading underscores indicate uninstantiated logic variables. 
+
+Line 1. All the logic variables are distinct. Each has its own identification number.
+
+Line 2. \textit{A} and \textit{B} have been unified. They have the same identification number.
+
+Line 3. \textit{C} and \textit{D} have also been unified. They have the same identification number, but different from that of \textit{A} and \textit{B}.
+
+Line 4. All the logic variables have been unified---with a single identifier.
+
+Line 5. All the logic variables have \textit{abc} as their value.
+
+Lines 6 - 9. Exit the unification scopes as defined by the \textbf{for}-loops and undo the respective unifications.
+
+We can trace through the unifications diagrammatically. The first two unifications produce the following. (The arrows may be reversed.)
 \begin{equation}\label{eq:one}
 \begin{split}
 A \,\to\, B \\
 D \,\to\, C 
 \end{split}
 \end{equation}
-The next unification is \textittt{A} with \textittt{C}. The first step in unification is to go to the end of the unification chains of the elements to be unified. In this case, \textittt{B} (at the end of \textittt{A}'s unification chain) is unified with \textittt{C}. The result is either of the following.
-\begin{equation}\label{eq:two}
-\begin{split}
-A \,\to\, B \: \: \qquad \qquad \qquad \qquad A \,\to\, B \\
-\downarrow \qquad \qquad \qquad \quad \qquad  \: \qquad \uparrow\\
-D \,\to\, C \: \: \qquad \qquad  \qquad \qquad D \,\to\, C 
-\end{split}
-\end{equation}
-Finally, to unify \textittt{E} with \textittt{D} we go the the end of \textittt{D}'s unification chain---\textittt{B} or \textittt{C}.
-\begin{equation}\label{eq:three}
-\begin{split}
-A \,\to\, B \: \:  \qquad \qquad  \qquad \qquad \qquad A \,\to\, B \,\to\, E('abc') \\
-\downarrow \qquad \qquad \qquad \qquad \qquad \qquad \quad \uparrow  \:  \:  \quad \qquad  \qquad \\
-D \,\to\, C  \,\to\, E('abc') \: \quad \qquad \qquad D \,\to\, C \:  \quad   \qquad \qquad 
-\end{split}
-\end{equation}
-Different as they appear, these two structures are equivalent for unification purposes. To determine a \textittt{Var}'s value, follow its unification chain. If the end is a \textittt{PyValue}, the \textittt{PyValue}'s value is the \textittt{Var}'s value. In (3), all \textittt{Var}s have value \textittt{'abc'}. If the end of a unification chain is an uninstantiated \textittt{Var} (as in (2) for all \textittt{Var}s), the \textittt{Var}'s in the tributary chains are mutually unified, but uninstantiated. When the end  \textittt{Var} gets a value, it will be the value for all  \textittt{Var}'s leading to it.
+The next unification is \textit{A} with \textit{C}. The first step in unification is to go to the end of the unification chains of the elements to be unified. In this case, \textit{B} (at the end of \textit{A}'s unification chain) is unified with \textit{C}. The result is either of the following.
 
-\item\textbftt{Structure}. The \textittt{Structure} class enables the construction of Prolog terms. A \textittt{Structure} object consists of a functor along with a tuple of values. The Zebra puzzle (see section 5) uses \textittt{Structure}s to build \textittt{house} terms. The functor is \textittt{house}, and the tuple contains the house attributes. 
+\begin{equation}\label{eq:two}
+\begin{array}{c c c c c c c c }
+A & \to & B            & \qquad \qquad \qquad \qquad \qquad &   A & \to  & B   \\
+  &     & \downarrow   & \qquad \qquad \qquad \qquad \qquad &     &      & \uparrow \\
+D & \to & C            & \qquad \qquad \qquad \qquad \qquad &   D & \to  & C
+\end{array}
+\end{equation}
+Finally, to unify \textit{E} with \textit{D}, we go the the end of \textit{D}'s unification chain---\textit{B} or \textit{C}.
+\begin{equation}\label{eq:three}
+\begin{array}{c c c c c c c c c c c}
+A & \to & B            &     &          & \quad \quad  \: &   A & \to  & B & \to & E('abc')   \\
+  &     & \downarrow   &     &          & \quad \quad \: &     &      &\uparrow & &  \\
+D & \to & C            & \to & E('abc') & \quad \quad \: &   D & \to  & C & & 
+\end{array}
+\end{equation}
+Different as they appear, these two structures are equivalent for unification purposes.
+
+To determine a \textit{Var}'s value, follow its unification chain. If the end is a \textit{PyValue}, the \textit{PyValue}'s value is the \textit{Var}'s value. In (3), all \textit{Var}s have value \textit{'abc'}. If the end of a unification chain is an uninstantiated \textit{Var} (as in (2) for all \textit{Var}s), the \textit{Var}'s in the tributary chains are mutually unified, but uninstantiated. When the end \textit{Var} gets a value, it will be the value for all \textit{Var}'s leading to it.
+
+The following convenience methods make it possible to write the preceding code more concisely---but without the \textit{print} statements. See Listing \ref{lis:unifylogicvarsshortened}.
+
+\begin{itemize}
+    \item \textit{n\_Vars} takes an integer argument and generates that many \textit{Var} objects.
+    \item \textit{unify\_pairs} takes a list of pairs (as tuples) and unifies the elements of each pair.
+\end{itemize}
+
+% \begin{minipage}{\linewidth} \largev   \hrulefill
+% \begin{python}
+% (A, B, C, D, E) = (*n_Vars(4), 'abc')
+% for _ in unify_pairs([(A, B), (D, C), (A, C), (E, D)]):
+% \end{python}
+% \begin{lstlisting} [caption={Unifying logic variables shortened},  label={lis:unifylogicvarsshortened}]
+% \end{lstlisting}
+% \end{minipage}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Structure (Listings in Appendix \ref{appsubsec:structure})} \label{subsec:structure}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+The \textit{Structure} class enables the construction of Prolog terms. A \textit{Structure} object consists of a functor along with a tuple of values. The Zebra puzzle (Section \ref{sec:zebra}) uses \textit{Structure}s to build \textit{house} terms. \textit{house} is the functor; the tuple contains the house attributes. 
 
 \centerline{\textit{house(\textless nationality\textgreater,~\textless cigarette\textgreater,~\textless pet\textgreater,~\textless drink\textgreater,~\textless house~color\textgreater)}}
 \smallv
 
-\textittt{Structure} objects can be unified---but, as in Prolog, only if they have the same functor and the same number of tuple elements. To unify two \textittt{Structure} objects their corresponding tuple components must unify. 
+\textit{Structure} objects can be unified---but, as in Prolog, only if they have the same functor and the same number of tuple elements. To unify two \textit{Structure} objects their corresponding tuple components must unify. 
 \smallv
 
-Let \textittt{N} and \textittt{P} be uninstantiated \textittt{Var}s and consider unifying the following two \textittt{house} objects.\footnote{The underscores represent don't-care elements.} 
+Let \textit{N} and \textit{P} be uninstantiated \textit{Var}s and consider unifying the following objects.\footnote{The underscores represent don't-care elements.} 
 \begin{python}
    house(japanese, _, P, coffee, _)
    house(N, _, zebra, coffee, _)
 \end{python}
 
-Unification would leave both \textittt{house} objects like this.
+Unification would leave both \textit{house} objects like this.
 \begin{python}
    house(japanese, _, zebra, coffee, _)
 \end{python}
-Unification would have failed if, for example, the \textittt{house} objects had different \textittt{drink} attributes. 
 
-Prolog's unification functionality is central to how it solves such puzzles so easily.
+Unification would have failed if the \textit{house} objects had different \textit{drink} attributes. 
 
-\item\textbftt{Lists}. Pylog includes two \textittt{list} classes. \textittt{PySequence} objects mimic Python lists and tuples. They are fixed in size; they are immutable; and their components are (recursively) required to be immutable. The only difference between \textittt{PyList} and \textittt{PyTuple} objects is that the former are displayed with square brackets, the latter with parentheses.
+Prolog's unification functionality is central to how it solves such puzzles so easily. We discuss the \textit{unify} function in Section \ref{subsec:unify}. 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Lists (Listings in Appendix \ref{appsubsec:lists})} \label{subsec:lists}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Pylog includes two \textit{list} classes. \textit{PySequence} objects mimic Python lists and tuples. They are fixed in size; they are immutable; and their components are (recursively) required to be immutable. The only difference between \textit{PyList} and \textit{PyTuple} objects is that the former are displayed with square brackets, the latter with parentheses.
 \smallv
 
-More interestingly, Pylog also offers a \textittt{LinkedList} class. Its functionality is similar to Prolog lists. In particular, a \textittt{LinkedList} may have an uninstantiated tail. Uninstantiated tails are not possible with standard Python lists or tuples or with \textittt{PySequence} objects.
+More interestingly, Pylog also offers a \textit{LinkedList} class. Its functionality is similar to Prolog lists. In particular, a \textit{LinkedList} may have an uninstantiated tail, which is not possible with standard Python lists or tuples or with \textit{PySequence} objects.
+
 \smallv
-
-The paradigmatic Prolog list function is \textittt{append/3}. Pylog's \textittt{append/3} has Prolog functionality for both \textittt{LinkedList}s and \textittt{PySequence}s. For example, running:
-
-\begin{minipage}{\linewidth}  \largev \hrulefill
-\begin{python}
-(Xs, Ys, Zs) = (Var(), Var(), LinkedList([1, 2, 3]))
-for _ in append(Xs, Ys, Zs):
-  print(f'Xs = {Xs}\nYs = {Ys}\n')
-\end{python}
-\begin{lstlisting} [caption={append},  label={lis:append}]
-\end{lstlisting}
-\end{minipage}
-produces this output.\footnote{The output is the same whether we use \textittt{PySequence}s or \textittt{LinkedList}s.}
-\smallv
-
-\begin{minipage}{\linewidth}  \largev \hrulefill
-\begin{python}
-Xs = []
-Ys = [1, 2, 3]
-
-Xs = [1]
-Ys = [2, 3]
-
-Xs = [1, 2]
-Ys = [3]
-
-Xs = [1, 2, 3]
-Ys = []
-\end{python}
-\begin{lstlisting} [caption={append output},  label={lis:append_output}]
-\end{lstlisting}
-\end{minipage}
-\smallv
-
-Pylog's \textittt{append/3} for \textittt{LinkedList}s parallels Prolog's \textittt{append/3}.
-\smallv
-
-First the Prolog version.
-
-\begin{minipage}{\linewidth}  \largev \hrulefill
-\begin{python}
-append([], Ys, Ys).
-append([XZ|Xs], Ys, [XZ|Zs]) :- append(Xs, Ys, Zs).
-\end{python}
-\begin{lstlisting} [caption={prolog append},  label={lis:prolog_append_code}]
-\end{lstlisting}
-\end{minipage}
-Now the wordier but isomorphic Pylog version.\footnote{To understand the code, you should know that \textittt{LinkedList}s may be created in two ways.
+\textit{LinkedList}s may be created in two ways.
 \begin{itemize}
-    \item Pass the \textittt{LinkedList} class the desired head and tail, e.g., \newline\textittt{Xs = LinkedList(Xs\_Head, Xs\_Tail)}.
-    \item Pass the  \textittt{LinkedList} class a Python list. For example,
-    \textittt{LinkedList([])} is an empty \textittt{LinkedList}. 
+    \item Pass the \textit{LinkedList} class the desired head and tail, e.g., \newline\textit{Xs = LinkedList(Xs\_Head, Xs\_Tail)}.
+    \item Pass the  \textit{LinkedList} class a Python list. For example,
+    \textit{LinkedList([])} is an empty \textit{LinkedList}. 
 \end{itemize}
-} (For a cleaner presentation, declarations are dropped. All parameters are: \textittt{Union[LinkedList, Var]}.)
 
-\begin{minipage}{\linewidth}  \largev \hrulefill
-\begin{python}
-def append(Xs, Ys, Zs):
-  # Corresponds to: append([], Ys, Ys).
-  yield from unify_pairs([(Xs, LinkedList([])), (Ys, Zs)])
+The next section (on \textit{append}) illustrates the power of Linked Lists.
 
-  # Corresponds to: append([XZ|Xs], Ys, [XZ|Zs]) :- append(Xs, Ys, Zs).
-  (XZ_Head, Xs_Tail, Zs_Tail) = n_Vars(3)
-  for _ in unify_pairs([(Xs, LinkedList(XZ_Head, Xs_Tail)),
-                       (Zs, LinkedList(XZ_Head, Zs_Tail))]):
-    yield from append(Xs_Tail, Ys, Zs_Tail)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{append (Listings in Appendix \ref{appsubsec:append})} \label{subsec:append}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\end{python}
-\begin{lstlisting} [caption={append code},  label={lis:append_code}]
-\end{lstlisting}
-\end{minipage}
+The paradigmatic Prolog list function, and one that illustrates the power of logic variables, is \textit{append/3}. 
 
-Note that \textbftt{yield from} appears twice. If after execution of the first \textbftt{yield from}, \textittt{append/3} is called for another result, e.g., as a result of "backtracking," it continues on to the second \textbftt{yield from}. (This is standard behavior for Python generators.) The second part of the function calls itself recursively. Results are returned to the caller from the first \textbftt{yield from}---as in the Prolog version. 
-\end{itemize}
+Pylog's \textit{append} has Prolog functionality for both \textit{LinkedList}s and \textit{PySequence}s. For example, running the code in Listing \ref{lis:append} produces the output in Listing \ref{lis:append_output}.\footnote{The output is the same whether we use \textit{PySequence}s or \textit{LinkedList}s.}
+
+% \begin{minipage}{\linewidth}  \largev \hrulefill
+% \begin{python}
+% (Xs, Ys, Zs) = (Var(), Var(), LinkedList([1, 2, 3]))
+% for _ in append(Xs, Ys, Zs):
+%   print(f'Xs = {Xs}\nYs = {Ys}\n')
+% \end{python}
+% \begin{lstlisting} [caption={append},  label={lis:append}]
+% \end{lstlisting}
+% \end{minipage}
+% produces this output.\footnote{The output is the same whether we use \textit{PySequence}s or \textit{LinkedList}s.}
+% \smallv
+
+% \begin{minipage}{\linewidth}  \largev \hrulefill
+% \begin{python}
+% Xs = []
+% Ys = [1, 2, 3]
+
+% Xs = [1]
+% Ys = [2, 3]
+
+% Xs = [1, 2]
+% Ys = [3]
+
+% Xs = [1, 2, 3]
+% Ys = []
+% \end{python}
+% \begin{lstlisting} [caption={append output},  label={lis:append_output}]
+% \end{lstlisting}
+% \end{minipage}
+
+
+\smallv
+
+Pylog's \textit{append} function for \textit{LinkedList}s parallels Prolog's \textit{append/3}. The Prolog code is in Listing \ref{lis:prolog_append_code}; the Pylog code is in  Listing \ref{lis:append_code}.
+
+% \begin{minipage}{\linewidth}  \largev \hrulefill
+% \begin{python}
+% append([], Ys, Ys).
+% append([XZ|Xs], Ys, [XZ|Zs]) :- append(Xs, Ys, Zs).
+% \end{python}
+% \begin{lstlisting} [caption={prolog append},  label={lis:prolog_append_code}]
+% \end{lstlisting}
+% \end{minipage}
+% Now the wordier but isomorphic Pylog version.
+
+% % (For a cleaner presentation, declarations are dropped. All variables are: \textit{Union[LinkedList, Var]}.)
+
+% \begin{minipage}{\linewidth}  \largev \hrulefill
+% \begin{python}[numbers=left]
+% def append(Xs, Ys, Zs):
+%   # Corresponds to: append([], Ys, Ys).
+%   yield from unify_pairs([(Xs, LinkedList([])), (Ys, Zs)])
+
+%   # Corresponds to: append([XZ|Xs], Ys, [XZ|Zs]) :- append(Xs, Ys, Zs).
+%   (XZ_Head, Xs_Tail, Zs_Tail) = n_Vars(3)
+%   for _ in unify_pairs([(Xs, LinkedList(XZ_Head, Xs_Tail)),
+%                       (Zs, LinkedList(XZ_Head, Zs_Tail))]):
+%     yield from append(Xs_Tail, Ys, Zs_Tail)
+
+% \end{python}
+% \begin{lstlisting} [caption={append code},  label={lis:append_code}]
+% \end{lstlisting}
+% \end{minipage}
+
+Note that \textbf{yield from} appears twice. If after execution of the first \textbf{yield from} (line 3), \textit{append} is called for another result, e.g., as a result of backtracking, it continues on to the second \textbf{yield from} (line 9). (As discussed in Section \ref{sec:control_functions}, this is standard behavior for Python generators.) The second part of the function calls itself recursively. Results are returned to the original caller from the first \textbf{yield from}---as in the Prolog version. 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Unification (Listings in Appendix \ref{appsubsec:unify})} \label{subsec:unify}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+To complete the discussion of logic variables, this section discusses the \textit{unify} function---which, like so many Pylog functions, is surprisingly straightforward. (Listing \ref{lis:unify}.)
+
+The \textit{unify} function is called, \textit{unify(Left, Right)}, where \textit{Left} and \textit{Right} are the Pylog objects to be unified. (Argument order is immaterial.) 
+
+% \begin{minipage}{\linewidth}  \largev \hrulefill
+% \begin{python}[numbers=left]
+% @euc
+% def unify(Left: Any, Right: Any):
+
+%   (Left, Right) = map(ensure_is_logic_variable, (Left, Right))
+
+%   # Case 1.
+%   if Left == Right:
+%     yield
+
+%   # Case 2.
+%   elif isinstance(Left, PyValue) and isinstance(Right, PyValue) and \
+%       (not Left.is_instantiated( ) or not Right.is_instantiated( )) and \
+%       (Left.is_instantiated( ) or Right.is_instantiated( )):
+%     (assignedTo, assignedFrom) = (Left, Right) if Right.is_instantiated( ) else (Right, Left)
+%     assignedTo._set_py_value(assignedFrom.get_py_value( ))
+%     yield
+
+%     assignedTo._set_py_value(None)
+
+%   # Case 3.
+%   elif isinstance(Left, Structure) and isinstance(Right, Structure) and Left.functor == Right.functor:
+%     yield from unify_sequences(Left.args, Right.args)
+
+%   # Case 4.
+%   elif isinstance(Left, Var) or isinstance(Right, Var):
+%     (pointsFrom, pointsTo) = (Left, Right) if isinstance(Left, Var) else (Right, Left)
+%     pointsFrom.unification_chain_next = pointsTo
+%     yield
+
+%     pointsFrom.unification_chain_next = None
+
+% \end{python}
+% \begin{lstlisting} [caption={unify},  label={lis:unify}]
+% \end{lstlisting}
+% \end{minipage}
+
+The first step (line 4) ensures that the arguments are Pylog objects. If either is an immutable Python element, such as a string or int, it is wrapped in a \textit{PyValue}. This allows us to call, e.g, \textit{unify(X, `abc')} and  \textit{unify(`abc', X)}.
+   
+There are four \textit{unify} cases.
+
+\begin{enumerate}
+    \item \textit{Left} and \textit{Right} are already the same. Since Pylog objects are immutable, neither can change, and there's nothing to do. Succeed quietly via \textbf{yield}.
+
+    \item \textit{Left} and \textit{Right} are both \textit{PyValue}s, and exactly one of them has a value. Assign the uninstantiated \textit{PyValue} the value of the instantiated one.
+    \smallv \\
+    An important step is to set the assignment back to \textbf{None} after the \textbf{yield} statement. (line 18) This undoes the unification on backtracking.
+
+    \item \textit{Left} and \textit{Right} are both \textit{Structure}s, and they have the same functor. Unification consists of unifying the respective arguments. 
+
+    \item Either \textit{Left} or \textit{Right} is a \textit{Var}. Point the \textit{Var} to the  element at the end of the other element's unification chain. As line 1 shows, \textit{unify} has a decorator. \textit{euc} ensures that if either argument is a \textit{Var} it is replaced by the element at the end of its unification chain. (\textit{euc} stands for \underline{e}nd of \underline{u}nification \underline{c}hain.) Again, unification must be undone on backtracking. (line 30) 
+
+\end{enumerate} 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Back to tvsl\_yield\_lv (Listings in Appendix \ref{appsubsec:more_tvsl_yield_lv})} \label{subsec:more_tvsl_yield_lv}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+We are now able to add more detail to our discussion of \textit{tvsl\_yield\_lv} (Listing \ref{lis:yieldlv}). We will step through the code line by line. We will see that \textit{tvsl\_yield\_lv} is essentially a Pylog translation of  \textit{tvsl\_prolog} (Listing \ref{lis:transversalprolog1}).
+
+Line 2. \textit{tvsl\_yield\_lv} has three parameters, as does \textit{tvsl\_prolog}. (The other Python transversal programs had two.) The parameters of  \textit{tvsl\_yield\_lv} and \textit{tvsl\_prolog} match up. In both cases. The third parameter is used to return the transversal to the caller.
+
+Lines 3 and 4. These lines correspond to the second clause of \textit{tvsl\_prolog} . (The first clause generates a log.) If we have reached the end of the sets, \textit{Partial\_Transversal} is a complete transversal. Unify it with \textit{Complete\_Tvsl}.
+
+Lines 6-9. These lines correspond to the third clause of \textit{tvsl\_prolog}.
+
+\begin{quote}
+\begin{quote}
+Line 6 defines \textit{Element} as a new \textit{Var}.
+
+\smallv
+Line 7 unifies \textit{Element} with a member of \textit{Sets[0]}. The Pylog \textit{member} function is like the Prolog  \textit{member} function. On backtracking it unifies its first argument with successive members of its second argument. (This corresponds to line 10 of \textit{tvsl\_prolog}.)
+
+\smallv
+Line 8 ensures that the current value of  \textit{Element} is not already a member of \textit{Partial\_Transversal}. (See the \textit{fails} function in Section \ref{subsec:controlfunctions}.)  (This corresponds to line 11 of  \textit{tvsl\_prolog}.)
+
+\smallv
+Line 9 calls \textit{tvsl\_yield\_lv} recursively (via \textbf{yield from}). (This corresponds to lines 12 and 13 of \textit{tvsl\_prolog}.)
+\end{quote}
+\end{quote}
+
