@@ -2,7 +2,7 @@ from math import log10
 from timeit import default_timer as timer
 from typing import List
 
-from logic_variables import PyValue, unify
+from pylog.logic_variables import PyValue, unify
 
 
 # noinspection SpellCheckingInspection

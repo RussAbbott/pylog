@@ -2,7 +2,7 @@
 from inspect import isgeneratorfunction, signature
 from typing import Generator
 
-from logic_variables import PyValue, Var, euc, unify, unify_pairs
+from .logic_variables import PyValue, Var, euc, unify, unify_pairs
 
 
 class Bool_Yield_Wrapper:

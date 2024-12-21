@@ -1,7 +1,7 @@
-from logic_variables import n_Vars, StructureItem, unify
+from pylog.logic_variables import n_Vars, StructureItem, unify
 
-from examples.logic_puzzles.puzzles import Problem
-from sequence_options.super_sequence import is_contiguous_in, member, members, next_to, SuperSequence
+from puzzles import Problem
+from pylog.sequence_options.super_sequence import is_contiguous_in, member, members, next_to, SuperSequence
 
 """
 One version of the famous Zebra problem. (All versions are structurally similar, but the names are often different.)
@@ -158,10 +158,10 @@ if __name__ == '__main__':
 
   """ Select either LinkedList or a PySequence (PyList or PyTuple) as the ListType. """
 
-  # from sequence_options.linked_list import LinkedList
+  # from pylog.sequence_options.linked_list import LinkedList
   # ListType = LinkedList
   #
-  from sequence_options.sequences import PyList  # or PyTuple
+  from pylog.sequence_options.sequences import PyList  # or PyTuple
   ListType = PyList  # or PyTuple
 
   """ Run problem """

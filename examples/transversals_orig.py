@@ -1,9 +1,9 @@
 from typing import Generator, List, Optional, Set, Tuple
 
-from control_structures import Trace, fails
-from logic_variables import PyValue
-from sequence_options.sequences import PyList, PySet
-from sequence_options.super_sequence import member
+from pylog.control_structures import Trace, fails
+from pylog.logic_variables import PyValue
+from pylog.sequence_options.sequences import PyList, PySet
+from pylog.sequence_options.super_sequence import member
 
 # trace = True
 #
@@ -396,7 +396,7 @@ Sets:[]; Partial_Transversal:[3, 4, 1]
 """
 
 
-def find_transversal_with_sum_n(sets: List[PySet[int]], n: int):
+def find_transversal_with_sum_n(sets: List[Set[int]], n: int):
     Trace.trace = False
     (A, B, C) = (PyValue(), PyValue(), PyValue())
     for _ in transversal_yield_lv(sets, (A, B, C)):

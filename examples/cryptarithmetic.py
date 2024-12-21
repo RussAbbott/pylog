@@ -1,6 +1,6 @@
 from typing import Iterable, List, Optional, Tuple
 
-from logic_variables import PyValue, unify, unify_pairs
+from pylog.logic_variables import PyValue, unify, unify_pairs
 
 
 def complete_column(carry_out: int, Carry_Out_Dig: PyValue,
@@ -20,7 +20,7 @@ def complete_column(carry_out: int, Carry_Out_Dig: PyValue,
 
     # sum_dig is available in digits_in. Give it to Sum_Dig as long as this does not give
     # 0 to one of the leading digits.
-    if sum_dig != 0 or all(Sum_Dig is not LD for LD in Leading_Digits):
+    if not (sum_dig == 0 and Sum_Dig in Leading_Digits):
       for _ in unify_pairs([(Carry_Out_Dig, carry_out), (Sum_Dig, sum_dig)]):
         # Remove sum_digit from digits_in
         i = digits_in.index(sum_dig)
@@ -71,7 +71,7 @@ def solve(Carries: List[PyValue],
       else:
         # Give PV one of the available digits. Through "backup" all digits will be tried.
         for i in range(len(digits_in)):
-          if digits_in[i] != 0 or all(PV is not LV for LV in Leading_Digits):
+          if not (digits_in[i] == 0 and PV in Leading_Digits):
             for _ in unify(PV, digits_in[i]):
               yield from fill_column(PVs, index, digits_in[:i] + digits_in[i + 1:])
 
@@ -111,12 +111,12 @@ def set_up_puzzle(t1: str, t2: str, sum: str, _Z: PyValue) -> \
     return
   Vars_Dict = {V: PyValue() for V in Var_Letters}
   length = len(sum) + 1
-  T1 = [_Z for _ in range((length - len(t1)))] + letters_to_vars(t1, Vars_Dict)
-  T2 = [_Z for _ in range((length - len(t2)))] + letters_to_vars(t2, Vars_Dict)
-  Sum = [_Z for _ in range((length - len(sum)))] + letters_to_vars(sum, Vars_Dict)
+  T1 = (length - len(t1)) * [_Z] + letters_to_vars(t1, Vars_Dict)
+  T2 = (length - len(t2)) * [_Z] + letters_to_vars(t2, Vars_Dict)
+  Sum = (length - len(sum)) * [_Z] + letters_to_vars(sum, Vars_Dict)
   # Leading_Digits are the variables that should not be assigned 0.
   Leading_Digits = letters_to_vars({t1[0], t2[0], sum[0]}, Vars_Dict)
-  Carries = [PyValue( ) for _ in range(length - 1)] + [PyValue(0)]
+  Carries = [PyValue() for _ in range(length - 1)] + [PyValue(0)]
   return (Carries, T1, T2, Sum, Leading_Digits)
 
 

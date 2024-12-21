@@ -1,3 +1,15 @@
+## How to use repository
+* Install `pytest`: `pip install pytest` / `conda install pytest`
+* Install `pylog` package:
+  ```sh
+  pip install -e pylog/.
+  ```
+* Run examples' tests:
+  ```sh
+  pytest examples/
+  ```
+
+
 ## Abstract (from [WI 2020](http://wi2020.vcrab.com.au/) paper)
 
 We examine the history of Artificial Intelligence, from its audacious beginnings to the current day. We argue that constraint programming (a) is the rightful heir and modern-day descendent of that early work and (b) offers a more stable and reliable platform for AI than deep machine learning.

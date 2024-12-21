@@ -1,8 +1,8 @@
-from control_structures import forall  #, print_SF  # Uncomment when we use it.
-from logic_variables import n_Vars, StructureItem, unify
+from pylog.control_structures import forall  #, print_SF  # Uncomment when we use it.
+from pylog.logic_variables import n_Vars, StructureItem, unify
 
-from sequence_options.super_sequence import is_contiguous_in, member, members, next_to
-from sequence_options.linked_list import LinkedList
+from pylog.sequence_options.super_sequence import is_contiguous_in, member, members, next_to
+from pylog.sequence_options.linked_list import LinkedList
 
 """
 One version of the famous Zebra problem. (They are all similar, but the names are often different.)

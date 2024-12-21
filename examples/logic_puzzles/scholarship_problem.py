@@ -1,8 +1,8 @@
-from logic_variables import PyValue, StructureItem, Var
+from pylog.logic_variables import PyValue, StructureItem, Var
 
-from sequence_options.super_sequence import is_contiguous_in, is_a_subsequence_of, member, SuperSequence
+from pylog.sequence_options.super_sequence import is_contiguous_in, is_a_subsequence_of, member, SuperSequence
 
-from examples.logic_puzzles.puzzles import Problem
+from puzzles import Problem
 
 """
 A puzzle from GeekOverdose: https://geekoverdose.wordpress.com/2015/10/31/solving-logic-puzzles-in-prolog-puzzle-1-of-3/
@@ -121,7 +121,7 @@ class ScholarshipProblem(Problem):
 if __name__ == '__main__':
 
   """ Select either LinkedList or a PySequence (PyList or PyTuple) as the ListType. """
-  from sequence_options.linked_list import LinkedList
+  from pylog.sequence_options.linked_list import LinkedList
   ListType = LinkedList
 
   # from sequence_options.sequences import PyList  # or PyTuple

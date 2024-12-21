@@ -1,8 +1,8 @@
 from __future__ import annotations
 from typing import List, Union
 
-from control_structures import forany, forall
-from logic_variables import euc, Structure, unify, Term, Var
+from ..control_structures import forany, forall
+from ..logic_variables import euc, Structure, unify, Term, Var
 
 
 class SuperSequence(Structure):

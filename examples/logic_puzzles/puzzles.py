@@ -1,8 +1,8 @@
 from timeit import default_timer as timer
 from typing import List, Type
 
-from control_structures import fails, trace
-from logic_variables import Term
+from pylog.control_structures import fails, trace
+from pylog.logic_variables import Term
 
 
 def all_distinct(lst: List[Term]):

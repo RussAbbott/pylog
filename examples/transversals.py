@@ -1,10 +1,10 @@
 from inspect import isgeneratorfunction, signature
 from typing import Generator, List, Optional, Set, Tuple
 
-from control_structures import fails, Trace
-from logic_variables import PyValue, Var
-from sequence_options.sequences import PyList, PySet, PyTuple
-from sequence_options.super_sequence import member
+from pylog.control_structures import fails, Trace
+from pylog.logic_variables import PyValue, Var
+from pylog.sequence_options.sequences import PyList, PySet, PyTuple
+from pylog.sequence_options.super_sequence import member
 
 
 # Use this for all non-lv tests.
